@@ -1,0 +1,10 @@
+def a_g
+#Koment
+"""TOTO JE KURVA DLOUHEJ KOMENT¡ÿ""
+FAKT DLOOOOOOOOOOOOOOUHEJ \N ADAWAWDADASD
+AWDAWEQWDSA
+WEWEQWEQW"
+ADAWDASD"""              
+'Ahoj\n"Sve\'te \\\x27'
+5+5+4.5e-5 = 66
+ahoj

@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include "stack.h"
+
+
+#define INTERNAL_ERR -1
+#define SCAN_OK 0
+#define SCAN_LEX_ERR 1
+
+#define ERROR_LEX 1
+#define ERROR_INTERNAL 99
+
+#define ERROR_STATE -1
+#define EOL_STATE 0
+#define START_TOKEN_STATE 1
+#define BACKSLASH_STATE 2
+#define ONE_LINE_COMMENT_STATE 3
+#define LONG_COMMENT_START_FIRST_STATE 4
+#define LONG_COMMENT_START_SECOND_STATE 5
+#define LONG_COMMENT_STATE 6
+#define LONG_COMMENT_END_FIRST_STATE 7
+#define LONG_COMMENT_END_SECOND_STATE 8
+#define LONG_COMMENT_END_STATE 9
+#define KEYWORD_ID_STATE 10
+#define DIGIT_STATE 11
+#define MORE_THAM_STATE 12
+#define LESS_THAN_STATE 13
+#define DECIMAL_POINT_STATE 14
+#define DOUBLE_NUMBER_STATE 15
+#define DOUBLE_EXPONENT_STATE 16
+#define REST_OF_DOUBLE_NUMBER_STATE 17
+#define DOUBLE_NUMBER_SIGN_STATE 18
+#define STRING_STATE 19
+#define STRING_ESCAPE_SEQ_STATE 20
+#define STRING_ESCAPE_SEQ_FIRST_HEX_STATE 21
+#define STRING_ESCAPE_SEQ_SECOND_HEX_STATE 22
+#define NOT_EQUAL_START_STATE 23
+#define DIVIDE_STATE 24
+#define ASSIGN_STATE 25
+#define REST_OF_LONG_COMMENT_STATE 26
+
+#define TOKEN_LEX_ERROR -1
+#define TOKEN_EOL 0
+#define TOKEN_DIGIT 1
+#define TOKEN_PLUS_SIGN 2
+#define TOKEN_MINUS_SIGN 3
+#define TOKEN_MULTIPY_SIGN 4
+#define TOKEN_DIVIDE_SIGN 5
+#define TOKEN_ASSIGN_SIGN 6
+#define TOKEN_LEFT_BRACKET 7
+#define TOKEN_RIGHT_BRACKET 8
+#define TOKEN_KEYWORD 9
+#define TOKEN_IDENTIFIER 10
+#define TOKEN_INTEGER 11
+#define TOKEN_DOUBLE 12
+#define TOKEN_STRING 13
+#define TOKEN_NOT_EQUAL 14
+#define TOKEN_LESS 15
+#define TOKEN_MORE 16
+#define TOKEN_LESS_EQUAL 17
+#define TOKEN_MORE_EQUAL 18
+#define TOKEN_WHOLE_DIVISION_SIGN 19
+#define TOKEN_EQUALS 20
+#define TOKEN_DOUBLE_DOT 21
+#define TOKEN_COLON 22
+
+
+#define TOKEN_EOF 255
+
+
+typedef struct
+{
+    int tokenType;
+    int integerValue;
+    double doubleValue;
+    char *stringValue;
+
+}tokenStruct;
+
+int getToken();
+void setSourceCodeFile(FILE *sourceCodeFile);
+

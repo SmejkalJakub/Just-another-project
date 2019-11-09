@@ -1,0 +1,46 @@
+# depslib dependency file v1.0
+1572299362 source:d:\programování\ifj\main.c
+	<stdio.h>
+	<ctype.h>
+	<stdbool.h>
+	<stdlib.h>
+	<string.h>
+
+1572646493 source:d:\programování\ifj\compilerifj19.c
+	<stdio.h>
+	"fileScanner.h"
+
+1573309453 d:\programování\ifj\filescanner.h
+	<stdio.h>
+	<ctype.h>
+	<stdbool.h>
+	<stdlib.h>
+	<string.h>
+	"stack.h"
+
+1573305413 source:d:\programování\ifj\filescanner.c
+	"fileScanner.h"
+	"dynamicString.h"
+
+1569823035 d:\programování\ifj\helpstack.h
+	<stdio.h>
+
+1572823149 source:d:\programování\ifj\helpstack.c
+	"helpStack.h"
+
+1573304857 source:d:\programování\ifj\compiler.c
+	<stdio.h>
+	"fileScanner.h"
+
+1573303552 source:d:\programování\ifj\dynamicstring.c
+	"dynamicString.h"
+
+1573303562 d:\programování\ifj\dynamicstring.h
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	<string.h>
+
+1569823035 d:\programování\ifj\stack.h
+	<stdio.h>
+
