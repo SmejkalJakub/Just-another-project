@@ -1,10 +1,13 @@
 #include "fileScanner.h"
 #include "dynamicString.h"
+#include "stack.h"
 
 char hexSeq[] = "0x00";
 
-
 FILE *sourceCode;
+
+int numOfSpaces = 0;
+bool returningDedent = false;
 
 void setSourceCodeFile(FILE *sourceCodeFile)
 {
@@ -13,12 +16,13 @@ void setSourceCodeFile(FILE *sourceCodeFile)
 
 int checkInt(DS *word, tokenStruct *token)
 {
+
     char *eptr;
 
     if(word->str[0] == '0')
     {
         DSDelete(word);
-        return SCAN_LEX_ERR;
+        return ERROR_LEX;
     }
 
     int number = (int) strtol(word->str, &eptr, 10);
@@ -42,7 +46,7 @@ int checkDouble(DS *word, tokenStruct *token)
     if(word->str[0] == '0')
     {
         DSDelete(word);
-        return SCAN_LEX_ERR;
+        return ERROR_LEX;
     }
 
     double number = strtod(word->str, &eptr);
@@ -66,87 +70,166 @@ int checkKeyword(DS *word, tokenStruct *token)
     token->tokenType = TOKEN_KEYWORD;
     if(strcmp(word->str, "def") == 0)
     {
-        //strcpy(word, "def");
+        token->keyword = DEF;
     }
     else if(strcmp(word->str, "else") == 0)
     {
-        //strcpy(word, "else");
+        token->keyword = ELSE;
     }
     else if(strcmp(word->str, "if") == 0)
     {
-        //strcpy(word, "if");
+        token->keyword = IF;
     }
     else if(strcmp(word->str, "None") == 0)
     {
-        //strcpy(word, "None");
+        token->keyword = NONE;
     }
     else if(strcmp(word->str, "pass") == 0)
     {
-        //strcpy(word, "pass");
+        token->keyword = PASS;
     }
     else if(strcmp(word->str, "return") == 0)
     {
-        //strcpy(word, "return");
+        token->keyword = RETURN;
     }
     else if(strcmp(word->str, "while") == 0)
     {
-        //strcpy(word, "while");
+        token->keyword = WHILE;
     }
     else if(strcmp(word->str, "inputs") == 0)
     {
-        //strcpy(word, "while");
+        token->keyword = INPUTS;
     }
     else if(strcmp(word->str, "inputi") == 0)
     {
-        //strcpy(word, "while");
+        token->keyword = INPUTI;
     }
     else if(strcmp(word->str, "inputf") == 0)
     {
-        //strcpy(word, "while");
+        token->keyword = INPUTF;
     }
     else if(strcmp(word->str, "print") == 0)
     {
-        //strcpy(word, "while");
+        token->keyword = PRINT;
     }
     else if(strcmp(word->str, "len") == 0)
     {
-        //strcpy(word, "while");
+        token->keyword = LEN;
     }
     else if(strcmp(word->str, "substr") == 0)
     {
-        //strcpy(word, "while");
+        token->keyword = SUBSTR;
     }
     else if(strcmp(word->str, "ord") == 0)
     {
-        //strcpy(word, "while");
+        token->keyword = ORD;
     }
     else if(strcmp(word->str, "chr") == 0)
     {
-        //strcpy(word, "while");
+        token->keyword = CHR;
     }
     else
     {
         token->tokenType = TOKEN_IDENTIFIER;
     }
+    if(!DSAddStr(token->stringValue, word->str))
+    {
+        return ERROR_INTERNAL;
+    }
     DSDelete(word);
     return SCAN_OK;
 }
 
-int getToken(tokenStruct *token)
+int getToken(tokenStruct *token, bool newLine, Stack *indentStack)
 {
     DS DString;
 
     DSInit(&DString);
 
+    DSDelete(token->stringValue);
+
+
     int state = START_TOKEN_STATE;
     char c = 0;
     char *eptr;
+
+    if(newLine)
+    {
+        state = NEW_LINE_START_STATE;
+    }
+
+    if(!returningDedent)
+    {
+        numOfSpaces = 0;
+    }
 
     while(true)
     {
         c = (char)(getc(sourceCode));
         switch(state)
         {
+            case NEW_LINE_START_STATE:
+                if(returningDedent)
+                {
+                    if(numOfSpaces != stackTop(indentStack))
+                    {
+                        if(stackEmpty(indentStack))
+                        {
+                            DSDelete(&DString);
+                            return ERROR_LEX;
+                        }
+                        ungetc(c, sourceCode);
+
+                        stackPop(indentStack);
+
+                        DSDelete(&DString);
+                        token->tokenType = TOKEN_DEDENT;
+
+                        return SCAN_OK;
+                    }
+                    else
+                    {
+                        returningDedent = false;
+                        state = START_TOKEN_STATE;
+                    }
+                }
+                if(isspace(c))
+                {
+                    numOfSpaces++;
+                }
+                else if(c != '#')
+                {
+                    ungetc(c, sourceCode);
+                    if(numOfSpaces > stackTop(indentStack))
+                    {
+                        if(!stackPush(indentStack, numOfSpaces))
+                        {
+                            DSDelete(&DString);
+                            return ERROR_INTERNAL;
+                        }
+                        token->tokenType = TOKEN_INDENT;
+                        DSDelete(&DString);
+                        return SCAN_OK;
+                    }
+                    else if(numOfSpaces == stackTop(indentStack))
+                    {
+                        state = START_TOKEN_STATE;
+                    }
+                    else if(numOfSpaces < stackTop(indentStack))
+                    {
+                        returningDedent = true;
+                        stackPop(indentStack);
+                        DSDelete(&DString);
+                        token->tokenType = TOKEN_DEDENT;
+                        return SCAN_OK;
+                    }
+                }
+                else if(c == '#')
+                {
+                    state = ONE_LINE_COMMENT_STATE;
+                }
+
+                break;
             case START_TOKEN_STATE:
                 if(c == '\n')
                 {
@@ -257,7 +340,7 @@ int getToken(tokenStruct *token)
                 else
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case ASSIGN_STATE:
@@ -324,12 +407,12 @@ int getToken(tokenStruct *token)
                 if(c < 32)
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 else if(c == '\'')
                 {
-                    printf("%s", DString.str);
                     token->tokenType = TOKEN_STRING;
+                    DSAddStr(token->stringValue, (&DString)->str);
                     DSDelete(&DString);
                     return SCAN_OK;
                 }
@@ -340,7 +423,7 @@ int getToken(tokenStruct *token)
                 else if(c == '\n')
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 else
                 {
@@ -362,14 +445,14 @@ int getToken(tokenStruct *token)
                 else
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case STRING_ESCAPE_SEQ_STATE:
                 if(c < 32)
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 else if(c == '\\')
                 {
@@ -444,7 +527,7 @@ int getToken(tokenStruct *token)
                 else
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case STRING_ESCAPE_SEQ_SECOND_HEX_STATE:
@@ -461,7 +544,7 @@ int getToken(tokenStruct *token)
                 else
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case LONG_COMMENT_START_FIRST_STATE:
@@ -472,7 +555,7 @@ int getToken(tokenStruct *token)
                 else
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case LONG_COMMENT_START_SECOND_STATE:
@@ -483,7 +566,7 @@ int getToken(tokenStruct *token)
                 else
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case LONG_COMMENT_STATE:
@@ -494,7 +577,7 @@ int getToken(tokenStruct *token)
                 else if(c == EOF)
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case LONG_COMMENT_END_FIRST_STATE:
@@ -525,7 +608,7 @@ int getToken(tokenStruct *token)
                 else if(!isspace(c))
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case KEYWORD_ID_STATE:
@@ -589,7 +672,7 @@ int getToken(tokenStruct *token)
                 else
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case DOUBLE_NUMBER_STATE:
@@ -638,7 +721,7 @@ int getToken(tokenStruct *token)
                 else
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case DOUBLE_NUMBER_SIGN_STATE:
@@ -654,7 +737,7 @@ int getToken(tokenStruct *token)
                 else
                 {
                     DSDelete(&DString);
-                    return SCAN_LEX_ERR;
+                    return ERROR_LEX;
                 }
                 break;
             case REST_OF_DOUBLE_NUMBER_STATE:
@@ -683,17 +766,10 @@ int getToken(tokenStruct *token)
                 break;
             case EOL_STATE:
                 {
-                    if(isspace(c))
-                    {
-                        state = START_TOKEN_STATE;
-                    }
-                    else
-                    {
-                        ungetc(c, sourceCode);
-                        token->tokenType = TOKEN_EOL;
-                        DSDelete(&DString);
-                        return SCAN_OK;
-                    }
+                    ungetc(c, sourceCode);
+                    token->tokenType = TOKEN_EOL;
+                    DSDelete(&DString);
+                    return SCAN_OK;
                 }
                 break;
         }

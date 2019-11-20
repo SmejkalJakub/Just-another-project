@@ -4,12 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "stack.h"
+#include "dynamicString.h"
 
-
-#define INTERNAL_ERR -1
-#define SCAN_OK 0
-#define SCAN_LEX_ERR 1
-
+#define SCAN_OK 100
 #define ERROR_LEX 1
 #define ERROR_INTERNAL 99
 
@@ -41,8 +38,9 @@
 #define DIVIDE_STATE 24
 #define ASSIGN_STATE 25
 #define REST_OF_LONG_COMMENT_STATE 26
+#define NEW_LINE_STATE 27
+#define NEW_LINE_START_STATE 28
 
-#define TOKEN_LEX_ERROR -1
 #define TOKEN_EOL 0
 #define TOKEN_DIGIT 1
 #define TOKEN_PLUS_SIGN 2
@@ -66,9 +64,27 @@
 #define TOKEN_EQUALS 20
 #define TOKEN_DOUBLE_DOT 21
 #define TOKEN_COLON 22
-
+#define TOKEN_INDENT 23
+#define TOKEN_DEDENT 24
 
 #define TOKEN_EOF 255
+
+
+#define DEF 0
+#define ELSE 1
+#define IF 2
+#define NONE 3
+#define PASS 4
+#define RETURN 5
+#define WHILE 6
+#define INPUTS 7
+#define INPUTI 8
+#define INPUTF 9
+#define PRINT 10
+#define LEN 11
+#define SUBSTR 12
+#define ORD 13
+#define CHR 14
 
 
 typedef struct
@@ -76,10 +92,11 @@ typedef struct
     int tokenType;
     int integerValue;
     double doubleValue;
-    char *stringValue;
+    DS *stringValue;
+    int keyword;
 
 }tokenStruct;
 
-int getToken();
+int getToken(tokenStruct *token, bool newLine, Stack *indentStack);
 void setSourceCodeFile(FILE *sourceCodeFile);
 

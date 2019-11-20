@@ -1,61 +1,44 @@
-#include <stdio.h>
-#include <ctype.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stdbool.h>
-
-/*ZÁSOBNÍK
-NEVIM, JAKE VSECHNY FUNKCE BY MEL UMET,
- PROTO ASPON TY ZAKLADNI. STEJNE TAK STRUKTURA POLOZKY, JELIKOZ NEVIM, CO JE POTREBA ZNAT*/
+#include "stack.h"
 
 
-
-typedef struct stackItem{                         
-    //
-    //
-    //
-    struct stackItem* next;
-} StackItem;
-
-typedef struct stack{
-    StackItem * top;
-}Stack;
 
 void initStack(Stack *stack){
-    stack->top = NULL;
+    stack->top = -1;
 }
 
-bool stackPush(Stack *stack,   ,   ,    ){
-    StackItem* newItem = (*StackItem) malloc (sizeof(StackItem));
-    if (newItem == NULL){
+int stackFull(Stack *stack)
+{
+    return stack->top == MAX_STACK - 1;
+}
+
+bool stackPush(Stack *stack, int numberOfSpaces)
+{
+    if(stackFull(stack))
+    {
         return false;
     }
-
-    newItem->next = stack->top;
-
+    stack->top++;
+    stack->arr[stack->top] = numberOfSpaces;
     return true;
 }
 
 bool stackPop(Stack *stack){
-    if (stack->top == NULL){
+
+    if(stackEmpty(stack))
+    {
         return false;
     }
 
-    StackItem* popedItem = stack->top;
-    stack->top = popedItem->next;
-    free(popedItem);
+    stack->top--;
     return true;
 }
 
-
-void stackFree(Stack* stack){
-    while (stack->top != NULL){
-        stackPop(stack);
-    }
+int stackEmpty(Stack *stack)
+{
+    return stack->top == -1;
 }
 
-StackItem* stackTop(Stack* stack){
-    return stack->top;
+
+int stackTop(Stack* stack){
+    return stack->arr[stack->top];
 }

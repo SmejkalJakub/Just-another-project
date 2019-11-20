@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="test.py" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -31,17 +32,21 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="compilerIFJ19.c">
+		<Unit filename="compiler.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="dynamicString.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="dynamicString.h" />
 		<Unit filename="fileScanner.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="fileScanner.h" />
-		<Unit filename="helpStack.c">
+		<Unit filename="stack.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="helpStack.h" />
+		<Unit filename="stack.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

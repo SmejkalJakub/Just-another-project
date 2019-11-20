@@ -6,8 +6,8 @@ CFLAGS=-Wall -std=c99 -pedantic -lm
 
 all: $(PROGS)
 
-$(PRJ)-test: compiler.c dynamicString.c fileScanner.c
-	$(CC) $(CFLAGS) -o test compiler.c dynamicString.c fileScanner.c
+$(PRJ)-test: compiler.c dynamicString.c fileScanner.c stack.c generator.c
+	$(CC) $(CFLAGS) -o test compiler.c dynamicString.c fileScanner.c stack.c generator.c
 
 clean:
-	rm -f *.o *.out $(PROGS)
+	rm -f *.o *.out test $(PROGS)

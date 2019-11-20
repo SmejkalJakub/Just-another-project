@@ -41,10 +41,9 @@ bool DSAddStr(DS *dynamicStr, char *str)
     return true;
 }
 
-/*bool DSAddStr2(DS *dynamicStr, char *str)
+/*bool DSAddStr(DS *dynamicStr, tokenStruct *token)
 {
-    unsigned int strLenght = strlen(str);
-
+    token->stringValue = malloc(dynamicStr->maxLenght);
     while((dynamicStr->maxLenght - dynamicStr->actIndex) <= strLenght)
     {
         dynamicStr->maxLenght += CHUNK;
@@ -56,10 +55,7 @@ bool DSAddStr(DS *dynamicStr, char *str)
         }
     }
 
-    strcpy(&(dynamicStr->str[dynamicStr->actIndex]), str);
-
-    dynamicStr->actIndex += strLenght;
-
+    strcpy(token->stringValue, dynamicStr->str);
     return true;
 }*/
 

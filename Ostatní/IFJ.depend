@@ -44,3 +44,44 @@
 1569823035 d:\programování\ifj\stack.h
 	<stdio.h>
 
+1574101011 source:c:\users\kubaa\desktop\ifj\ifj---project\ostatní\filescanner.c
+	"fileScanner.h"
+	"dynamicString.h"
+	"stack.h"
+
+1574100017 c:\users\kubaa\desktop\ifj\ifj---project\ostatní\filescanner.h
+	<stdio.h>
+	<ctype.h>
+	<stdbool.h>
+	<stdlib.h>
+	<string.h>
+	"stack.h"
+	"dynamicString.h"
+
+1573669148 c:\users\kubaa\desktop\ifj\ifj---project\ostatní\stack.h
+	<stdlib.h>
+	<stdbool.h>
+
+1573985802 c:\users\kubaa\desktop\ifj\ifj---project\ostatní\dynamicstring.h
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	<string.h>
+
+1574112654 source:c:\users\kubaa\desktop\ifj\ifj---project\ostatní\compiler.c
+	<stdio.h>
+	"fileScanner.h"
+	"stack.h"
+	"generator.h"
+
+1573985802 source:c:\users\kubaa\desktop\ifj\ifj---project\ostatní\dynamicstring.c
+	"dynamicString.h"
+
+1574102112 source:c:\users\kubaa\desktop\ifj\ifj---project\ostatní\stack.c
+	"stack.h"
+
+1574112401 c:\users\kubaa\desktop\ifj\ifj---project\ostatní\generator.h
+	<stdlib.h>
+	<stdio.h>
+	"dynamicString.h"
+

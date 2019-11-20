@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "generator.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "dynamicstring.h": "c"
+    }
+}

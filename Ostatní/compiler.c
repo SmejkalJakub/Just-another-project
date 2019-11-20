@@ -1,11 +1,29 @@
 #include <stdio.h>
-#include "fileScanner.h"
+#include "stack.h"
+#include "generator.h"
 
-int main(int argc , char *argv[])
+int main(int argc, char *argv[])
 {
     tokenStruct *t;
 
+    DS dynamicString;
+
+    DSInit(&dynamicString);
+
+    setDynamicString(&dynamicString);
+
+    bool newLine = true;
+
+    Stack indentationStack;
+
+    initStack(&indentationStack);
+    stackPush(&indentationStack, 0);
+
+
     t = malloc(sizeof(tokenStruct));
+    t->stringValue = malloc(sizeof(DS));
+    DSInit(t->stringValue);
+
 
     FILE *sourceCode;
 
@@ -19,36 +37,61 @@ int main(int argc , char *argv[])
     }
 
     setSourceCodeFile(sourceCode);
+    
+    generateHeader();
 
     while(t->tokenType != TOKEN_EOF)
     {
-        if(getToken(t) == SCAN_LEX_ERR)
+        if(getToken(t, newLine, &indentationStack) == ERROR_LEX)
         {
             printf("LEX ERROR");
             free(t);
             fclose(sourceCode);
+
             return -1;
         }
-        if(t->tokenType == TOKEN_EOL)
+        if(t->tokenType == TOKEN_KEYWORD && t->keyword == PRINT)
         {
-            printf("\n");
+            getToken(t, false, &indentationStack);
+            if(t->tokenType == TOKEN_LEFT_BRACKET)
+            {
+                getToken(t, false, &indentationStack);
+                generateWriteValue("s", t->stringValue->str);
+            }
+            else
+            {
+                printf("SYNTAX ERROR");
+                return -6;
+            }
+            
         }
-        if(t->tokenType == TOKEN_INTEGER)
+        if(t->tokenType == TOKEN_KEYWORD && t->keyword == DEF)
         {
-            printf("%d ", t->integerValue);
-        }
-        else if(t->tokenType == TOKEN_DOUBLE)
-        {
-            printf("%f ", t->doubleValue);
+            getToken(t, false, &indentationStack);
+            if(t->tokenType == TOKEN_IDENTIFIER)
+            {
+                generateFunctionStart(t->stringValue->str);
+            }
+            else
+            {
+                printf("SYNTAX ERROR");
+                return -6;
+            }
 
         }
-        else
+        if(t->tokenType == TOKEN_KEYWORD && t->keyword == RETURN)
         {
-            printf("%d ", t->tokenType);
+            getToken(t, false, &indentationStack);
+            generateFunctionReturn("test", t);
         }
     }
+
     free(t);
     fclose(sourceCode);
+
+    generateFunctionEnd("test");
+
+    printf("%s", dynamicString.str);
 
 }
 
