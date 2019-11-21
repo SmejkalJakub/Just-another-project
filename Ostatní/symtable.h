@@ -10,7 +10,7 @@ typedef enum
     typeIntiger,
     typeDouble, 
     typeString,
-} dataType; 
+} DataType; 
 
 typedef struct{
     dataType Type;
@@ -18,11 +18,13 @@ typedef struct{
     DS *parametrs;
     char *nameID;
     bool globalVariable;
-}TData;
+}SymbolTableData;
 
 typedef struct{
     char *itemKey;
     TData Data;
     itemSymtable *next;
 
-}itemSymtable
+}ItemOfSymboltable;
+
+typedef ItemOfSymboltable *symbolTable [66666];

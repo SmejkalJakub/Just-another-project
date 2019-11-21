@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include "stack.h"
 #include "generator.h"
+#include <compiler.h>
+#include <symtable.c>
+#include <dynamicString.h>
+
+int analysis();
 
 char* doubleToString(double convertedNumber){
     
@@ -10,48 +15,23 @@ char* doubleToString(double convertedNumber){
     return doubleInString;
 }
 
-
-
-int main(int argc, char *argv[])
-{
-    tokenStruct *t;
-
-    DS dynamicString;
-
-    DSInit(&dynamicString);
-
-    setDynamicString(&dynamicString);
-
-    bool newLine = true;
-
-    Stack indentationStack;
-
-    initStack(&indentationStack);
-    stackPush(&indentationStack, 0);
-
-
-    t = malloc(sizeof(tokenStruct));
-    t->stringValue = malloc(sizeof(DS));
-    DSInit(t->stringValue);
-
-
-    FILE *sourceCode;
-
-    if(argc == 2)
+int analysis()
     {
-        sourceCode = fopen(argv[1], "r");
-    }
-    else
-    {
-        sourceCode = stdin;
+        DS dynamicStr;
+
+        DSInit(&dynamicStr);
+        setDynamicString(&dynamicStr);
+
+        CompilerData compilerData;
+            
+
+
+        
+
     }
 
-    setSourceCodeFile(sourceCode);
-    
-    generateHeader();
-
-    static int Prog (){
-        getToken(t, )
+    static int Prog (TData *data){
+        
 
     }
 
@@ -95,7 +75,49 @@ int main(int argc, char *argv[])
 
     }
 
-    /*while(t->tokenType != TOKEN_EOF)
+
+
+/*int main(int argc, char *argv[])
+{
+    tokenStruct *t;
+
+    DS dynamicString;
+
+    DSInit(&dynamicString);
+
+    setDynamicString(&dynamicString);
+
+    bool newLine = true;
+
+    Stack indentationStack;
+
+    initStack(&indentationStack);
+    stackPush(&indentationStack, 0);
+
+
+    t = malloc(sizeof(tokenStruct));
+    t->stringValue = malloc(sizeof(DS));
+    DSInit(t->stringValue);
+
+
+    FILE *sourceCode;
+
+    if(argc == 2)
+    {
+        sourceCode = fopen(argv[1], "r");
+    }
+    else
+    {
+        sourceCode = stdin;
+    }
+
+    setSourceCodeFile(sourceCode);
+    
+    generateHeader();
+
+
+    
+    while(t->tokenType != TOKEN_EOF)
     {
         if(getToken(t, newLine, &indentationStack) == ERROR_LEX)
         {
