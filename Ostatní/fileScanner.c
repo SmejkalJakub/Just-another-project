@@ -775,6 +775,3 @@ int getToken(tokenStruct *token, bool newLine, Stack *indentStack)
         }
     }
 }
-
-
-
