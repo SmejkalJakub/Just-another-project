@@ -24,7 +24,7 @@ int compilerDataInit(CompilerData* compilerData){
     STInit(&compilerData->localTable);
     STInit(&compilerData->globalTable);
 
-    compilerData->token = malloc(sizeof(tokenStruct));
+   compilerData->token = malloc(sizeof(tokenStruct));
     compilerData->token.stringValue = malloc(sizeof(DS));
     DSInit(compilerData->token.stringValue);
 
@@ -114,6 +114,7 @@ int compilerDataInit(CompilerData* compilerData){
     }
 
     static int anotherCommand (CompilerData *compilerData){
+        getToken(&compilerData->token, newLine, &indentationStack);
 
     }
 
@@ -135,11 +136,27 @@ int compilerDataInit(CompilerData* compilerData){
             }
 
 
-            else if(compilerData->token.keyword == INPUTI){
-                generateRead();
+            else if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
+                getToken(&compilerData->token, newLine, &indentationStack);
+
+                if(compilerData->token.tokenType == TOKEN_EQUALS){
+                    getToken(&compilerData->token, newLine, &indentationStack);
+                    commandValue(&compilerData);
+
+                    if(compilerData->token.tokenType == TOKEN_EOL){
+                        anotherCommand(&compilerData);
+                    }
+
+                }
+                else{
+                    anotherCommand(&compilerData);
+                }
             }
-            else if(compilerData->token.keyword == INPUTI){
-                generateRead();
+            else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
+               getToken(&compilerData->token, newLine, &indentationStack);
+
+                if()
+
             }
             else if(compilerData->token.keyword == INPUTI){
                 generateRead();
@@ -167,13 +184,11 @@ int compilerDataInit(CompilerData* compilerData){
 
     static int Params(CompilerData *compilerData){
         if (compilerData->token.tokenType == TOKEN_IDENTIFIER){
+
             STInsert(&compilerData->localTable, &compilerData->token.stringValue);
             getToken(&compilerData->token, newLine, &indentationStack);
 
             anotherParam(&compilerData);
-
-
-
             
         }
         else{
@@ -194,17 +209,15 @@ int compilerDataInit(CompilerData* compilerData){
                 STInsert(&compilerData->localTable, &compilerData->token.stringValue);
                 getToken(&compilerData->token, newLine, &indentationStack);
 
-                return anot
+                return anotherParam(&compilerData);
             }
             else{
                 return 2;
             }
         }
         else{
-            
+           return 0; 
         }
-
-
     }
 
     static int commandValue (){
