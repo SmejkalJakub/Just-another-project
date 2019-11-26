@@ -9,12 +9,12 @@ typedef struct {
 
     tokenStruct token;
 
-    SymbolTableData* current_id;
+    ItemOfSymboltable *current_id;
 
     bool inFunction;
 	bool inDeclaratin;	
 	bool inWhileOrIf;
-	bool nonDeclaredFunction;;
+	bool nonDeclaredFunction;
 
 
 }CompilerData;
