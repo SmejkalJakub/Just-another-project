@@ -4,12 +4,12 @@
 #include "fileScanner.h"
 
 typedef struct {
-    symbolTable localTable;
-    symbolTable globalTable;
+    symTable localTable;
+    symTable globalTable;
 
     tokenStruct token;
 
-    ItemOfSymboltable *current_id;
+    symTableItem *current_id;
 
     bool inFunction;
 	bool inDeclaratin;	

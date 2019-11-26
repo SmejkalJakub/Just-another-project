@@ -19,20 +19,20 @@ char* doubleToString(double convertedNumber){
 }
 
 
-int compilerDataInit(CompilerData* CompilerData){
+int compilerDataInit(CompilerData* compilerData){
 
-    initTable(&localTable);
-    initTable (&globalTable);
+    STInit(&compilerData->localTable);
+    STInit(&compilerData->globalTable);
 
-    CompilerData->token = malloc(sizeof(tokenStruct));
-    CompilerData->token.stringValue = malloc(sizeof(DS));
-    DSInit(CompilerData->token.stringValue);
+    compilerData->token = malloc(sizeof(tokenStruct));
+    compilerData->token.stringValue = malloc(sizeof(DS));
+    DSInit(compilerData->token.stringValue);
 
-    CompilerData->current_id = NULL;
-    CompilerData -> inFunction = NULL;
-	CompilerData -> inDeclaratin = NULL;	
-	CompilerData -> inWhileOrIf = NULL;
-	CompilerData -> nonDeclaredFunction = NULL;
+    compilerData->current_id = NULL;
+    compilerData -> inFunction = NULL;
+	compilerData -> inDeclaratin = NULL;	
+	compilerData -> inWhileOrIf = NULL;
+	compilerData -> nonDeclaredFunction = NULL;
 }
 
 
@@ -47,7 +47,7 @@ int compilerDataInit(CompilerData* CompilerData){
             getToken(&compilerData->token, newLine, &indentationStack);
             
             if((compilerData->token.tokenType == TOKEN_IDENTIFIER)){
-                compilerData->current_id = 0/*addsymboltosymtable*/;
+                compilerData->current_id = STInsert(&compilerData->localTable, &compilerData->token.stringValue);
                 generateFunctionStart(compilerData->current_id);
 
                 getToken(&compilerData->token, newLine, &indentationStack);
@@ -57,26 +57,31 @@ int compilerDataInit(CompilerData* CompilerData){
                     getToken(&compilerData->token, newLine, &indentationStack);
                         Params(&compilerData);
 
-                    if((compilerData->token.tokenType == TOKEN_RIGHT_BRACKET)){
+                    if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
                         getToken(&compilerData->token, newLine, &indentationStack);
-
-                       if((compilerData->token.tokenType == TOKEN_EOL)){
-                           newLine = true;
+                
+                        if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
                             getToken(&compilerData->token, newLine, &indentationStack);
 
-                            if(compilerData->token.tokenType == TOKEN_INDENT){
-                                //return expression;
-                                getToken(&compilerData->token, newLine, &indentationStack);
-                                if (compilerData->token.tokenType == TOKEN_DEDENT){
-                                    return Prog(&compilerData);
-                                }
+                            if((compilerData->token.tokenType == TOKEN_EOL)){
+                                newLine = true;
+                                    getToken(&compilerData->token, newLine, &indentationStack);
 
-                                
+                                    if(compilerData->token.tokenType == TOKEN_INDENT){
+                                        //return expression;
+                                        getToken(&compilerData->token, newLine, &indentationStack);
+                                        if (compilerData->token.tokenType == TOKEN_DEDENT){
+                                            return Prog(&compilerData);
+                                        }                                        
+                                    }
+                                    else{
+                                        return 2;
+                                    }
                             }
-                            else{
-                                return 2;
-                            }
-                       }
+                        }
+                        else{
+                            return 2;
+                        }
                     }
                     else{
                         return 2;
@@ -126,7 +131,7 @@ int compilerDataInit(CompilerData* CompilerData){
 
 
             else if(compilerData->token.keyword == PRINT){
-                generateWrite()
+                generateWrite();
             }
 
 
@@ -162,7 +167,13 @@ int compilerDataInit(CompilerData* CompilerData){
 
     static int Params(CompilerData *compilerData){
         if (compilerData->token.tokenType == TOKEN_IDENTIFIER){
-            generate
+            STInsert(&compilerData->localTable, &compilerData->token.stringValue);
+            getToken(&compilerData->token, newLine, &indentationStack);
+
+            anotherParam(&compilerData);
+
+
+
             
         }
         else{
@@ -173,7 +184,26 @@ int compilerDataInit(CompilerData* CompilerData){
 
     
 
-    static int anotherParam (){
+    static int anotherParam (CompilerData *compilerData){
+
+        if(compilerData->token.tokenType == TOKEN_COLON){
+            getToken(&compilerData->token, newLine, &indentationStack);
+
+            if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
+
+                STInsert(&compilerData->localTable, &compilerData->token.stringValue);
+                getToken(&compilerData->token, newLine, &indentationStack);
+
+                return anot
+            }
+            else{
+                return 2;
+            }
+        }
+        else{
+            
+        }
+
 
     }
 
