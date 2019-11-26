@@ -41,26 +41,11 @@ bool DSAddStr(DS *dynamicStr, char *str)
     return true;
 }
 
-/*bool DSAddStr(DS *dynamicStr, tokenStruct *token)
-{
-    token->stringValue = malloc(dynamicStr->maxLenght);
-    while((dynamicStr->maxLenght - dynamicStr->actIndex) <= strLenght)
-    {
-        dynamicStr->maxLenght += CHUNK;
-        dynamicStr->str = realloc(dynamicStr->str, dynamicStr->maxLenght);
-
-        if(dynamicStr->str == NULL)
-        {
-            return false;
-        }
-    }
-
-    strcpy(token->stringValue, dynamicStr->str);
-    return true;
-}*/
-
 void DSDelete(DS *dynamicStr)
 {
-    free(dynamicStr->str);
-    DSInit(dynamicStr);
+    if(dynamicStr)
+    {
+        free(dynamicStr->str);
+        DSInit(dynamicStr);
+    }
 }

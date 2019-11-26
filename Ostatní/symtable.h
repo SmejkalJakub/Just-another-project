@@ -1,30 +1,29 @@
-#include <stdio.h>
-#include "stack.h"
-#include <stdbool.h>
-#include <dynamicString.h>
+#ifndef SYMTABLE_H_INCLUDED
+#define SYMTABLE_H_INCLUDED
 
+#include "dynamicString.h"
 
-typedef enum
-{
-    typeUndefined,
-    typeIntiger,
-    typeDouble, 
-    typeString,
-} DataType; 
+#define NONE 0
+#define INT 1
+#define FLOAT 2
+#define STRING 3
+#define BOOL 4
 
-typedef struct{
-    dataType Type;
-    bool defined;
-    DS *parametrs;
-    char *nameID;
-    bool globalVariable;
-}SymbolTableData;
+#define ST_SIZE 65003
 
-typedef struct{
-    char *itemKey;
-    TData Data;
-    itemSymtable *next;
+typedef struct hashTableItem{
+    char *key;
+    int type;
+    DS *params;
+    bool global;
+    struct hashTableItem *next;
+} symTableItem;
 
-}ItemOfSymboltable;
+typedef symTableItem *symTable[ST_SIZE];
 
-typedef ItemOfSymboltable *symbolTable [66666];
+void STInit(symTable *STptr);
+symTableItem *STSearch(symTable* STptr, char *key);
+symTableItem *STInsert(symTable* STptr, char *key);
+bool STAddParam(symTableItem *item, int type);
+
+#endif
