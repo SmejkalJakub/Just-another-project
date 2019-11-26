@@ -17,7 +17,6 @@ typedef struct dynamicStr {
 void DSInit(DS *dynamicStr);
 bool DSAddChar(DS *dynamicStr, char character);
 bool DSAddStr(DS *dynamicStr, char *str);
-//bool DSAddStr(DS *dynamicStr, char *str);
 void DSDelete(DS *dynamicStr);
 
 #endif
