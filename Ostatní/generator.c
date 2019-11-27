@@ -21,6 +21,54 @@ void generateHeader()
 
 }
 
+void generateExpresion(int exprRule)
+{
+    if(exprRule == EXPR_PLUS)
+    {
+        addInstruction("ADDS\n");
+    }
+    else if(exprRule == EXPR_MINUS)
+    {
+        addInstruction("SUBS\n");
+    }
+    else if(exprRule == EXPR_MUL)
+    {
+        addInstruction("MULS\n");
+    }
+    
+}
+
+void generateStackPush(tokenStruct *token)
+{
+    addInstruction("PUSHS ");
+    if(token->tokenType == TOKEN_INTEGER)
+    {
+        char str[12];
+        sprintf(str, "%d", token->integerValue);
+        addInstruction("int@");
+        addInstruction(str);
+    }
+    else if(token->tokenType == TOKEN_DOUBLE)
+    {
+        char str[30];
+        sprintf(str, "%f", token->doubleValue);
+        addInstruction("float@");
+        addInstruction(str);
+    }
+    else if(token->tokenType == TOKEN_STRING)
+    {
+        addInstruction("string@");
+        addInstruction(token->stringValue->str);
+    }
+    else if(token->tokenType == TOKEN_IDENTIFIER)
+    {
+        addInstruction("LF@");
+        addInstruction(token->stringValue->str);
+    }
+
+    addInstruction("\n");
+}
+
 void generateFunctionStart(char *functionName)
 {
     addInstruction("LABEL $");

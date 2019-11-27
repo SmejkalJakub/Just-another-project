@@ -2,6 +2,8 @@
 #define SYMSTACK_H_INCLUDED
 
 #include "expr.h"
+#include "symtable.h"
+
 typedef struct stackItem
 {
 	precedenceTabSym symbol; /// Symbol of stack item.

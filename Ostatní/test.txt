@@ -1,4 +1,1 @@
-def a():
-   print('Ahoj')
-   return a
-   print('nazdar')
+4 + 5 + 6

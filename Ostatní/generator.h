@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "dynamicString.h"
 #include "fileScanner.h"
+#include "expr.h"
 
 #define LOCAL_VAR 0
 #define GLOBAL_VAR 1
@@ -25,5 +26,7 @@ void generateFunctionEnd(char *functionName);
 void generateFunctionStart(char *functionName);
 void generateFunctionReturn(char *functionName, tokenStruct *token);
 void generateJump(char *functionName);
+void generateStackPush(tokenStruct *token);
+void generateExpresion(int exprRule);
 
 #endif

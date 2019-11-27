@@ -150,7 +150,6 @@ int getToken(tokenStruct *token)
 
     DSDelete(token->stringValue);
 
-
     int state = START_TOKEN_STATE;
     char c = 0;
     char *eptr;

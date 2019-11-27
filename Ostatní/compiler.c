@@ -2,7 +2,7 @@
 #include "compiler.h"
 
 
-DS dynamicString;
+/*DS dynamicString;
 
 
 
@@ -13,7 +13,7 @@ DS dynamicString;
     snprintf( doubleInString, 50, "%f", convertedNumber);
 
     return doubleInString;
-}*/
+}
 
 
 int compilerDataInit(CompilerData* compilerData){
@@ -468,8 +468,6 @@ int main(int argc, char *argv[])
             generateFunctionReturn("test", token);
         }
     }*/
-
-
 
 
 

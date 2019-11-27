@@ -21,7 +21,6 @@ typedef struct {
 	bool inDefinition;
 	bool inWhileOrIf;
 
-<<<<<<< HEAD
 }CompilerData;
 
 
@@ -36,6 +35,3 @@ static int Params(CompilerData *compilerData);
 static int anotherParam (CompilerData *compilerData);
 static int listCommandFunction();
 #endif
-=======
-}CompilerData;
->>>>>>> 55714eb8d170b47d08e8ec0f122b0ef6ac4acc62

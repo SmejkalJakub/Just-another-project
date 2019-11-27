@@ -1,6 +1,9 @@
 #ifndef EXPR_H_INCLUDED
 #define EXPR_H_INCLUDED
 
+#include <stdbool.h>
+#include "generator.h"
+
 #define EQ 0
 #define S 1
 #define R 2
@@ -57,10 +60,12 @@ typedef enum
     SYM_DOUBLE,
     SYM_STRING,
     SYM_DOLAR,
-    SYM_TERM,
+    SYM_STOP,
     SYM_NON_TERM
 
 } precedenceTabSym;
+
+bool getitemsBeforeStop(int *itemsBeforeStop);
 
 
 #endif
