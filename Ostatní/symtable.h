@@ -3,9 +3,9 @@
 
 #include "dynamicString.h"
 
-//#define NONE 0
+#define TYPE_NONE 0
 #define INT 1
-#define FLOAT 2
+#define DOUBLE 2
 #define STRING 3
 #define BOOL 4
 
