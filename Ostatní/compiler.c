@@ -21,6 +21,9 @@ int compilerDataInit(CompilerData* compilerData){
     STInit(&compilerData->localTable);
     STInit(&compilerData->globalTable);
 
+    compilerData->globalTable = malloc(sizeof(symTable));
+    compilerData->localTable = malloc(sizeof(symTable));
+
     compilerData->printedValues = malloc(sizeof(DS));
     DSInit(compilerData->printedValues);
 
@@ -72,7 +75,7 @@ static int Prog (CompilerData *compilerData){
 
                                     getToken(&compilerData->token);
 
-                                    return (&compilerData);
+                                    return Commands(&compilerData);
 
                                     if (compilerData->token.tokenType == TOKEN_DEDENT){
 
@@ -254,7 +257,8 @@ static int Values(CompilerData *compilerData){
     getToken(&compilerData->token);
 
     if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-        return;
+        compilerData->
+        return 0;
     }
 
     //compilerData->printedValues = DSAddStr
@@ -342,7 +346,7 @@ int main(int argc, char *argv[])
     setDynamicString(&dynamicString);
 
     CompilerData *compilerData;
-    compilerDataInit(compilerData);
+     compilerDataInit(&compilerData);
 
 
     compilerData->token.stringValue = malloc(sizeof(DS));
