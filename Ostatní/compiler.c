@@ -24,8 +24,9 @@ int compilerDataInit(CompilerData* compilerData){
     STInit(&compilerData->localTable);
     STInit(&compilerData->globalTable);
 
-    initStack(&compilerData->indentationStack);
-    stackPush(&compilerData->indentationStack, 0);
+    compilerData->printedValues = malloc(sizeof(DS));
+    DSInit(&compilerData->printedValues);
+
 
     compilerData->token.stringValue = malloc(sizeof(DS));
     DSInit(compilerData->token.stringValue);
@@ -77,6 +78,9 @@ int compilerDataInit(CompilerData* compilerData){
                                         if (compilerData->token.tokenType == TOKEN_DEDENT){
                                             return Prog(&compilerData);
                                         }
+                                        else{
+                                            return 2;
+                                        }
                                     }
                                     else{
                                         return 2;
@@ -102,7 +106,6 @@ int compilerDataInit(CompilerData* compilerData){
 
        //PROG →  eol PROG
         else if (compilerData->token.tokenType == TOKEN_EOL){
-            getToken(&compilerData->token);
             return Prog(&compilerData);
         }
 
@@ -113,18 +116,109 @@ int compilerDataInit(CompilerData* compilerData){
 
         //PROG →  COMMANDS eol PROG
         else{
-           Commands(&compilerData);
-           return Prog(&compilerData);
+            Commands(&compilerData);
+            return Prog(&compilerData);
         }
     }
 
-    static int anotherCommand (CompilerData *compilerData){
-        getToken(&compilerData->token);
-
-    }
+   
 
     static int Commands (CompilerData *compilerData){
-        if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
+        if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTS){
+            if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
+                getToken(&compilerData->token);
+                if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+
+                        //TODO generateRead()
+                        getToken(&compilerData->token);
+                        if(compilerData->token.tokenType == TOKEN_EOL){
+                            anotherCommand(&compilerData);
+                        }
+                        else{
+                            return 2;
+                        }
+                }
+                else{
+                    return 2;
+                }
+            }
+            else{
+                return 2;
+            }
+        }
+       if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTF){
+            if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
+                getToken(&compilerData->token);
+                if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+
+                        //TODO generateRead()
+                        getToken(&compilerData->token);
+                        if(compilerData->token.tokenType == TOKEN_EOL){
+                            anotherCommand(&compilerData);
+                        }
+                        else{
+                            return 2;
+                        }
+                }
+                else{
+                    return 2;
+                }
+            }
+            else{
+                return 2;
+            }
+        }
+        if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTS){
+            if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
+                getToken(&compilerData->token);
+                if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+
+                        //TODO generateRead()
+                        getToken(&compilerData->token);
+                        if(compilerData->token.tokenType == TOKEN_EOL){
+                            anotherCommand(&compilerData);
+                        }
+                        else{
+                            return 2;
+                        }
+                }
+                else{
+                    return 2;
+                }
+            }
+            else{
+                return 2;
+            }
+        }
+
+        if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == PRINT){
+                //TODO generateWrite()  
+            getToken(&compilerData->token); 
+
+            if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
+                
+                getToken(&compilerData->token); 
+                Values(&compilerData);
+
+                if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+
+                    getToken(&compilerData->token);
+
+                    if(compilerData->token.tokenType == TOKEN_EOL){
+                        anotherCommand(&compilerData);
+                    }
+                    else{
+                        return 2;
+                    }
+                }
+                else{
+                    return 2;
+                }
+                //generateWrite(&compilerData->printedValues, )
+            }
+        }
+
+        else if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
             getToken(&compilerData->token);
 
                 if(compilerData->token.tokenType == TOKEN_EQUALS){
@@ -138,29 +232,31 @@ int compilerDataInit(CompilerData* compilerData){
                 else if(compilerData->token.tokenType == TOKEN_EOL){
                     anotherCommand(&compilerData);
                 }
-            }
-            else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
+         }
+        else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
                getToken(&compilerData->token);
-            }
+        }
           
+
+    }
+    static int anotherCommand (CompilerData *compilerData){
+        getToken(&compilerData->token);
 
     }
 
     static int commandValue (CompilerData *compilerData){
         if(compilerData->token.tokenType == TOKEN_KEYWORD)
             if (compilerData->token.keyword == INPUTS){
-                generateRead();
+                //generateRead();
             }
             else if (compilerData->token.keyword == INPUTF){
-                generateRead();
+                //generateRead();
             }
             else if(compilerData->token.keyword == INPUTI){
-                generateRead();
+                //generateRead();
             }
-
-
             else if(compilerData->token.keyword == PRINT){
-                generateWrite();
+                //generateWrite();
             }
 
     }
