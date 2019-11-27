@@ -5,8 +5,9 @@
 #include <symtable.c>
 #include <dynamicString.h>
 #include <fileScanner.h>
+#include "expr.h"
 
-DS dynamicString;
+/*DS dynamicString;
 Stack indentationStack;
 bool newLine = true;
 
@@ -24,7 +25,7 @@ int compilerDataInit(CompilerData* compilerData){
     STInit(&compilerData->localTable);
     STInit(&compilerData->globalTable);
 
-   compilerData->token = malloc(sizeof(tokenStruct));
+    compilerData->token = malloc(sizeof(tokenStruct));
     compilerData->token.stringValue = malloc(sizeof(DS));
     DSInit(compilerData->token.stringValue);
 
@@ -228,13 +229,11 @@ int compilerDataInit(CompilerData* compilerData){
 
     }
 
-
+*/
 
 int main(int argc, char *argv[])
 {
-   
-
-    DS dynamicString;
+    /*DS dynamicString;
     DSInit(&dynamicString);
     setDynamicString(&dynamicString);
 
@@ -281,7 +280,7 @@ int main(int argc, char *argv[])
 
 }
 
-
+*/
     
     /*while(token->tokenType != TOKEN_EOF)
     {
@@ -373,6 +372,7 @@ int main(int argc, char *argv[])
             generateFunctionReturn("test", token);
         }
     }*/
+}
 
     
 

@@ -64,7 +64,7 @@ symTableItem *STInsert(symTable* STptr, char *key)
 
     strcpy(newItem->key, key);
 
-    newItem->type = NONE;
+    newItem->type = TYPE_NONE;
     newItem->global = false;
 
     unsigned long index = hashFunction(key);
@@ -85,7 +85,7 @@ bool STAddParam(symTableItem *item, int type)
             return false;
         }
     }
-    else if(type == FLOAT)
+    else if(type == DOUBLE)
     {
         if(!DSAddChar(item->params, 'f'))
         {
