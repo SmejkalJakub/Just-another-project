@@ -1,4 +1,4 @@
-
+#include "expr.h"
 typedef struct stackItem
 {
 	precedenceTabSym symbol; /// Symbol of stack item.
