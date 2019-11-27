@@ -138,18 +138,16 @@
 1574798679 source:c:\users\kubaa\onedrive\ifj\ostatní\dynamicstring.c
 	"dynamicString.h"
 
-1574798679 c:\users\kubaa\onedrive\ifj\ostatní\dynamicstring.h
+1574866136 c:\users\kubaa\onedrive\ifj\ostatní\dynamicstring.h
 	<stdio.h>
 	<stdlib.h>
 	<stdbool.h>
 	<string.h>
 
-1574858707 source:c:\users\kubaa\onedrive\ifj\ostatní\filescanner.c
+1574865291 source:c:\users\kubaa\onedrive\ifj\ostatní\filescanner.c
 	"fileScanner.h"
-	"dynamicString.h"
-	"stack.h"
 
-1574858708 c:\users\kubaa\onedrive\ifj\ostatní\filescanner.h
+1574866154 c:\users\kubaa\onedrive\ifj\ostatní\filescanner.h
 	<stdio.h>
 	<ctype.h>
 	<stdbool.h>
@@ -168,18 +166,18 @@
 	"symtable.h"
 	"symstack.h"
 
-1574863847 c:\users\kubaa\onedrive\ifj\ostatní\expr.h
+1574866228 c:\users\kubaa\onedrive\ifj\ostatní\expr.h
 
 1574807722 c:\users\kubaa\onedrive\ifj\ostatní\symtable.h
 	"dynamicString.h"
 
-1574863989 c:\users\kubaa\onedrive\ifj\ostatní\symstack.h
+1574866229 c:\users\kubaa\onedrive\ifj\ostatní\symstack.h
 	"expr.h"
 
 1574864281 source:c:\users\kubaa\onedrive\ifj\ostatní\generator.c
 	"generator.h"
 
-1574864201 c:\users\kubaa\onedrive\ifj\ostatní\generator.h
+1574866208 c:\users\kubaa\onedrive\ifj\ostatní\generator.h
 	<stdlib.h>
 	<stdio.h>
 	"dynamicString.h"
@@ -188,6 +186,25 @@
 1574810308 source:c:\users\kubaa\onedrive\ifj\ostatní\stack.c
 	"stack.h"
 
-1574807756 source:c:\users\kubaa\onedrive\ifj\ostatní\symtable.c
+1574865209 source:c:\users\kubaa\onedrive\ifj\ostatní\symtable.c
+	"symtable.h"
+
+1574864379 source:c:\users\kubaa\onedrive\ifj\ostatní\symstack.c
+	<stdlib.h>
+	<stdbool.h>
+	"symstack.h"
+
+1574865382 source:c:\users\kubaa\onedrive\ifj\ostatní\compiler.c
+	<stdio.h>
+	"compiler.h"
+
+1574866112 c:\users\kubaa\onedrive\ifj\ostatní\compiler.h
+	<stdbool.h>
+	"stack.h"
+	"generator.h"
+	"dynamicString.h"
+	"symtable.h"
+
+1574865209 c:\users\kubaa\onedrive\ifj\ostatní\symtable.c
 	"symtable.h"
 

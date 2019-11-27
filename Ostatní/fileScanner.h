@@ -1,3 +1,6 @@
+#ifndef FILESCANNER_H_INCLUDED
+#define FILESCANNER_H_INCLUDED
+
 #include <stdio.h>
 #include <ctype.h>
 #include <stdbool.h>
@@ -100,3 +103,4 @@ typedef struct
 int getToken(tokenStruct *token);
 void setSourceCodeFile(FILE *sourceCodeFile);
 
+#endif

@@ -1,3 +1,6 @@
+#ifndef SYMSTACK_H_INCLUDED
+#define SYMSTACK_H_INCLUDED
+
 #include "expr.h"
 typedef struct stackItem
 {
@@ -17,3 +20,4 @@ bool symStackPush(symStack* stack, precedenceTabSym symbol, int type);
 bool symStackPop(symStack* stack);
 symStackItem* symStackTop(symStack* stack);
 void symStackFree(symStack* stack);
+#endif

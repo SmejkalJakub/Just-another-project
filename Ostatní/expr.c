@@ -19,22 +19,22 @@ E
 id
 */
 
-/*	
+/*
 "+/-"	"*\/"	r	i	"("	")"	$
 "+/-"	>	<	>	<	<	>	>
 "*\/"	>	>	>	<	<	>	>
 r	<	<		<	<	>	>
 i	>	>	>			>	>
-"("	<	<	<	<	<	"="	
+"("	<	<	<	<	<	"="
 ")"	>	>	>			>	>
-$	<	<	<	<	<		
+$	<	<	<	<	<
 */
 
 symStack stack;
 
 symTable *dummyTable;
 
-int precedenceTable[TABLE_SIZE][TABLE_SIZE] = 
+int precedenceTable[TABLE_SIZE][TABLE_SIZE] =
 {
     {R, S, R, S, S, R, R},
     {R, R, R, S, S, R, R},
@@ -103,9 +103,9 @@ precedenceTabSym tokenToSymbol(tokenStruct *token)
         break;
     case TOKEN_STRING:
         return SYM_STRING;
-        break;    
+        break;
     default:
-        return SYM_DOLAR; 
+        return SYM_DOLAR;
         break;
     }
 }
@@ -135,11 +135,11 @@ int getTokenType(tokenStruct *token, symTable *localTable)
         {
             return sym->type;
         }
-        
+
     }
-    
-    
-    
+
+
+
 }
 
 int symbolToType(precedenceTabSym symbol)
@@ -187,7 +187,7 @@ symStackItem *getTopTerm()
     }
 
     return NULL;
-    
+
 }
 
 
@@ -215,7 +215,7 @@ int solveExpr(tokenStruct *token)
         symStackTopSym = getTopTerm();
 
         currentSymType = symbolToType(currentSym);
-        symStackTopSymType = symbolToType(symStackTopSym);
+        symStackTopSymType = symbolToType(symStackTopSym->symbol);
 
 
 
@@ -223,11 +223,11 @@ int solveExpr(tokenStruct *token)
         {
         case ER:
             {
-                if(currentSym == SYM_DOLAR && symStackTopSym == SYM_DOLAR)
+                if(currentSym == SYM_DOLAR && symStackTopSym->symbol == SYM_DOLAR)
                 {
                     end = true;
                 }
-                else 
+                else
                 {
                     return 2;
                 }
@@ -242,11 +242,11 @@ int solveExpr(tokenStruct *token)
             {
 
             }
-        
+
         default:
             break;
         }
-        
+
     }
 
 }

@@ -1,6 +1,5 @@
 #include "fileScanner.h"
-#include "dynamicString.h"
-#include "stack.h"
+
 
 char hexSeq[] = "0x00";
 

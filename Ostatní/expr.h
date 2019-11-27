@@ -1,3 +1,6 @@
+#ifndef EXPR_H_INCLUDED
+#define EXPR_H_INCLUDED
+
 #define EQ 0
 #define S 1
 #define R 2
@@ -58,3 +61,6 @@ typedef enum
     SYM_NON_TERM
 
 } precedenceTabSym;
+
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef GENERATOR_H_INCLUDED
+#define GENERATOR_H_INCLUDED
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "dynamicString.h"
@@ -23,3 +26,4 @@ void generateFunctionStart(char *functionName);
 void generateFunctionReturn(char *functionName, tokenStruct *token);
 void generateJump(char *functionName);
 
+#endif
