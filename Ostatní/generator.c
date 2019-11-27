@@ -58,7 +58,6 @@ void generateFunctionReturn(char *functionName, tokenStruct *token)
     }
     else if(token->tokenType == TOKEN_STRING)
     {
-        printf("jse tu\n");
         addInstruction("string@");
         addInstruction(token->stringValue->str);
     }

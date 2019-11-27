@@ -1,10 +1,10 @@
 #define EQ 0
-#define L 1
-#define B 2
+#define S 1
+#define R 2
 #define ER 3
 
 
-#define TSIZE 7
+#define TABLE_SIZE 7
 
 
 #define EXPR_ERR -1

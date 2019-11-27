@@ -36,13 +36,13 @@ symTable *dummyTable;
 
 int precedenceTable[TABLE_SIZE][TABLE_SIZE] = 
 {
-    {B, L, B, L, L, B, B},
-    {B, B, B, L, L, B, B},
-    {L, L, ER, L, L, B, B},
-    {B, B, B, ER, ER, B, B},
-    {L, L, L, L, L, EQ, ER},
-    {B, B, B, ER, ER, B, B},
-    {L, L, L, L, L, ER, ER},
+    {R, S, R, S, S, R, R},
+    {R, R, R, S, S, R, R},
+    {S, S, ER, S, S, R, R},
+    {R, R, R, ER, ER, R, R},
+    {S, S, S, S, S, EQ, ER},
+    {R, R, R, ER, ER, R, R},
+    {S, S, S, S, S, ER, ER},
 };
 
 
@@ -236,8 +236,10 @@ int solveExpr(tokenStruct *token)
         case EQ:
             {
                 symStackPush(&stack, currentSym, getTokenType(token, dummyTable));
-
                 returnValue = getToken(token);
+            }
+        case S:
+            {
 
             }
         
