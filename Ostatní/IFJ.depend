@@ -101,12 +101,12 @@
 	<stdbool.h>
 	<string.h>
 
-1574846497 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\filescanner.c
+1574863372 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\filescanner.c
 	"fileScanner.h"
 	"dynamicString.h"
 	"stack.h"
 
-1574858305 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\filescanner.h
+1574863372 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\filescanner.h
 	<stdio.h>
 	<ctype.h>
 	<stdbool.h>
@@ -129,10 +129,10 @@
 	"dynamicString.h"
 	"fileScanner.h"
 
-1574859187 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\symtable.c
+1574861520 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\symtable.c
 	"symtable.h"
 
-1574858802 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\symtable.h
+1574861555 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\symtable.h
 	"dynamicString.h"
 
 1574798679 source:c:\users\kubaa\onedrive\ifj\ostatní\dynamicstring.c

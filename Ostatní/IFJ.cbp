@@ -35,18 +35,34 @@
 		<Unit filename="compiler.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="compiler.h" />
 		<Unit filename="dynamicString.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="dynamicString.h" />
+		<Unit filename="expr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="expr.h" />
 		<Unit filename="fileScanner.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="fileScanner.h" />
+		<Unit filename="ifj19.py" />
 		<Unit filename="stack.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="stack.h" />
+		<Unit filename="symstack.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="symstack.h" />
+		<Unit filename="symtable.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="symtable.h" />
+		<Unit filename="test" />
+		<Unit filename="test.txt" />
 		<Extensions>
 			<code_completion />
 			<envvars />
