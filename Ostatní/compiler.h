@@ -6,15 +6,14 @@
 typedef struct {
     symTable localTable;
     symTable globalTable;
+    DS* printedValues;
 
     tokenStruct token;
 
     symTableItem *current_id;
 
     bool inFunction;
-	bool inDeclaratin;	
+	bool inDefinition;	
 	bool inWhileOrIf;
-	bool nonDeclaredFunction;
-
 
 }CompilerData;
