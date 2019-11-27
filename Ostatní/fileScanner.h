@@ -97,6 +97,6 @@ typedef struct
 
 }tokenStruct;
 
-int getToken(tokenStruct *token, bool newLine, Stack *indentStack);
+int getToken(tokenStruct *token);
 void setSourceCodeFile(FILE *sourceCodeFile);
 

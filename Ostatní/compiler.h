@@ -6,7 +6,7 @@
 typedef struct {
     symTable localTable;
     symTable globalTable;
-    Stack indentationStack;
+    
 
     tokenStruct token;
 

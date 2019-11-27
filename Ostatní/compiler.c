@@ -39,38 +39,38 @@ int compilerDataInit(CompilerData* compilerData){
 
     static int Prog (CompilerData *compilerData){
 
-        getToken(&compilerData->token, &compilerData->indentationStack);
+        getToken(&compilerData->token);
 
        // PROG → def id PARAMS eol indent LIST_COMMAND_FUNC eol dedent PROG
         if ((compilerData->token.tokenType == TOKEN_KEYWORD) && (compilerData->token.keyword == DEF)){
 
-            getToken(&compilerData->token, &compilerData->indentationStack);
+            getToken(&compilerData->token);
 
             if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
                 compilerData->current_id = STInsert(&compilerData->localTable, compilerData->token.stringValue);
                 generateFunctionStart(compilerData->current_id);
 
-                getToken(&compilerData->token, &compilerData->indentationStack);
+                getToken(&compilerData->token);
 
                 if (compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
 
-                    getToken(&compilerData->token, &compilerData->indentationStack);
+                    getToken(&compilerData->token);
                         Params(&compilerData);
 
                     if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-                        getToken(&compilerData->token, &compilerData->indentationStack);
+                        getToken(&compilerData->token);
 
                         if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
-                            getToken(&compilerData->token, &compilerData->indentationStack);
+                            getToken(&compilerData->token);
 
                             if((compilerData->token.tokenType == TOKEN_EOL)){
                        
-                                    getToken(&compilerData->token, &compilerData->indentationStack);
+                                    getToken(&compilerData->token);
 
                                     if(compilerData->token.tokenType == TOKEN_INDENT){
                                         
-                                        getToken(&compilerData->token, &compilerData->indentationStack);
+                                        getToken(&compilerData->token);
 
                                         Commands(&compilerData);
 
@@ -102,7 +102,7 @@ int compilerDataInit(CompilerData* compilerData){
 
        //PROG →  eol PROG
         else if (compilerData->token.tokenType == TOKEN_EOL){
-            getToken(&compilerData->token, &compilerData->indentationStack);
+            getToken(&compilerData->token);
             return Prog(&compilerData);
         }
 
@@ -119,11 +119,34 @@ int compilerDataInit(CompilerData* compilerData){
     }
 
     static int anotherCommand (CompilerData *compilerData){
-        getToken(&compilerData->token, &compilerData->indentationStack);
+        getToken(&compilerData->token);
 
     }
 
     static int Commands (CompilerData *compilerData){
+        if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
+            getToken(&compilerData->token);
+
+                if(compilerData->token.tokenType == TOKEN_EQUALS){
+                    getToken(&compilerData->token);
+                    commandValue(&compilerData);
+
+                    if(compilerData->token.tokenType == TOKEN_EOL){
+                        anotherCommand(&compilerData);
+                    }
+                }
+                else if(compilerData->token.tokenType == TOKEN_EOL){
+                    anotherCommand(&compilerData);
+                }
+            }
+            else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
+               getToken(&compilerData->token);
+            }
+          
+
+    }
+
+    static int commandValue (CompilerData *compilerData){
         if(compilerData->token.tokenType == TOKEN_KEYWORD)
             if (compilerData->token.keyword == INPUTS){
                 generateRead();
@@ -140,43 +163,6 @@ int compilerDataInit(CompilerData* compilerData){
                 generateWrite();
             }
 
-
-            else if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
-                getToken(&compilerData->token, &compilerData->indentationStack);
-
-                if(compilerData->token.tokenType == TOKEN_EQUALS){
-                    getToken(&compilerData->token, &compilerData->indentationStack);
-                    commandValue(&compilerData);
-
-                    if(compilerData->token.tokenType == TOKEN_EOL){
-                        anotherCommand(&compilerData);
-                    }
-
-                }
-                else{
-                    anotherCommand(&compilerData);
-                }
-            }
-            else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
-               getToken(&compilerData->token, &compilerData->indentationStack);
-
-                
-
-            }
-            else if(compilerData->token.keyword == INPUTI){
-                generateRead();
-            }
-            else if(compilerData->token.keyword == INPUTI){
-                generateRead();
-            }
-            else if(compilerData->token.keyword == INPUTI){
-                generateRead();
-            }
-
-    }
-
-    static int commandValue (CompilerData *compilerData){
-
     }
 
     static int Values(CompilerData *compilerData){
@@ -191,7 +177,7 @@ int compilerDataInit(CompilerData* compilerData){
         if (compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
             STInsert(&compilerData->localTable, &compilerData->token.stringValue);
-            getToken(&compilerData->token, &compilerData->indentationStack);
+            getToken(&compilerData->token);
 
             anotherParam(&compilerData);
 
@@ -207,12 +193,12 @@ int compilerDataInit(CompilerData* compilerData){
     static int anotherParam (CompilerData *compilerData){
 
         if(compilerData->token.tokenType == TOKEN_COLON){
-            getToken(&compilerData->token, &compilerData->indentationStack);
+            getToken(&compilerData->token);
 
             if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
                 STInsert(&compilerData->localTable, &compilerData->token.stringValue);
-                getToken(&compilerData->token, &compilerData->indentationStack);
+                getToken(&compilerData->token);
 
                 return anotherParam(&compilerData);
             }
