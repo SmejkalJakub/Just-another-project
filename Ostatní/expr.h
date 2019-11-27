@@ -4,7 +4,7 @@
 #define ER 3
 
 
-#define TSIZE 7
+#define TABLE_SIZE 7
 
 
 #define EXPR_ERR -1

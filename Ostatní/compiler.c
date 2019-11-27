@@ -1,20 +1,11 @@
 #include <stdio.h>
-<<<<<<< HEAD
-#include <stack.h>
-#include <generator.h>
-#include <compiler.h>
-#include <symtable.c>
-#include <dynamicString.h>
-#include <fileScanner.h>
-#include "expr.h"
-=======
 #include "stack.h"
 #include "generator.h"
 #include "compiler.h"
 #include "symtable.c"
 #include "dynamicString.h"
 #include "fileScanner.h"
->>>>>>> ed53d73aa21b459c0e624797766fd94bbb31771e
+
 
 DS dynamicString;
 
@@ -35,14 +26,10 @@ int compilerDataInit(CompilerData* compilerData){
     STInit(&compilerData->localTable);
     STInit(&compilerData->globalTable);
 
-<<<<<<< HEAD
-    compilerData->token = malloc(sizeof(tokenStruct));
-=======
     compilerData->printedValues = malloc(sizeof(DS));
     DSInit(compilerData->printedValues);
 
 
->>>>>>> ed53d73aa21b459c0e624797766fd94bbb31771e
     compilerData->token.stringValue = malloc(sizeof(DS));
     DSInit(compilerData->token.stringValue);
 
@@ -354,12 +341,8 @@ int compilerDataInit(CompilerData* compilerData){
 
 int main(int argc, char *argv[])
 {
-<<<<<<< HEAD
-    /*DS dynamicString;
-=======
-
     DS dynamicString;
->>>>>>> ed53d73aa21b459c0e624797766fd94bbb31771e
+
     DSInit(&dynamicString);
     setDynamicString(&dynamicString);
 
@@ -399,13 +382,7 @@ int main(int argc, char *argv[])
 
 }
 
-<<<<<<< HEAD
-*/
-    
-=======
 
-
->>>>>>> ed53d73aa21b459c0e624797766fd94bbb31771e
     /*while(token->tokenType != TOKEN_EOF)
     {
         if(getToken(token, compilerData->indentationStack) == ERROR_LEX)
