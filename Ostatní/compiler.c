@@ -8,11 +8,6 @@
 
 DS dynamicString;
 
-/*int getTokenAndCheckType(CompilerData* compilerData, ){
-    getToken(&compilerData->token);
-
-
-}*/
 
 
 
@@ -178,7 +173,7 @@ int compilerDataInit(CompilerData* compilerData){
                 return 2;
             }
         }
-        if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTS){
+        if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTI){
             if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
                 getToken(&compilerData->token);
                 if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){

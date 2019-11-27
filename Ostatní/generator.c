@@ -233,7 +233,7 @@ void generateCall(char *labelName)
     addInstruction("\n");
 }
 
-void generateReturt()
+void generateReturn()
 {
     addInstruction("RETURN");
     addInstruction("\n");
