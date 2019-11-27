@@ -3,7 +3,7 @@
 
 #include "dynamicString.h"
 
-#define NONE 0
+//#define NONE 0
 #define INT 1
 #define FLOAT 2
 #define STRING 3

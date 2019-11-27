@@ -8,6 +8,12 @@
 
 DS dynamicString;
 
+/*int getTokenAndCheckType(CompilerData* compilerData, ){
+    getToken(&compilerData->token);
+
+
+}*/
+
 
 
 /*char* doubleToString(double convertedNumber){
@@ -25,7 +31,7 @@ int compilerDataInit(CompilerData* compilerData){
     STInit(&compilerData->globalTable);
 
     compilerData->printedValues = malloc(sizeof(DS));
-    DSInit(&compilerData->printedValues);
+    DSInit(compilerData->printedValues);
 
 
     compilerData->token.stringValue = malloc(sizeof(DS));
@@ -34,7 +40,7 @@ int compilerDataInit(CompilerData* compilerData){
     compilerData->current_id = NULL;
     compilerData -> inFunction = NULL;
 	compilerData -> inWhileOrIf = NULL;
-	
+
 }
 
 
@@ -44,6 +50,8 @@ int compilerDataInit(CompilerData* compilerData){
 
        // PROG → def id PARAMS eol indent LIST_COMMAND_FUNC eol dedent PROG
         if ((compilerData->token.tokenType == TOKEN_KEYWORD) && (compilerData->token.keyword == DEF)){
+
+            compilerData->inFunction = true;
 
             getToken(&compilerData->token);
 
@@ -57,7 +65,7 @@ int compilerDataInit(CompilerData* compilerData){
                 if (compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
 
                     getToken(&compilerData->token);
-                        Params(&compilerData);
+                      return (Params(&compilerData));
 
                     if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
                         getToken(&compilerData->token);
@@ -66,16 +74,18 @@ int compilerDataInit(CompilerData* compilerData){
                             getToken(&compilerData->token);
 
                             if((compilerData->token.tokenType == TOKEN_EOL)){
-                       
+
                                     getToken(&compilerData->token);
 
                                     if(compilerData->token.tokenType == TOKEN_INDENT){
-                                        
+
                                         getToken(&compilerData->token);
 
-                                        Commands(&compilerData);
+                                        return Commands(&compilerData);
 
                                         if (compilerData->token.tokenType == TOKEN_DEDENT){
+
+                                            compilerData->inFunction = false;
                                             return Prog(&compilerData);
                                         }
                                         else{
@@ -106,7 +116,7 @@ int compilerDataInit(CompilerData* compilerData){
 
        //PROG →  eol PROG
         else if (compilerData->token.tokenType == TOKEN_EOL){
-            return Prog(&compilerData);
+            return Prog(compilerData);
         }
 
         //PROG →  EOF
@@ -121,7 +131,7 @@ int compilerDataInit(CompilerData* compilerData){
         }
     }
 
-   
+
 
     static int Commands (CompilerData *compilerData){
         if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTS){
@@ -132,7 +142,7 @@ int compilerDataInit(CompilerData* compilerData){
                         //TODO generateRead()
                         getToken(&compilerData->token);
                         if(compilerData->token.tokenType == TOKEN_EOL){
-                            anotherCommand(&compilerData);
+                            return anotherCommand(&compilerData);
                         }
                         else{
                             return 2;
@@ -192,13 +202,12 @@ int compilerDataInit(CompilerData* compilerData){
         }
 
         if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == PRINT){
-                //TODO generateWrite()  
-            getToken(&compilerData->token); 
+                //TODO generateWrite()
+            getToken(&compilerData->token);
 
             if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-                
-                getToken(&compilerData->token); 
-                Values(&compilerData);
+
+                return Values(&compilerData);
 
                 if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
 
@@ -219,11 +228,22 @@ int compilerDataInit(CompilerData* compilerData){
         }
 
         else if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
+
+            //TODO rozlisovani, zde jde o localni ci globalni promennou
+
+            if(!compilerData->inFunction){
+                compilerData->current_id = STInsert(&compilerData->globalTable, &compilerData->token.stringValue);
+            }
+            else{
+                compilerData->current_id = STInsert(&compilerData->globalTable, &compilerData->token.stringValue);
+            }
+
             getToken(&compilerData->token);
 
                 if(compilerData->token.tokenType == TOKEN_EQUALS){
                     getToken(&compilerData->token);
-                    commandValue(&compilerData);
+                    //TODO prirazeni
+                    return commandValue(&compilerData);
 
                     if(compilerData->token.tokenType == TOKEN_EOL){
                         anotherCommand(&compilerData);
@@ -236,7 +256,21 @@ int compilerDataInit(CompilerData* compilerData){
         else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
                getToken(&compilerData->token);
         }
-          
+
+
+    }
+    static int Values(CompilerData *compilerData){
+        getToken(&compilerData->token);
+
+        if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+            return;
+        }
+
+        //compilerData->printedValues = DSAddStr
+
+    }
+
+    static int Value(CompilerData *compilerData){
 
     }
     static int anotherCommand (CompilerData *compilerData){
@@ -245,7 +279,7 @@ int compilerDataInit(CompilerData* compilerData){
     }
 
     static int commandValue (CompilerData *compilerData){
-        if(compilerData->token.tokenType == TOKEN_KEYWORD)
+        if(compilerData->token.tokenType == TOKEN_KEYWORD){
             if (compilerData->token.keyword == INPUTS){
                 //generateRead();
             }
@@ -258,21 +292,17 @@ int compilerDataInit(CompilerData* compilerData){
             else if(compilerData->token.keyword == PRINT){
                 //generateWrite();
             }
+        }
+        return 0;
 
     }
 
-    static int Values(CompilerData *compilerData){
 
-    }
-
-    static int Value(CompilerData *compilerData){
-
-    }
 
     static int Params(CompilerData *compilerData){
         if (compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
-            STInsert(&compilerData->localTable, &compilerData->token.stringValue);
+            STInsert(&compilerData->localTable, compilerData->token.stringValue);
             getToken(&compilerData->token);
 
             anotherParam(&compilerData);
@@ -293,7 +323,7 @@ int compilerDataInit(CompilerData* compilerData){
 
             if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
-                STInsert(&compilerData->localTable, &compilerData->token.stringValue);
+                STInsert(&compilerData->localTable, compilerData->token.stringValue);
                 getToken(&compilerData->token);
 
                 return anotherParam(&compilerData);
@@ -307,9 +337,7 @@ int compilerDataInit(CompilerData* compilerData){
         }
     }
 
-    static int commandValue (){
 
-    }
 
     static int listCommandFunction(){
 
@@ -327,7 +355,7 @@ int main(int argc, char *argv[])
     CompilerData *compilerData;
     compilerDataInit(&compilerData);
 
-    
+
     compilerData->token.stringValue = malloc(sizeof(DS));
     DSInit(compilerData->token.stringValue);
 
@@ -347,7 +375,7 @@ int main(int argc, char *argv[])
 
     generateHeader();
 
-    
+
 
     Prog(&compilerData);
 
