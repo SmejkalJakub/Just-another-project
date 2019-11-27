@@ -13,7 +13,7 @@ typedef struct {
     symTableItem *current_id;
 
     bool inFunction;
-	bool inDefinition;	
+	bool inDefinition;
 	bool inWhileOrIf;
 
 }CompilerData;
