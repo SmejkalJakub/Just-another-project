@@ -7,7 +7,7 @@
 #include <fileScanner.h>
 #include "expr.h"
 
-/*DS dynamicString;
+DS dynamicString;
 Stack indentationStack;
 bool newLine = true;
 
@@ -228,8 +228,6 @@ int compilerDataInit(CompilerData* compilerData){
     static int listCommandFunction(){
 
     }
-
-*/
 
 int main(int argc, char *argv[])
 {

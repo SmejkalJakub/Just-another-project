@@ -16,8 +16,8 @@ void addInstruction(char *instruction)
 void generateHeader()
 {
     addInstruction(".IFJcode19\n");
-    addInstruction("DEFVAR GF@%%conditionRes\n");
-    addInstruction("DEFVAR GF@%%lastExpresionResult\n\n\n");
+    addInstruction("DEFVAR GF@%conditionRes\n");
+    addInstruction("DEFVAR GF@%lastExpresionResult\n\n\n");
 
 }
 
@@ -168,6 +168,13 @@ void generateWrite(char *variable, int frame)
     addInstruction("WRITE ");
     addInstruction(frameVar);
     addInstruction(variable);
+    addInstruction("\n");
+}
+
+void generatePrint(char *string)
+{
+    addInstruction("WRITE string@");
+    addInstruction(string);
     addInstruction("\n");
 }
 

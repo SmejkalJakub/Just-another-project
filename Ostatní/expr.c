@@ -1,6 +1,7 @@
 #include "expr.h"
 #include "fileScanner.h"
 #include "symtable.h"
+#include "symstack.h"
 
 /*E -> E + E
 E = E
@@ -29,10 +30,11 @@ i	>	>	>			>	>
 $	<	<	<	<	<		
 */
 
+symStack stack;
 
-Stack stack;
+symTable *dummyTable;
 
-int precedenceTable[TSIZE][TSIZE] = 
+int precedenceTable[TABLE_SIZE][TABLE_SIZE] = 
 {
     {B, L, B, L, L, B, B},
     {B, B, B, L, L, B, B},
@@ -146,13 +148,9 @@ int symbolToType(precedenceTabSym symbol)
     {
         return PREC_TAB_PLUS_MINUS;
     }
-    else if(symbol == SYM_MUL || symbol == SYM_DIV)
+    else if(symbol == SYM_MUL || symbol == SYM_DIV || symbol == SYM_SPEC_DIV)
     {
-        return PREC_TAB_MUL_DIV;
-    }
-    else if(symbol == SYM_SPEC_DIV)
-    {
-        return PREC_TAB_SPEC_DIV;
+        return PREC_TAB_MUL_DIV_IDIV;
     }
     else if(symbol == SYM_LESS || symbol == SYM_LESS_EQ ||
             symbol == SYM_MORE || symbol == SYM_MORE_EQ ||
@@ -179,8 +177,74 @@ int symbolToType(precedenceTabSym symbol)
 }
 
 
-
-int solveExpr()
+symStackItem *getTopTerm()
 {
-    initStack(&stack);
+    symStackItem *topItem = (&stack)->top;
+    while (topItem != NULL)
+    {
+        if(topItem->symbol <= SYM_DOLAR)
+            return topItem;
+    }
+
+    return NULL;
+    
+}
+
+
+int solveExpr(tokenStruct *token)
+{
+
+    int returnValue;
+
+    bool end = false;
+    precedenceTabSym currentSym;
+
+    symStackItem *symStackTopSym;
+
+    symStackInit(&stack);
+
+    symStackPush(&stack, SYM_DOLAR, NONE);
+
+    int currentSymType;
+    int symStackTopSymType;
+
+
+    while(!end)
+    {
+        currentSym = tokenToSymbol(token);
+        symStackTopSym = getTopTerm();
+
+        currentSymType = symbolToType(currentSym);
+        symStackTopSymType = symbolToType(symStackTopSym);
+
+
+
+        switch (precedenceTable[symStackTopSymType][currentSymType])
+        {
+        case ER:
+            {
+                if(currentSym == SYM_DOLAR && symStackTopSym == SYM_DOLAR)
+                {
+                    end = true;
+                }
+                else 
+                {
+                    return 2;
+                }
+            }
+            break;
+        case EQ:
+            {
+                symStackPush(&stack, currentSym, getTokenType(token, dummyTable));
+
+                returnValue = getToken(token);
+
+            }
+        
+        default:
+            break;
+        }
+        
+    }
+
 }

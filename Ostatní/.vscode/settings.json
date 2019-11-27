@@ -3,6 +3,8 @@
         "generator.h": "c",
         "stdlib.h": "c",
         "stdio.h": "c",
-        "dynamicstring.h": "c"
+        "dynamicstring.h": "c",
+        "stdbool.h": "c",
+        "filescanner.h": "c"
     }
 }

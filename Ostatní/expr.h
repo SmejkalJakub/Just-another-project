@@ -25,13 +25,12 @@
 
 
 #define PREC_TAB_PLUS_MINUS 0
-#define PREC_TAB_MUL_DIV 1
-#define PREC_TAB_SPEC_DIV 2
-#define PREC_TAB_RELATION_OPERATOR 3
-#define PREC_TAB_ID 4
-#define PREC_TAB_LEFT_BRACKET 5
-#define PREC_TAB_RIGHT_BRACKET 6
-#define PREC_TAB_DOLAR 7 
+#define PREC_TAB_MUL_DIV_IDIV 1
+#define PREC_TAB_RELATION_OPERATOR 2
+#define PREC_TAB_ID 3
+#define PREC_TAB_LEFT_BRACKET 4
+#define PREC_TAB_RIGHT_BRACKET 5
+#define PREC_TAB_DOLAR 6
 
 
 typedef enum
@@ -54,6 +53,8 @@ typedef enum
     SYM_INT,
     SYM_DOUBLE,
     SYM_STRING,
-    SYM_DOLAR
+    SYM_DOLAR,
+    SYM_TERM,
+    SYM_NON_TERM
 
 } precedenceTabSym;
