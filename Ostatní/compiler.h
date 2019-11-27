@@ -1,7 +1,6 @@
 #include <stdbool.h>
 
 #include "symtable.h"
-#include "fileScanner.h"
 
 typedef struct {
     symTable localTable;
@@ -13,7 +12,7 @@ typedef struct {
     symTableItem *current_id;
 
     bool inFunction;
-	bool inDefinition;	
+	bool inDefinition;
 	bool inWhileOrIf;
 
 }CompilerData;

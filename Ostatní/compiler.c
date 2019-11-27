@@ -4,7 +4,6 @@
 #include "compiler.h"
 #include "symtable.c"
 #include "dynamicString.h"
-#include "fileScanner.h"
 
 
 DS dynamicString;
