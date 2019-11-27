@@ -58,7 +58,6 @@ void generateFunctionReturn(char *functionName, tokenStruct *token)
     }
     else if(token->tokenType == TOKEN_STRING)
     {
-        printf("jse tu\n");
         addInstruction("string@");
         addInstruction(token->stringValue->str);
     }
@@ -90,7 +89,7 @@ void generateVariableDef(char *varName, int frame)
     {
         varFrame = "TF@";
     }
-    
+
     addInstruction("DEFVAR ");
     addInstruction(varFrame);
     addInstruction(varName);
@@ -119,7 +118,7 @@ void generateMoveVariableToVariable(char *toVar, char *fromVar, int toFrame, int
     {
         toVarFrame = "GF@";
     }
-    
+
     addInstruction("MOVE ");
     addInstruction(toVarFrame);
     addInstruction(toVar);
@@ -141,7 +140,7 @@ void generateMoveValueToVariable(char *toVar, int toFrame, char *type, char *val
     {
         toVarFrame = "GF@";
     }
-    
+
     addInstruction("MOVE ");
     addInstruction(toVarFrame);
     addInstruction(toVar);

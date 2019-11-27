@@ -2,7 +2,6 @@
 #include <stdbool.h>
 
 #include "symstack.h"
-#include "expr.h"
 
 
 void symStackInit(symStack *stack)
@@ -27,7 +26,7 @@ bool symStackPush(symStack* stack, precedenceTabSym symbol, int type)
 
         return true;
     }
-    
+
 }
 
 bool symStackPop(symStack* stack)
@@ -43,9 +42,9 @@ bool symStackPop(symStack* stack)
     else
     {
 	    return false;
-        
+
     }
-    
+
 }
 
 

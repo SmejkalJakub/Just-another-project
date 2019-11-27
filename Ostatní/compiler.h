@@ -1,7 +1,6 @@
 #include <stdbool.h>
 
 #include "symtable.h"
-#include "fileScanner.h"
 
 typedef struct {
     symTable localTable;
