@@ -1,22 +1,22 @@
 #include <stdio.h>
-#include <stack.h>
-#include <generator.h>
-#include <compiler.h>
-#include <symtable.c>
-#include <dynamicString.h>
-#include <fileScanner.h>
+#include "stack.h"
+#include "generator.h"
+#include "compiler.h"
+#include "symtable.c"
+#include "dynamicString.h"
+#include "fileScanner.h"
 
 DS dynamicString;
-Stack indentationStack;
-bool newLine = true;
 
-char* doubleToString(double convertedNumber){
-    
+
+
+/*char* doubleToString(double convertedNumber){
+
     char doubleInString[50];
     snprintf( doubleInString, 50, "%f", convertedNumber);
 
     return doubleInString;
-}
+}*/
 
 
 int compilerDataInit(CompilerData* compilerData){
@@ -24,55 +24,59 @@ int compilerDataInit(CompilerData* compilerData){
     STInit(&compilerData->localTable);
     STInit(&compilerData->globalTable);
 
-   compilerData->token = malloc(sizeof(tokenStruct));
+    initStack(&compilerData->indentationStack);
+    stackPush(&compilerData->indentationStack, 0);
+
     compilerData->token.stringValue = malloc(sizeof(DS));
     DSInit(compilerData->token.stringValue);
 
     compilerData->current_id = NULL;
     compilerData -> inFunction = NULL;
-	compilerData -> inDeclaratin = NULL;	
 	compilerData -> inWhileOrIf = NULL;
-	compilerData -> nonDeclaredFunction = NULL;
+	
 }
-
 
 
     static int Prog (CompilerData *compilerData){
 
+        getToken(&compilerData->token, &compilerData->indentationStack);
+
        // PROG → def id PARAMS eol indent LIST_COMMAND_FUNC eol dedent PROG
         if ((compilerData->token.tokenType == TOKEN_KEYWORD) && (compilerData->token.keyword == DEF)){
-            ///???///
-            newLine = false;
 
-            getToken(&compilerData->token, newLine, &indentationStack);
-            
-            if((compilerData->token.tokenType == TOKEN_IDENTIFIER)){
-                compilerData->current_id = STInsert(&compilerData->localTable, &compilerData->token.stringValue);
+            getToken(&compilerData->token, &compilerData->indentationStack);
+
+            if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
+
+                compilerData->current_id = STInsert(&compilerData->localTable, compilerData->token.stringValue);
                 generateFunctionStart(compilerData->current_id);
 
-                getToken(&compilerData->token, newLine, &indentationStack);
+                getToken(&compilerData->token, &compilerData->indentationStack);
 
                 if (compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
 
-                    getToken(&compilerData->token, newLine, &indentationStack);
+                    getToken(&compilerData->token, &compilerData->indentationStack);
                         Params(&compilerData);
 
                     if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-                        getToken(&compilerData->token, newLine, &indentationStack);
-                
+                        getToken(&compilerData->token, &compilerData->indentationStack);
+
                         if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
-                            getToken(&compilerData->token, newLine, &indentationStack);
+                            getToken(&compilerData->token, &compilerData->indentationStack);
 
                             if((compilerData->token.tokenType == TOKEN_EOL)){
-                                newLine = true;
-                                    getToken(&compilerData->token, newLine, &indentationStack);
+                       
+                                    getToken(&compilerData->token, &compilerData->indentationStack);
 
                                     if(compilerData->token.tokenType == TOKEN_INDENT){
-                                        //return expression;
-                                        getToken(&compilerData->token, newLine, &indentationStack);
+                                        
+                                        getToken(&compilerData->token, &compilerData->indentationStack);
+
+                                        Commands(&compilerData);
+
                                         if (compilerData->token.tokenType == TOKEN_DEDENT){
                                             return Prog(&compilerData);
-                                        }                                        
+                                        }
                                     }
                                     else{
                                         return 2;
@@ -94,11 +98,11 @@ int compilerDataInit(CompilerData* compilerData){
             else{
                 return 2;
             }
-        }       
+        }
 
        //PROG →  eol PROG
         else if (compilerData->token.tokenType == TOKEN_EOL){
-            getToken(&compilerData->token, &newLine, &indentationStack);
+            getToken(&compilerData->token, &compilerData->indentationStack);
             return Prog(&compilerData);
         }
 
@@ -109,12 +113,13 @@ int compilerDataInit(CompilerData* compilerData){
 
         //PROG →  COMMANDS eol PROG
         else{
-           return Commands(&compilerData);
+           Commands(&compilerData);
+           return Prog(&compilerData);
         }
     }
 
     static int anotherCommand (CompilerData *compilerData){
-        getToken(&compilerData->token, newLine, &indentationStack);
+        getToken(&compilerData->token, &compilerData->indentationStack);
 
     }
 
@@ -137,10 +142,10 @@ int compilerDataInit(CompilerData* compilerData){
 
 
             else if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
-                getToken(&compilerData->token, newLine, &indentationStack);
+                getToken(&compilerData->token, &compilerData->indentationStack);
 
                 if(compilerData->token.tokenType == TOKEN_EQUALS){
-                    getToken(&compilerData->token, newLine, &indentationStack);
+                    getToken(&compilerData->token, &compilerData->indentationStack);
                     commandValue(&compilerData);
 
                     if(compilerData->token.tokenType == TOKEN_EOL){
@@ -153,9 +158,9 @@ int compilerDataInit(CompilerData* compilerData){
                 }
             }
             else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
-               getToken(&compilerData->token, newLine, &indentationStack);
+               getToken(&compilerData->token, &compilerData->indentationStack);
 
-                if()
+                
 
             }
             else if(compilerData->token.keyword == INPUTI){
@@ -186,10 +191,10 @@ int compilerDataInit(CompilerData* compilerData){
         if (compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
             STInsert(&compilerData->localTable, &compilerData->token.stringValue);
-            getToken(&compilerData->token, newLine, &indentationStack);
+            getToken(&compilerData->token, &compilerData->indentationStack);
 
             anotherParam(&compilerData);
-            
+
         }
         else{
             return 2;
@@ -197,17 +202,17 @@ int compilerDataInit(CompilerData* compilerData){
 
     }
 
-    
+
 
     static int anotherParam (CompilerData *compilerData){
 
         if(compilerData->token.tokenType == TOKEN_COLON){
-            getToken(&compilerData->token, newLine, &indentationStack);
+            getToken(&compilerData->token, &compilerData->indentationStack);
 
             if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
                 STInsert(&compilerData->localTable, &compilerData->token.stringValue);
-                getToken(&compilerData->token, newLine, &indentationStack);
+                getToken(&compilerData->token, &compilerData->indentationStack);
 
                 return anotherParam(&compilerData);
             }
@@ -216,7 +221,7 @@ int compilerDataInit(CompilerData* compilerData){
             }
         }
         else{
-           return 0; 
+           return 0;
         }
     }
 
@@ -232,23 +237,15 @@ int compilerDataInit(CompilerData* compilerData){
 
 int main(int argc, char *argv[])
 {
-   
 
     DS dynamicString;
     DSInit(&dynamicString);
     setDynamicString(&dynamicString);
 
     CompilerData *compilerData;
-    compilerDataInit(&compilerData);    
+    compilerDataInit(&compilerData);
 
-    bool newLine = true;
-
-    Stack indentationStack;
-    initStack(&indentationStack);
-    stackPush(&indentationStack, 0);
-
-
-    compilerData->token = malloc(sizeof(tokenStruct));
+    
     compilerData->token.stringValue = malloc(sizeof(DS));
     DSInit(compilerData->token.stringValue);
 
@@ -265,13 +262,13 @@ int main(int argc, char *argv[])
     }
 
     setSourceCodeFile(sourceCode);
-    
+
     generateHeader();
 
-    getToken(&compilerData->token, newLine, &indentationStack);
+    
 
     Prog(&compilerData);
-    
+
     free(&compilerData->token);
     fclose(sourceCode);
 
@@ -282,10 +279,10 @@ int main(int argc, char *argv[])
 }
 
 
-    
+
     /*while(token->tokenType != TOKEN_EOF)
     {
-        if(getToken(token, newLine, &indentationStack) == ERROR_LEX)
+        if(getToken(token, compilerData->indentationStack) == ERROR_LEX)
         {
             printf("LEX ERROR");
             free(token);
@@ -295,10 +292,10 @@ int main(int argc, char *argv[])
         }
         if(token->tokenType == TOKEN_KEYWORD && token->keyword == PRINT)
         {
-            getToken(token, false, &indentationStack);
+            getToken(token, false, compilerData->indentationStack);
             if(token->tokenType == TOKEN_LEFT_BRACKET)
             {
-                while ( getToken(token, false, &indentationStack ) ){//prochazim termy a ukladam je do tisknuteho retezce dokud nenarazim na pravou zavorku
+                while ( getToken(token, false, compilerData->indentationStack ) ){//prochazim termy a ukladam je do tisknuteho retezce dokud nenarazim na pravou zavorku
                     if ( token->tokenType == TOKEN_RIGHT_BRACKET ){
                         break;
                     }
@@ -323,7 +320,7 @@ int main(int argc, char *argv[])
                         return -6;
                     }
 
-                    getToken(token, false, &indentationStack );
+                    getToken(token, false, compilerData->indentationStack );
                      if ( token->tokenType == TOKEN_RIGHT_BRACKET ){
                         break;
                     }
@@ -344,18 +341,18 @@ int main(int argc, char *argv[])
                     return -6;
                 }
 
-                
+
             }
             else
             {
                 printf("SYNTAX ERROR");
                 return -6;
             }
-            
+
         }
         if(token->tokenType == TOKEN_KEYWORD && token->keyword == DEF)
         {
-            getToken(token, false, &indentationStack);
+            getToken(token, false, compilerData->indentationStack);
             if(token->tokenType == TOKEN_IDENTIFIER)
             {
                 generateFunctionStart(token->stringValue->str);
@@ -369,12 +366,12 @@ int main(int argc, char *argv[])
         }
         if(token->tokenType == TOKEN_KEYWORD && token->keyword == RETURN)
         {
-            getToken(token, false, &indentationStack);
+            getToken(token, false, compilerData->indentationStack);
             generateFunctionReturn("test", token);
         }
     }*/
 
-    
+
 
 
 
