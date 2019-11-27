@@ -85,28 +85,26 @@
 	<stdio.h>
 	"dynamicString.h"
 
-1574254594 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\stack.c
+1574866991 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\stack.c
 	"stack.h"
 
-1574254594 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\stack.h
+1574866991 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\stack.h
 	<stdlib.h>
 	<stdbool.h>
 
-1574785762 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\dynamicstring.c
+1574866991 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\dynamicstring.c
 	"dynamicString.h"
 
-1574785762 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\dynamicstring.h
+1574866991 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\dynamicstring.h
 	<stdio.h>
 	<stdlib.h>
 	<stdbool.h>
 	<string.h>
 
-1574863372 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\filescanner.c
+1574866991 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\filescanner.c
 	"fileScanner.h"
-	"dynamicString.h"
-	"stack.h"
 
-1574863372 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\filescanner.h
+1574866991 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\filescanner.h
 	<stdio.h>
 	<ctype.h>
 	<stdbool.h>
@@ -115,24 +113,27 @@
 	"stack.h"
 	"dynamicString.h"
 
-1574845776 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\expr.c
+1574866991 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\expr.c
 	"expr.h"
+	"fileScanner.h"
+	"symtable.h"
+	"symstack.h"
 
-1574845776 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\expr.h
+1574866991 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\expr.h
 
-1574845423 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\generator.c
+1574866991 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\generator.c
 	"generator.h"
 
-1574254594 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\generator.h
+1574866991 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\generator.h
 	<stdlib.h>
 	<stdio.h>
 	"dynamicString.h"
 	"fileScanner.h"
 
-1574861520 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\symtable.c
+1574866991 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\symtable.c
 	"symtable.h"
 
-1574861555 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\symtable.h
+1574866991 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\symtable.h
 	"dynamicString.h"
 
 1574798679 source:c:\users\kubaa\onedrive\ifj\ostatní\dynamicstring.c
@@ -207,4 +208,23 @@
 
 1574865209 c:\users\kubaa\onedrive\ifj\ostatní\symtable.c
 	"symtable.h"
+
+1574867372 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\compiler.c
+	<stdio.h>
+	"compiler.h"
+
+1574867123 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\compiler.h
+	<stdbool.h>
+	"stack.h"
+	"generator.h"
+	"dynamicString.h"
+	"symtable.h"
+
+1574866991 c:\users\grunw\desktop\fit\github\just-another-project\ostatní\symstack.h
+	"expr.h"
+
+1574866991 source:c:\users\grunw\desktop\fit\github\just-another-project\ostatní\symstack.c
+	<stdlib.h>
+	<stdbool.h>
+	"symstack.h"
 
