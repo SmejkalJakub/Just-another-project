@@ -40,5 +40,7 @@ int stackEmpty(Stack *stack)
 
 
 int stackTop(Stack* stack){
-    return stack->arr[stack->top];
+
+    //return stack->arr[stack->top];
+    return stack->top;
 }

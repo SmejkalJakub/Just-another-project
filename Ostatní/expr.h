@@ -69,4 +69,5 @@ typedef enum
 bool getitemsBeforeStop(int *itemsBeforeStop);
 
 
+
 #endif

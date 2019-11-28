@@ -3,7 +3,7 @@
 #include "symtable.h"
 #include "symstack.h"
 
-/*E -> 
+/*E ->
 (E)
 E + E
 E = E
@@ -36,6 +36,7 @@ int precedenceTable[TABLE_SIZE][TABLE_SIZE] =
     {R, R, R, ER, ER, R, R},
     {S, S, S, S, S, ER, ER},
 };
+int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem* operand3, int rule, int *finalType);
 
 
 precedenceTabSym tokenToSymbol(tokenStruct *token)
@@ -198,7 +199,7 @@ bool getitemsBeforeStop(int *itemsBeforeStop)
         {
             return true;
         }
-        
+
         tempItem = tempItem->nextItem;
     }
     return false;
@@ -278,9 +279,9 @@ int checkExprRule(symStackItem *firstItem, symStackItem *secondItem, symStackIte
         {
             return EXPR_ERR;
         }
-        
+
     }
-    else 
+    else
     {
         return EXPR_ERR;
     }
@@ -329,7 +330,7 @@ int checkItems(symStackItem *firstItem, symStackItem *secondItem, symStackItem *
             }
         }
     }
-    
+
 }
 
 int reduce()
@@ -345,11 +346,11 @@ int reduce()
         symStackItem* operand2 = NULL;
         symStackItem* operand3 = NULL;
 
-        
 
-        
+
+
         int rule;
-        int* finalType;
+        int* finalType = NULL;
 
         if(hasStop)
         {
@@ -370,7 +371,7 @@ int reduce()
             {
                 return 2;
             }
-            
+
         }
         else
         {
@@ -381,26 +382,28 @@ int reduce()
             return EXPR_ERR;
         }
         else{
-            successState = checkAndRetype(rule, operand1, operand2, operand3, rule, &finalType);
+            successState = checkAndRetype(operand1, operand2, operand3, rule, finalType);
 
             if(successState != 0){
                 return successState;
             }
 
-            if(rule == EXPR_PLUS && finalType == STRING){
+            if(rule == EXPR_PLUS && *finalType == STRING){
                 //generate CONCAT
             }
             else{
-                generateExpresion(rule);               
-            }             
+                generateExpresion(rule);
+            }
         }
 
         for(int i = 0; i <= itemsBeforeStop; i++)
         {
             symStackPop(&stack);
-        }           
-        
+        }
+
         symStackPush(&stack, SYM_NON_TERM, INT);
+
+        return 0;
 }
 
 int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem* operand3, int rule, int *finalType){
@@ -418,14 +421,14 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
 
         case EXPR_ID:
             *finalType = operand1->type;
-            break; 
-        
+            break;
+
         case EXPR_PLUS:
         case EXPR_MINUS:
         case EXPR_MUL:
 
              //dva retezce jde jen scitat - konkatenace
-            if(operand1->type == STRING && operand3 == STRING && rule == EXPR_PLUS){
+            if(operand1->type == STRING && operand3->type == STRING && rule == EXPR_PLUS){
                 *finalType = STRING;
                 break;
             }
@@ -435,21 +438,21 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             }
 
             //pokud jsou oba inty, pretypovani neni nutne
-            else if(operand1->type == INT && operand3 == INT){
+            else if((operand1->type == INT) && (operand3->type == INT)){
                 *finalType = INT;
                 break;
-            }           
+            }
 
-            
+
             //alespon jeden byl double - vysledny bude tez
             *finalType = DOUBLE;
 
             //a ten, co double nebyl, pretypujeme
             if(operand1->type == INT){
-                firstOperandToDouble = true;                
+                firstOperandToDouble = true;
             }
-            else if (operand3 == INT){
-                thirdOperandToDouble = true;                
+            else if (operand3->type == INT){
+                thirdOperandToDouble = true;
             }
             break;
 
@@ -471,7 +474,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             }
 
             break;
-            
+
         //pri celosielnem je vysledek typu int
         case EXPR_SPEC_DIV:
             *finalType = INT;
@@ -488,7 +491,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             if(operand3->type == DOUBLE){
                 thirdOperandToInteger = true;
             }
-        
+
             break;
 
         case EXPR_LESS:
@@ -602,7 +605,7 @@ int solveExpr(tokenStruct *token)
             break;
         case S:
             {
-                
+
                 shift(currentSym, token);
                 returnValue = getToken(token);
             }
@@ -629,6 +632,7 @@ int main(int argc, char *argv[])
     DSInit(&dynamicString);
     setDynamicString(&dynamicString);
 
+
     generateHeader();
 
     FILE *sourceCode;
@@ -647,14 +651,15 @@ int main(int argc, char *argv[])
 
     tokenStruct token;
 
+
     token.stringValue = malloc(sizeof(DS));
 
     symStackItem *symStackTopSym;
 
-
+    getToken(&token);
 
     getToken(&token);
-    getToken(&token);
+
 
     solveExpr(&token);
     printf("%s", dynamicString.str);

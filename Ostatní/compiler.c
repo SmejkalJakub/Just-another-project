@@ -2,12 +2,12 @@
 #include "compiler.h"
 
 
-/*DS dynamicString;
+DS dynamicString;
 
 
 
 
-/*char* doubleToString(double convertedNumber){
+char* doubleToString(double convertedNumber){
 
     char doubleInString[50];
     snprintf( doubleInString, 50, "%f", convertedNumber);
@@ -21,8 +21,8 @@ int compilerDataInit(CompilerData* compilerData){
     STInit(&compilerData->localTable);
     STInit(&compilerData->globalTable);
 
-    compilerData->globalTable = malloc(sizeof(symTable));
-    compilerData->localTable = malloc(sizeof(symTable));
+    //compilerData->globalTable = malloc(sizeof(symTable));
+    //compilerData->localTable = malloc(sizeof(symTable));
 
     compilerData->printedValues = malloc(sizeof(DS));
     DSInit(compilerData->printedValues);
@@ -257,7 +257,7 @@ static int Values(CompilerData *compilerData){
     getToken(&compilerData->token);
 
     if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-        compilerData->
+        //compilerData->;
         return 0;
     }
 
@@ -338,7 +338,7 @@ static int listCommandFunction(){
 
 }
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
     DS dynamicString;
 
@@ -382,7 +382,7 @@ int main(int argc, char *argv[])
 }
 
 
-    /*while(token->tokenType != TOKEN_EOF)
+  /*  while(token->tokenType != TOKEN_EOF)
     {
         if(getToken(token, compilerData->indentationStack) == ERROR_LEX)
         {
