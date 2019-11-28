@@ -3,7 +3,9 @@
 #include "symtable.h"
 #include "symstack.h"
 
-/*E -> E + E
+/*E ->
+(E)
+E + E
 E = E
 E – E
 E < E
@@ -34,6 +36,7 @@ int precedenceTable[TABLE_SIZE][TABLE_SIZE] =
     {R, R, R, ER, ER, R, R},
     {S, S, S, S, S, ER, ER},
 };
+int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem* operand3, int rule, int *finalType);
 
 
 precedenceTabSym tokenToSymbol(tokenStruct *token)
@@ -196,7 +199,7 @@ bool getitemsBeforeStop(int *itemsBeforeStop)
         {
             return true;
         }
-        
+
         tempItem = tempItem->nextItem;
     }
     return false;
@@ -217,6 +220,10 @@ int checkExprRule(symStackItem *firstItem, symStackItem *secondItem, symStackIte
     }
     else if(numberOfItems == 3)
     {
+        if(firstItem->symbol == SYM_LEFT_BRACKET && secondItem->symbol == SYM_NON_TERM && firstItem->symbol == SYM_RIGHT_BRACKET){
+            return BRACKET_NONTERM_BRACKET;
+        }
+
         if(firstItem->symbol == SYM_NON_TERM && thirdItem->symbol == SYM_NON_TERM)
         {
             if(secondItem->symbol == SYM_PLUS)
@@ -272,9 +279,9 @@ int checkExprRule(symStackItem *firstItem, symStackItem *secondItem, symStackIte
         {
             return EXPR_ERR;
         }
-        
+
     }
-    else 
+    else
     {
         return EXPR_ERR;
     }
@@ -323,54 +330,215 @@ int checkItems(symStackItem *firstItem, symStackItem *secondItem, symStackItem *
             }
         }
     }
-    
+
 }
 
-void reduce()
+int reduce()
 {
         bool hasStop = false;
 
         int itemsBeforeStop = 0;
+        int successState;
 
         hasStop = getitemsBeforeStop(&itemsBeforeStop);
-        
+
+        symStackItem* operand1 = NULL;
+        symStackItem* operand2 = NULL;
+        symStackItem* operand3 = NULL;
+
+
+
+
         int rule;
+        int* finalType = NULL;
 
         if(hasStop)
         {
             if(itemsBeforeStop == 1)
             {
-                rule = checkExprRule((&stack)->top, NULL, NULL, 1);
+                operand1 = (&stack)->top;
+                rule = checkExprRule(operand1, NULL, NULL, 1);
             }
             else if(itemsBeforeStop == 3)
             {
-                rule = checkExprRule((&stack)->top->nextItem->nextItem, (&stack)->top->nextItem, (&stack)->top, 3);
+                operand1 = (&stack)->top->nextItem->nextItem;
+                operand2 = (&stack)->top->nextItem;
+                operand3 = (&stack)->top;
+
+                rule = checkExprRule(operand1, operand2, operand3, 3);
             }
             else
             {
                 return 2;
             }
-            
+
         }
         else
         {
             return 2;
         }
 
-        int type;
-        type = checkItems((&stack)->top->nextItem->nextItem, (&stack)->top->nextItem, (&stack)->top, rule);
-        
-        if(type != TYPE_NONE)
-        {
-            generateExpresion(rule);
+        if (rule == EXPR_ERR){
+            return EXPR_ERR;
+        }
+        else{
+            successState = checkAndRetype(operand1, operand2, operand3, rule, finalType);
+
+            if(successState != 0){
+                return successState;
+            }
+
+            if(rule == EXPR_PLUS && *finalType == STRING){
+                //generate CONCAT
+            }
+            else{
+                generateExpresion(rule);
+            }
         }
 
         for(int i = 0; i <= itemsBeforeStop; i++)
         {
             symStackPop(&stack);
-        }           
-        
+        }
+
         symStackPush(&stack, SYM_NON_TERM, INT);
+
+        return 0;
+}
+
+int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem* operand3, int rule, int *finalType){
+
+    bool firstOperandToInteger = false;
+    bool thirdOperandToInteger = false;
+    bool firstOperandToDouble = false;
+    bool thirdOperandToDouble = false;
+
+    switch(rule){
+
+        case BRACKET_NONTERM_BRACKET:
+            *finalType = operand2->type;
+            break;
+
+        case EXPR_ID:
+            *finalType = operand1->type;
+            break;
+
+        case EXPR_PLUS:
+        case EXPR_MINUS:
+        case EXPR_MUL:
+
+             //dva retezce jde jen scitat - konkatenace
+            if(operand1->type == STRING && operand3->type == STRING && rule == EXPR_PLUS){
+                *finalType = STRING;
+                break;
+            }
+            //pokud byl string jen jeden, nastava chyba
+            else if(operand1->type == STRING || operand3->type == STRING){
+                return 3;
+            }
+
+            //pokud jsou oba inty, pretypovani neni nutne
+            else if((operand1->type == INT) && (operand3->type == INT)){
+                *finalType = INT;
+                break;
+            }
+
+
+            //alespon jeden byl double - vysledny bude tez
+            *finalType = DOUBLE;
+
+            //a ten, co double nebyl, pretypujeme
+            if(operand1->type == INT){
+                firstOperandToDouble = true;
+            }
+            else if (operand3->type == INT){
+                thirdOperandToDouble = true;
+            }
+            break;
+
+        //pri klasickem deleni je vzdy vysledek double
+        case EXPR_DIV:
+            *finalType = DOUBLE;
+
+            //stringy delit nelze :-)
+            if(operand1->type == STRING || operand3->type == STRING){
+                return 3;
+            }
+
+
+            if(operand1->type == INT){
+                firstOperandToDouble = true;
+            }
+            if(operand3->type == INT){
+                thirdOperandToDouble = true;
+            }
+
+            break;
+
+        //pri celosielnem je vysledek typu int
+        case EXPR_SPEC_DIV:
+            *finalType = INT;
+
+            //stringy opet nepodelime
+            if(operand1->type == STRING || operand3->type == STRING){
+                return 3;
+            }
+
+            //pokud byl nejaky z ciselnych operandu double, prevedeme jej na int
+            if(operand1->type == DOUBLE){
+                firstOperandToInteger = true;
+            }
+            if(operand3->type == DOUBLE){
+                thirdOperandToInteger = true;
+            }
+
+            break;
+
+        case EXPR_LESS:
+        case EXPR_MORE:
+        case EXPR_LESS_EQ:
+        case EXPR_MORE_EQ:
+        case EXPR_NOT_EQ:
+        case EXPR_EQ:
+            *finalType = BOOL;
+
+            //pokud jsou oba operandy cisla, udelame z nich doubly
+            if (operand1->type == INT && operand3->type == DOUBLE){
+                firstOperandToDouble = true;
+            }
+            else if(operand3->type == INT && operand1->type == DOUBLE){
+                thirdOperandToDouble = true;
+            }
+
+            //pokud chceme porovnavat dva operandy, z nichz jeden je jineho typu nez druhy(neplati u cisel) - chyba
+            else if(operand1->type != operand3->type){
+                return 3;
+            }
+
+            break;
+
+        default:
+            break;
+
+    }
+
+    if(firstOperandToDouble){
+        //generateFirstOperandToDouble
+    }
+
+    if(firstOperandToInteger){
+        //generateFirstOperandToInteger
+    }
+
+    if(thirdOperandToDouble){
+        //generateThirdOperandToDouble
+    }
+    if(thirdOperandToInteger){
+        //generateThirdOperandToInteger
+    }
+
+        return 0;
+
 }
 
 void shift(precedenceTabSym currentSym, tokenStruct *token)
@@ -437,7 +605,7 @@ int solveExpr(tokenStruct *token)
             break;
         case S:
             {
-                
+
                 shift(currentSym, token);
                 returnValue = getToken(token);
             }
@@ -464,6 +632,7 @@ int main(int argc, char *argv[])
     DSInit(&dynamicString);
     setDynamicString(&dynamicString);
 
+
     generateHeader();
 
     FILE *sourceCode;
@@ -482,14 +651,15 @@ int main(int argc, char *argv[])
 
     tokenStruct token;
 
+
     token.stringValue = malloc(sizeof(DS));
 
     symStackItem *symStackTopSym;
 
-
+    getToken(&token);
 
     getToken(&token);
-    getToken(&token);
+
 
     solveExpr(&token);
     printf("%s", dynamicString.str);

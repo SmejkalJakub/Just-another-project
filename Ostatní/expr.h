@@ -28,6 +28,7 @@
 #define EXPR_ASSIGN 11
 #define EXPR_E 12
 #define EXPR_ID 13
+#define BRACKET_NONTERM_BRACKET 14
 
 
 #define PREC_TAB_PLUS_MINUS 0
@@ -66,6 +67,7 @@ typedef enum
 } precedenceTabSym;
 
 bool getitemsBeforeStop(int *itemsBeforeStop);
+
 
 
 #endif

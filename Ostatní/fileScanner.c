@@ -5,13 +5,17 @@ char hexSeq[] = "0x00";
 
 FILE *sourceCode;
 
+
 int numOfSpaces = 0;
 bool returningDedent = false;
 
 void setSourceCodeFile(FILE *sourceCodeFile)
 {
     sourceCode = sourceCodeFile;
+
 }
+
+
 
 int checkInt(DS *word, tokenStruct *token)
 {
@@ -141,6 +145,7 @@ int checkKeyword(DS *word, tokenStruct *token)
 
 int getToken(tokenStruct *token)
 {
+
     DS DString;
     Stack indentStack;
 
@@ -148,7 +153,10 @@ int getToken(tokenStruct *token)
 
     DSInit(&DString);
 
+
     DSDelete(token->stringValue);
+
+
 
     int state = START_TOKEN_STATE;
     char c = 0;
@@ -156,6 +164,7 @@ int getToken(tokenStruct *token)
 
     if(newLine)
     {
+
         state = NEW_LINE_START_STATE;
     }
 
@@ -171,8 +180,10 @@ int getToken(tokenStruct *token)
         {
             case NEW_LINE_START_STATE:
                 newLine = false;
+
                 if(returningDedent)
                 {
+
                     if(numOfSpaces != stackTop(&indentStack))
                     {
                         if(stackEmpty(&indentStack))
@@ -201,7 +212,9 @@ int getToken(tokenStruct *token)
                 }
                 else if(c != '#')
                 {
+
                     ungetc(c, sourceCode);
+
                     if(numOfSpaces > stackTop(&indentStack))
                     {
                         if(!stackPush(&indentStack, numOfSpaces))
