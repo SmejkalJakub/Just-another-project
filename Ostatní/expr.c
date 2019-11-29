@@ -26,6 +26,8 @@ symStack stack;
 
 symTable *dummyTable;
 
+bool firstConcat = true;
+
 int precedenceTable[TABLE_SIZE][TABLE_SIZE] =
 {
     {R, S, R, S, S, R, R},
@@ -130,9 +132,6 @@ int getTokenType(tokenStruct *token, symTable *localTable)
         }
 
     }
-
-
-
 }
 
 int symbolToType(precedenceTabSym symbol)
@@ -347,10 +346,8 @@ int reduce()
         symStackItem* operand3 = NULL;
 
 
-
-
         int rule;
-        int* finalType = NULL;
+        int finalType;
 
         if(hasStop)
         {
@@ -381,27 +378,28 @@ int reduce()
         if (rule == EXPR_ERR){
             return EXPR_ERR;
         }
-        else{
-            successState = checkAndRetype(operand1, operand2, operand3, rule, finalType);
+        else
+        {
+            successState = checkAndRetype(operand1, operand2, operand3, rule, &finalType);
 
             if(successState != 0){
                 return successState;
             }
 
-            if(rule == EXPR_PLUS && *finalType == STRING){
-                //generate CONCAT
+            if(rule == EXPR_PLUS && finalType == STRING){
+                generateConcatenateString(firstConcat);
+                firstConcat = false;
             }
-            else{
+            else
+            {
                 generateExpresion(rule);
             }
         }
-
         for(int i = 0; i <= itemsBeforeStop; i++)
         {
             symStackPop(&stack);
         }
-
-        symStackPush(&stack, SYM_NON_TERM, INT);
+        symStackPush(&stack, SYM_NON_TERM, finalType);
 
         return 0;
 }
@@ -412,6 +410,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
     bool thirdOperandToInteger = false;
     bool firstOperandToDouble = false;
     bool thirdOperandToDouble = false;
+    
 
     switch(rule){
 
@@ -523,18 +522,18 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
     }
 
     if(firstOperandToDouble){
-        //generateFirstOperandToDouble
+        generateFirstOperandToDouble();
     }
 
     if(firstOperandToInteger){
-        //generateFirstOperandToInteger
+        generateFirstOperandToInteger();
     }
 
     if(thirdOperandToDouble){
-        //generateThirdOperandToDouble
+        generateThirdOperandToDouble();
     }
     if(thirdOperandToInteger){
-        //generateThirdOperandToInteger
+        generateThirdOperandToInteger();
     }
 
         return 0;
@@ -571,11 +570,9 @@ int solveExpr(tokenStruct *token)
     int currentSymType;
     int symStackTopSymType;
 
+
     while(!end)
     {
-        symStackItem *tempItemPrint = (&stack)->top;
-
-
         currentSym = tokenToSymbol(token);
         symStackTopSym = getTopTerm();
 
@@ -585,44 +582,48 @@ int solveExpr(tokenStruct *token)
 
         switch (precedenceTable[symStackTopSymType][currentSymType])
         {
-        case ER:
-            {
-                if(currentSym == SYM_DOLAR && symStackTopSym->symbol == SYM_DOLAR)
+            
+            case ER:
                 {
-                    end = true;
+                    if(currentSym == SYM_DOLAR && symStackTopSym->symbol == SYM_DOLAR)
+                    {
+                        end = true;
+                    }
+                    else
+                    {
+                        return 2;
+                    }
                 }
-                else
+                break;
+            case EQ:
                 {
-                    return 2;
+                    symStackPush(&stack, currentSym, getTokenType(token, dummyTable));
+                    returnValue = getToken(token);
                 }
-            }
-            break;
-        case EQ:
-            {
-                symStackPush(&stack, currentSym, getTokenType(token, dummyTable));
-                returnValue = getToken(token);
-            }
-            break;
-        case S:
-            {
+                break;
+            case S:
+                {
+                    shift(currentSym, token);
+                    returnValue = getToken(token);
+                }
+                break;
+            case R:
+                {
+                    reduce();
+                }
+                break;
 
-                shift(currentSym, token);
-                returnValue = getToken(token);
-            }
-            break;
-        case R:
-            {
-
-                reduce();
-            }
-            break;
-
-        default:
-            break;
+            default:
+                break;
         }
-
+    }
+    
+    if(stack.top->type != STRING)
+    {
+        generateSaveLastExpresionValue();
     }
 
+    generateWrite("%lastExpresionResult", GLOBAL_VAR);
 }
 
 int main(int argc, char *argv[])
@@ -660,15 +661,7 @@ int main(int argc, char *argv[])
 
     getToken(&token);
 
-    getToken(&token);
-
-    getToken(&token);
-
-
-    
-
-    /*printf("%d", (&token)->tokenType);
     solveExpr(&token);
-    printf("%s", dynamicString.str);*/
+    printf("%s", dynamicString.str);
 
 }

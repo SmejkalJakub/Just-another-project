@@ -6,6 +6,7 @@
 #include "dynamicString.h"
 #include "fileScanner.h"
 #include "expr.h"
+#include "symtable.h"
 
 #define LOCAL_VAR 0
 #define GLOBAL_VAR 1
@@ -18,7 +19,8 @@ void setDynamicString(DS *dString);
 void generateMoveVariableToVariable(char *toVar, char *fromVar, int toFrame, int fromFrame);
 void generateMoveValueToVariable(char *toVar, int toFrame, char *type, char *value);
 void generateWrite(char *variable, int frame);
-void generateWriteValue(char *type, char *value);
+void generateWriteValue(int type, char *value);
+void generateConcatenateString(bool firstConcat);
 void generateRead(char *var, int frame, char *type);
 void generateLabel(char *labelName);
 void generateCall(char *labelName);

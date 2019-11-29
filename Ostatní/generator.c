@@ -15,21 +15,43 @@ void addInstruction(char *instruction)
 
 void generateHeader()
 {
-    addInstruction(".IFJcode19\n");
-    addInstruction("DEFVAR GF@%conditionRes\n");
-    addInstruction("DEFVAR GF@%lastExpresionResult\n\n\n");
+    addInstruction(".IFJcode19\n\n");
+    addInstruction("DEFVAR GF@%convertHelpVar0\n");
+    addInstruction("DEFVAR GF@%convertHelpVar1\n\n");
 
+    addInstruction("DEFVAR GF@%conditionRes\n");
+    addInstruction("DEFVAR GF@%lastExpresionResult\n\n");
+
+}
+
+void generateThirdOperandToDouble()
+{
+    addInstruction("INT2FLOATS\n");
+}
+
+void generateThirdOperandToInteger()
+{
+    addInstruction("FLOAT2INTS\n");
 }
 
 void generateFirstOperandToDouble()
 {
-    
+    addInstruction("POPS GF@%convertHelpVar0\n");
+    addInstruction("INT2FLOATS\n");
+    addInstruction("PUSHS GF@%convertHelpVar0\n");
+}
+
+void generateFirstOperandToInteger()
+{
+    addInstruction("POPS GF@%convertHelpVar0\n");
+    addInstruction("FLOAT2INTS\n");
+    addInstruction("PUSHS GF@%convertHelpVar0\n");    
 }
 
 void generateExpresion(int exprRule)
 {
     if(exprRule == EXPR_PLUS)
-    {
+    {   
         addInstruction("ADDS\n");
     }
     else if(exprRule == EXPR_MINUS)
@@ -40,8 +62,48 @@ void generateExpresion(int exprRule)
     {
         addInstruction("MULS\n");
     }
+    else if(exprRule == EXPR_DIV)
+    {
+        addInstruction("DIVS\n");
+    }
+    else if(exprRule == EXPR_EQ)
+    {
+        addInstruction("EQS\n");
+    }
+    else if(exprRule == EXPR_NOT_EQ)
+    {
+        addInstruction("EQS\n");
+        addInstruction("NOTS\n");
+    }
+    else if(exprRule == EXPR_MORE)
+    {
+        addInstruction("GTS");
+    }
+    else if(exprRule == EXPR_LESS)
+    {
+        addInstruction("LTS");
+    }
+    
     
 }
+
+void generateConcatenateString(bool firstConcat)
+{
+    if(firstConcat)
+    {
+        addInstruction("POPS GF@%convertHelpVar0\n");
+        addInstruction("POPS GF@%convertHelpVar1\n");
+        
+        addInstruction("CONCAT GF@%lastExpresionResult GF@%convertHelpVar1 GF@%convertHelpVar0\n");
+    }
+    else
+    {
+        addInstruction("POPS GF@%convertHelpVar0\n");
+        addInstruction("CONCAT GF@%lastExpresionResult GF@%lastExpresionResult GF@%convertHelpVar0\n");
+    }
+
+}
+
 
 void generateStackPush(tokenStruct *token)
 {
@@ -56,7 +118,7 @@ void generateStackPush(tokenStruct *token)
     else if(token->tokenType == TOKEN_DOUBLE)
     {
         char str[30];
-        sprintf(str, "%f", token->doubleValue);
+        sprintf(str, "%a", token->doubleValue);
         addInstruction("float@");
         addInstruction(str);
     }
@@ -105,7 +167,7 @@ void generateFunctionReturn(char *functionName, tokenStruct *token)
     else if(token->tokenType == TOKEN_DOUBLE)
     {
         char str[30];
-        sprintf(str, "%f", token->doubleValue);
+        sprintf(str, "%a", token->doubleValue);
         addInstruction("float@");
         addInstruction(str);
     }
@@ -230,11 +292,28 @@ void generatePrint(char *string)
     addInstruction("\n");
 }
 
-void generateWriteValue(char *type, char *value)
+void generateSaveLastExpresionValue()
 {
+    addInstruction("POPS GF@%lastExpresionResult\n");
+}
+
+void generateWriteValue(int type, char *value)
+{
+    char *typeStr;
     addInstruction("WRITE ");
-    addInstruction(type);
-    addInstruction("@");
+    if(type == INT)
+    {
+        typeStr = "int@";
+    }
+    else if(type == DOUBLE)
+    {
+        typeStr = "float@";
+    }
+    else if(type == STRING)
+    {
+        typeStr = "string@";
+    }
+    addInstruction(typeStr);
     addInstruction(value);
     addInstruction("\n");
 }
