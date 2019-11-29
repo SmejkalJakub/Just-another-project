@@ -21,6 +21,11 @@ void generateHeader()
 
 }
 
+void generateFirstOperandToDouble()
+{
+    
+}
+
 void generateExpresion(int exprRule)
 {
     if(exprRule == EXPR_PLUS)

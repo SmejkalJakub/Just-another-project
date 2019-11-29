@@ -655,14 +655,21 @@ int main(int argc, char *argv[])
 
     token.stringValue = malloc(sizeof(DS));
 
+    DSInit(token.stringValue);
+
     symStackItem *symStackTopSym;
 
     getToken(&token);
 
     getToken(&token);
 
+    getToken(&token);
 
+
+    
+
+    /*printf("%d", (&token)->tokenType);
     solveExpr(&token);
-    printf("%s", dynamicString.str);
+    printf("%s", dynamicString.str);*/
 
 }

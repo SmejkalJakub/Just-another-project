@@ -23,6 +23,7 @@ typedef struct {
 
 }CompilerData;
 
+
 int compilerDataInit(CompilerData* compilerData);
 static int Prog (CompilerData *compilerData);
 static int Commands (CompilerData *compilerData);
