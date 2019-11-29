@@ -14,7 +14,7 @@
 typedef struct hashTableItem{
     char *key;
     int type;
-    //pridani poctu parametru pro funkci?
+    int numberOfParams;
     DS *params;
     bool global;
     struct hashTableItem *next;
