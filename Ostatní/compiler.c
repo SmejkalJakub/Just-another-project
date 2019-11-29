@@ -254,20 +254,65 @@ static int Commands (CompilerData *compilerData){
 
 }
 static int Values(CompilerData *compilerData){
+
     getToken(&compilerData->token);
 
+    int loadedParametrs = 0;
+
     if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-        //compilerData->;
-        return 0;
+        
+        while(compilerData->token.tokenType != TOKEN_LEFT_BRACKET){
+
+            loadedParametrs++;
+
+            getToken(&compilerData->token);        
+
+            //VALUES ->  VAL VALUES
+            switch(compilerData->token.tokenType){
+                //VAL ->  id
+                case TOKEN_IDENTIFIER:
+
+                        break;
+                    
+                //VAL ->  integer
+                case TOKEN_INTEGER:
+
+                        break;
+                //VAL ->  double
+                case TOKEN_DOUBLE:
+
+                        break;
+                //VAL ->  string
+                case TOKEN_STRING:
+
+                        break;
+
+                //VALUES ->  eps
+                case TOKEN_LEFT_BRACKET:
+                    
+                        break;
+
+                default: 
+                    return 2;
+            
+            }
+        }
+        
     }
+    else{
+        return 2;
+    }
+
+    //kontrola poctu parametru
+    if ( loadedParametrs != STSearch(&compilerData->globalTable, &compilerData->current_id)->numberOfParams){
+        return 2;
+    }
+   
 
     //compilerData->printedValues = DSAddStr
 
 }
 
-static int Value(CompilerData *compilerData){
-
-}
 static int anotherCommand (CompilerData *compilerData){
     getToken(&compilerData->token);
 
