@@ -23,7 +23,6 @@ typedef struct {
 
 }CompilerData;
 
-}CompilerData;
 
 int compilerDataInit(CompilerData* compilerData);
 static int Prog (CompilerData *compilerData);

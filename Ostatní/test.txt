@@ -1,1 +1,2 @@
-4 + 5 * 6
+"""Ahoj ja jsem 
+franta"""

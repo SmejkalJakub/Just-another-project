@@ -22,7 +22,7 @@ int checkInt(DS *word, tokenStruct *token)
 
     char *eptr;
 
-    if(word->str[0] == '0')
+    if(word->str[0] == '0' && word->actIndex > 1)
     {
         DSDelete(word);
         return ERROR_LEX;
@@ -595,6 +595,11 @@ int getToken(tokenStruct *token)
                     DSDelete(&DString);
                     return ERROR_LEX;
                 }
+                else
+                {
+                    DSAddChar(&DString, c);
+                }
+                
                 break;
             case LONG_COMMENT_END_FIRST_STATE:
                 if(c == '"')
@@ -603,6 +608,7 @@ int getToken(tokenStruct *token)
                 }
                 else
                 {
+                    DSAddChar(&DString, c);
                     state = LONG_COMMENT_STATE;
                 }
                 break;
@@ -613,6 +619,7 @@ int getToken(tokenStruct *token)
                 }
                 else
                 {
+                    DSAddChar(&DString, c);
                     state = LONG_COMMENT_STATE;
                 }
                 break;
@@ -621,11 +628,20 @@ int getToken(tokenStruct *token)
                 {
                     state = START_TOKEN_STATE;
                 }
+                else if(c == ')')
+                {
+                    token->tokenType = TOKEN_STRING;
+                    DSAddStr(token->stringValue, (&DString)->str);
+                    DSDelete(&DString);
+                    return SCAN_OK;
+                }
                 else if(!isspace(c))
                 {
                     DSDelete(&DString);
                     return ERROR_LEX;
                 }
+                
+                
                 break;
             case KEYWORD_ID_STATE:
                 if(isalnum(c) || c == '_')
