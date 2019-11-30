@@ -7,13 +7,13 @@ DS dynamicString;
 
 
 
-char* doubleToString(double convertedNumber){
+/*char* doubleToString(double convertedNumber){
 
     char doubleInString[50];
     snprintf( doubleInString, 50, "%f", convertedNumber);
 
     return doubleInString;
-}
+}*/
 
 
 int compilerDataInit(CompilerData* compilerData){
@@ -25,8 +25,8 @@ int compilerDataInit(CompilerData* compilerData){
     //compilerData->localTable = malloc(sizeof(symTable));
 
     //inicializace indentStacku, prvotni pushnuti 0
-    initStack(&compilerData->IndentationStack);
-    stackPush(&compilerData->IndentationStack, 0);
+    initStack(compilerData->IndentationStack);
+    stackPush(compilerData->IndentationStack, 0);
 
     compilerData->printedValues = malloc(sizeof(DS));
     DSInit(compilerData->printedValues);
@@ -54,44 +54,9 @@ static int Prog (CompilerData *compilerData){
         getToken(&compilerData->token, &compilerData->IndentationStack);
     }
 
-        if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
-            compilerData->current_id = STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
-            generateFunctionStart(compilerData->current_id->key);
-        }
-
-            getToken(&compilerData->token, &compilerData->IndentationStack);
-
-            if (compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-
-                getToken(&compilerData->token, &compilerData->IndentationStack);
-                  return (Params(compilerData));
-
-                if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-                    getToken(&compilerData->token, &compilerData->IndentationStack);
-
-                    if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
-                        getToken(&compilerData->token, &compilerData->IndentationStack);
-
-                        if((compilerData->token.tokenType == TOKEN_EOL)){
-
-                                getToken(&compilerData->token, &compilerData->IndentationStack);
-
-                                if(compilerData->token.tokenType == TOKEN_INDENT){
-
-                                    getToken(&compilerData->token, &compilerData->IndentationStack);
-
-                                    return Commands(&compilerData);
-
-                                    if (compilerData->token.tokenType == TOKEN_DEDENT){
-
-                                        compilerData->inFunction = false;
-                                        return Prog(compilerData);
-
-    }
-
-   //PROG →  eol PROG
+     //PROG →  eol PROG
     else if (compilerData->token.tokenType == TOKEN_EOL){
-        return Prog(&compilerData);
+        return Prog(compilerData);
     }
 
     //PROG →  EOF
@@ -101,10 +66,47 @@ static int Prog (CompilerData *compilerData){
 
     //PROG →  COMMANDS eol PROG
     else{
-        Commands(&compilerData);
-        return Prog(&compilerData);
+        Commands(compilerData);
+        return Prog(compilerData);
     }
+
+    if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
+        compilerData->current_id = STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
+        generateFunctionStart(compilerData->current_id->key);
+    }
+
+    getToken(&compilerData->token, &compilerData->IndentationStack);
+
+    if (compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
+        getToken(&compilerData->token, &compilerData->IndentationStack);
+        return (Params(compilerData));
+    }
+
+    if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+        getToken(&compilerData->token, &compilerData->IndentationStack);
+    }
+
+    if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
+        getToken(&compilerData->token, &compilerData->IndentationStack);
+    }
+
+    if((compilerData->token.tokenType == TOKEN_EOL)){
+        getToken(&compilerData->token, &compilerData->IndentationStack);
+    }
+
+    if(compilerData->token.tokenType == TOKEN_INDENT){
+        getToken(&compilerData->token, &compilerData->IndentationStack);
+        return Commands(&compilerData);
+    }
+
+    if (compilerData->token.tokenType == TOKEN_DEDENT){
+        compilerData->inFunction = false;
+        return Prog(compilerData);
+    }
+
+
 }
+
 
 
 
