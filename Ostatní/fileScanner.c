@@ -5,8 +5,6 @@ char hexSeq[] = "0x00";
 
 FILE *sourceCode;
 
-int numOfSpaces = 0;
-bool returningDedent = false;
 
 void setSourceCodeFile(FILE *sourceCodeFile)
 {
@@ -143,7 +141,10 @@ int getToken(Stack *indentStack, tokenStruct *token)
     DS DString;
 
     static bool newLine = true;
+    static bool returningDedent = false;
     bool CommentStr = newLine;
+
+    static int numOfSpaces = 0;
 
     DSInit(&DString);
 
@@ -153,7 +154,7 @@ int getToken(Stack *indentStack, tokenStruct *token)
     char c = 0;
     char *eptr;
 
-    if(newLine)
+    if(newLine || returningDedent)
     {
         state = NEW_LINE_START_STATE;
     }
@@ -174,14 +175,17 @@ int getToken(Stack *indentStack, tokenStruct *token)
                 {
                     if(numOfSpaces != stackTop(indentStack))
                     {
-                        if(stackEmpty(indentStack))
+                        if(stackTop(indentStack) == 0)
                         {
                             DSDelete(&DString);
                             return ERROR_LEX;
                         }
-                        ungetc(c, sourceCode);
+                        else
+                        {
+                            stackPop(indentStack);
+                        }
 
-                        stackPop(indentStack);
+                        ungetc(c, sourceCode);
 
                         DSDelete(&DString);
                         token->tokenType = TOKEN_DEDENT;
@@ -196,7 +200,10 @@ int getToken(Stack *indentStack, tokenStruct *token)
                 }
                 if(isspace(c))
                 {
-                    numOfSpaces++;
+                    if(c != '\n')
+                    {
+                        numOfSpaces++;
+                    }
                 }
                 else if(c != '#')
                 {
@@ -852,9 +859,15 @@ int getToken(Stack *indentStack, tokenStruct *token)
             case EOL_STATE:
                 {
                     ungetc(c, sourceCode);
-                    token->tokenType = TOKEN_EOL;
                     DSDelete(&DString);
-                    return SCAN_OK;
+
+                    if(!CommentStr)
+                    {
+                        token->tokenType = TOKEN_EOL;
+                        return SCAN_OK;
+                    }
+
+                    state = NEW_LINE_START_STATE;
                 }
                 break;
         }
