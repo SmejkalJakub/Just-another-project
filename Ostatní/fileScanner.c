@@ -5,17 +5,13 @@ char hexSeq[] = "0x00";
 
 FILE *sourceCode;
 
-
 int numOfSpaces = 0;
 bool returningDedent = false;
 
 void setSourceCodeFile(FILE *sourceCodeFile)
 {
     sourceCode = sourceCodeFile;
-
 }
-
-
 
 int checkInt(DS *word, tokenStruct *token)
 {
@@ -46,14 +42,13 @@ int checkDouble(DS *word, tokenStruct *token)
 {
     char *eptr;
 
-    if(word->str[0] == '0')
+    if(word->str[0] == '0' && word->actIndex > 1 && word->str[1] != '.')
     {
         DSDelete(word);
         return ERROR_LEX;
     }
 
     double number = strtod(word->str, &eptr);
-
 
     if(*eptr)
     {
@@ -143,20 +138,16 @@ int checkKeyword(DS *word, tokenStruct *token)
     return SCAN_OK;
 }
 
-int getToken(tokenStruct *token)
+int getToken(Stack *indentStack, tokenStruct *token)
 {
-
     DS DString;
-    Stack indentStack;
 
     static bool newLine = true;
+    bool CommentStr = newLine;
 
     DSInit(&DString);
 
-
     DSDelete(token->stringValue);
-
-
 
     int state = START_TOKEN_STATE;
     char c = 0;
@@ -164,7 +155,6 @@ int getToken(tokenStruct *token)
 
     if(newLine)
     {
-
         state = NEW_LINE_START_STATE;
     }
 
@@ -180,20 +170,18 @@ int getToken(tokenStruct *token)
         {
             case NEW_LINE_START_STATE:
                 newLine = false;
-
                 if(returningDedent)
                 {
-
-                    if(numOfSpaces != stackTop(&indentStack))
+                    if(numOfSpaces != stackTop(indentStack))
                     {
-                        if(stackEmpty(&indentStack))
+                        if(stackEmpty(indentStack))
                         {
                             DSDelete(&DString);
                             return ERROR_LEX;
                         }
                         ungetc(c, sourceCode);
 
-                        stackPop(&indentStack);
+                        stackPop(indentStack);
 
                         DSDelete(&DString);
                         token->tokenType = TOKEN_DEDENT;
@@ -212,12 +200,10 @@ int getToken(tokenStruct *token)
                 }
                 else if(c != '#')
                 {
-
                     ungetc(c, sourceCode);
-
-                    if(numOfSpaces > stackTop(&indentStack))
+                    if(numOfSpaces > stackTop(indentStack))
                     {
-                        if(!stackPush(&indentStack, numOfSpaces))
+                        if(!stackPush(indentStack, numOfSpaces))
                         {
                             DSDelete(&DString);
                             return ERROR_INTERNAL;
@@ -226,14 +212,14 @@ int getToken(tokenStruct *token)
                         DSDelete(&DString);
                         return SCAN_OK;
                     }
-                    else if(numOfSpaces == stackTop(&indentStack))
+                    else if(numOfSpaces == stackTop(indentStack))
                     {
                         state = START_TOKEN_STATE;
                     }
-                    else if(numOfSpaces < stackTop(&indentStack))
+                    else if(numOfSpaces < stackTop(indentStack))
                     {
                         returningDedent = true;
-                        stackPop(&indentStack);
+                        stackPop(indentStack);
                         DSDelete(&DString);
                         token->tokenType = TOKEN_DEDENT;
                         return SCAN_OK;
@@ -335,7 +321,7 @@ int getToken(tokenStruct *token)
                 }
                 else if(c == '>')
                 {
-                    state = MORE_THAM_STATE;
+                    state = MORE_THAN_STATE;
                 }
                 else if(c == '-')
                 {
@@ -404,7 +390,7 @@ int getToken(tokenStruct *token)
                     return SCAN_OK;
                 }
                 break;
-            case MORE_THAM_STATE:
+            case MORE_THAN_STATE:
                 if(c == '=')
                 {
                     token->tokenType = TOKEN_MORE_EQUAL;
@@ -521,7 +507,7 @@ int getToken(tokenStruct *token)
                 }
                 else
                 {
-                    if(!DSAddChar(&DString, '\''))
+                    if(!DSAddChar(&DString, '\\'))
                     {
                         DSDelete(&DString);
                         return ERROR_INTERNAL;
@@ -595,11 +581,48 @@ int getToken(tokenStruct *token)
                     DSDelete(&DString);
                     return ERROR_LEX;
                 }
+                else if(!CommentStr)
+                {
+                    if(c == '\\')
+                    {
+                        state = LONG_COMMENT_STATE_ESC;
+                    }
+                    else if(!DSAddChar(&DString, c))
+                    {
+                        DSDelete(&DString);
+                        return ERROR_INTERNAL;
+                    }
+                }
+                break;
+            case LONG_COMMENT_STATE_ESC:
+                if(c < 32)
+                {
+                    DSDelete(&DString);
+                    return ERROR_LEX;
+                }
+                else if(c == '"')
+                {
+                    if(!DSAddChar(&DString, c))
+                    {
+                        DSDelete(&DString);
+                        return ERROR_INTERNAL;
+                    }
+                    state = LONG_COMMENT_STATE;
+                }
                 else
                 {
-                    DSAddChar(&DString, c);
+                    if(!DSAddChar(&DString, '\\'))
+                    {
+                        DSDelete(&DString);
+                        return ERROR_INTERNAL;
+                    }
+                    if(!DSAddChar(&DString, c))
+                    {
+                        DSDelete(&DString);
+                        return ERROR_INTERNAL;
+                    }
+                    state = LONG_COMMENT_STATE;
                 }
-                
                 break;
             case LONG_COMMENT_END_FIRST_STATE:
                 if(c == '"')
@@ -608,18 +631,57 @@ int getToken(tokenStruct *token)
                 }
                 else
                 {
-                    DSAddChar(&DString, c);
+                    if(!CommentStr)
+                    {
+                        if(!DSAddChar(&DString, '"'))
+                        {
+                            DSDelete(&DString);
+                            return ERROR_INTERNAL;
+                        }
+
+                        if(!DSAddChar(&DString, c))
+                        {
+                            DSDelete(&DString);
+                            return ERROR_INTERNAL;
+                        }
+                    }
+
                     state = LONG_COMMENT_STATE;
                 }
                 break;
             case LONG_COMMENT_END_SECOND_STATE:
                 if(c == '"')
                 {
+                    if(!CommentStr)
+                    {
+                        token->tokenType = TOKEN_STRING;
+                        DSAddStr(token->stringValue, (&DString)->str);
+                        DSDelete(&DString);
+                        return SCAN_OK;
+                    }
+
                     state = REST_OF_LONG_COMMENT_STATE;
                 }
                 else
                 {
-                    DSAddChar(&DString, c);
+                    if(!CommentStr)
+                    {
+                        for(int i = 0; i < 2; i++)
+                        {
+                            if(!DSAddChar(&DString, '"'))
+                            {
+                                DSDelete(&DString);
+                                return ERROR_INTERNAL;
+                            }
+                        }
+
+                        if(!DSAddChar(&DString, c))
+                        {
+                            DSDelete(&DString);
+                            return ERROR_INTERNAL;
+                        }
+                    }
+
                     state = LONG_COMMENT_STATE;
                 }
                 break;
@@ -628,20 +690,11 @@ int getToken(tokenStruct *token)
                 {
                     state = START_TOKEN_STATE;
                 }
-                else if(c == ')')
-                {
-                    token->tokenType = TOKEN_STRING;
-                    DSAddStr(token->stringValue, (&DString)->str);
-                    DSDelete(&DString);
-                    return SCAN_OK;
-                }
                 else if(!isspace(c))
                 {
                     DSDelete(&DString);
                     return ERROR_LEX;
                 }
-                
-                
                 break;
             case KEYWORD_ID_STATE:
                 if(isalnum(c) || c == '_')

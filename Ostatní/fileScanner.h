@@ -26,7 +26,7 @@
 #define LONG_COMMENT_END_STATE 9
 #define KEYWORD_ID_STATE 10
 #define DIGIT_STATE 11
-#define MORE_THAM_STATE 12
+#define MORE_THAN_STATE 12
 #define LESS_THAN_STATE 13
 #define DECIMAL_POINT_STATE 14
 #define DOUBLE_NUMBER_STATE 15
@@ -43,6 +43,7 @@
 #define REST_OF_LONG_COMMENT_STATE 26
 #define NEW_LINE_STATE 27
 #define NEW_LINE_START_STATE 28
+#define LONG_COMMENT_STATE_ESC 29
 
 #define TOKEN_EOL 0
 #define TOKEN_DIGIT 1
@@ -100,7 +101,7 @@ typedef struct
 
 }tokenStruct;
 
-int getToken(tokenStruct *token);
+int getToken(Stack *indentStack, tokenStruct *token);
 void setSourceCodeFile(FILE *sourceCodeFile);
 
 #endif
