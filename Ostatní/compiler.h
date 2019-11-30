@@ -13,6 +13,8 @@ typedef struct {
     symTable globalTable;
     DS* printedValues;
 
+    Stack* IndentationStack;
+
     tokenStruct token;
 
     symTableItem *current_id;

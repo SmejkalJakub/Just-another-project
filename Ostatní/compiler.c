@@ -24,6 +24,10 @@ int compilerDataInit(CompilerData* compilerData){
     //compilerData->globalTable = malloc(sizeof(symTable));
     //compilerData->localTable = malloc(sizeof(symTable));
 
+    //inicializace indentStacku, prvotni pushnuti 0
+    initStack(&compilerData->IndentationStack);
+    stackPush(&compilerData->IndentationStack, 0);
+
     compilerData->printedValues = malloc(sizeof(DS));
     DSInit(compilerData->printedValues);
 
@@ -40,40 +44,41 @@ int compilerDataInit(CompilerData* compilerData){
 
 static int Prog (CompilerData *compilerData){
 
-    getToken(&compilerData->token);
+    getToken(&compilerData->token, &compilerData->IndentationStack);
 
    // PROG → def id PARAMS eol indent LIST_COMMAND_FUNC eol dedent PROG
     if ((compilerData->token.tokenType == TOKEN_KEYWORD) && (compilerData->token.keyword == DEF)){
 
         compilerData->inFunction = true;
 
-        getToken(&compilerData->token);
+        getToken(&compilerData->token, &compilerData->IndentationStack);
+    }
 
         if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
-
             compilerData->current_id = STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
             generateFunctionStart(compilerData->current_id->key);
+        }
 
-            getToken(&compilerData->token);
+            getToken(&compilerData->token, &compilerData->IndentationStack);
 
             if (compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
 
-                getToken(&compilerData->token);
+                getToken(&compilerData->token, &compilerData->IndentationStack);
                   return (Params(compilerData));
 
                 if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-                    getToken(&compilerData->token);
+                    getToken(&compilerData->token, &compilerData->IndentationStack);
 
                     if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
-                        getToken(&compilerData->token);
+                        getToken(&compilerData->token, &compilerData->IndentationStack);
 
                         if((compilerData->token.tokenType == TOKEN_EOL)){
 
-                                getToken(&compilerData->token);
+                                getToken(&compilerData->token, &compilerData->IndentationStack);
 
                                 if(compilerData->token.tokenType == TOKEN_INDENT){
 
-                                    getToken(&compilerData->token);
+                                    getToken(&compilerData->token, &compilerData->IndentationStack);
 
                                     return Commands(&compilerData);
 
@@ -81,36 +86,12 @@ static int Prog (CompilerData *compilerData){
 
                                         compilerData->inFunction = false;
                                         return Prog(compilerData);
-                                    }
-                                    else{
-                                        return 2;
-                                    }
-                                }
-                                else{
-                                    return 2;
-                                }
-                        }
-                    }
-                    else{
-                        return 2;
-                    }
-                }
-                else{
-                    return 2;
-                }
-            }
-            else{
-                return 2;
-            }
-        }
-        else{
-            return 2;
-        }
+
     }
 
    //PROG →  eol PROG
     else if (compilerData->token.tokenType == TOKEN_EOL){
-        return Prog(compilerData);
+        return Prog(&compilerData);
     }
 
     //PROG →  EOF
@@ -120,21 +101,24 @@ static int Prog (CompilerData *compilerData){
 
     //PROG →  COMMANDS eol PROG
     else{
-        Commands(compilerData);
-        return Prog(compilerData);
+        Commands(&compilerData);
+        return Prog(&compilerData);
     }
 }
 
 
 
 static int Commands (CompilerData *compilerData){
+    int finalState;
+
+    //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
     if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTS){
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-            getToken(&compilerData->token);
+            getToken(&compilerData->token, &compilerData->IndentationStack);
             if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
 
                     //TODO generateRead()
-                    getToken(&compilerData->token);
+                    getToken(&compilerData->token, &compilerData->IndentationStack);
                     if(compilerData->token.tokenType == TOKEN_EOL){
                         return anotherCommand(compilerData);
                     }
@@ -150,13 +134,15 @@ static int Commands (CompilerData *compilerData){
             return 2;
         }
     }
+
+     //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
    if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTF){
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-            getToken(&compilerData->token);
+            getToken(&compilerData->token, &compilerData->IndentationStack);
             if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
 
                     //TODO generateRead()
-                    getToken(&compilerData->token);
+                    getToken(&compilerData->token, &compilerData->IndentationStack);
                     if(compilerData->token.tokenType == TOKEN_EOL){
                         anotherCommand(compilerData);
                     }
@@ -172,13 +158,16 @@ static int Commands (CompilerData *compilerData){
             return 2;
         }
     }
+
+    //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
+
     if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTI){
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-            getToken(&compilerData->token);
+            getToken(&compilerData->token, &compilerData->IndentationStack);
             if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
 
                     //TODO generateRead()
-                    getToken(&compilerData->token);
+                    getToken(&compilerData->token, &compilerData->IndentationStack);
                     if(compilerData->token.tokenType == TOKEN_EOL){
                         anotherCommand(compilerData);
                     }
@@ -195,9 +184,10 @@ static int Commands (CompilerData *compilerData){
         }
     }
 
+     //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
     if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == PRINT){
             //TODO generateWrite()
-        getToken(&compilerData->token);
+        getToken(&compilerData->token, &compilerData->IndentationStack);
 
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
 
@@ -205,7 +195,7 @@ static int Commands (CompilerData *compilerData){
 
             if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
 
-                getToken(&compilerData->token);
+                getToken(&compilerData->token, &compilerData->IndentationStack);
 
                 if(compilerData->token.tokenType == TOKEN_EOL){
                     anotherCommand(compilerData);
@@ -221,10 +211,10 @@ static int Commands (CompilerData *compilerData){
         }
     }
 
+    //V PRIPADE, ZE JE PRVNI ID
     else if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
-        //TODO rozlisovani, zde jde o localni ci globalni promennou
-
+        //ULOZIME ID DO SYMTABLU
         if(!compilerData->inFunction){
             compilerData->current_id = STInsert(&compilerData->globalTable, compilerData->token.stringValue->str);
         }
@@ -232,89 +222,134 @@ static int Commands (CompilerData *compilerData){
             compilerData->current_id = STInsert(&compilerData->globalTable, compilerData->token.stringValue->str);
         }
 
-        getToken(&compilerData->token);
-
+        getToken(&compilerData->token, &compilerData->IndentationStack);
+            //PRIRAZENI
             if(compilerData->token.tokenType == TOKEN_EQUALS){
-                getToken(&compilerData->token);
+                getToken(&compilerData->token, &compilerData->IndentationStack);
+
+
                 //TODO prirazeni
-                return commandValue(compilerData);
+
+                //VOLANI COMMVALUE PRO VYHODNOCENI PRIRAZENE HODNOTY
+                commandValue(compilerData);
 
                 if(compilerData->token.tokenType == TOKEN_EOL){
                     anotherCommand(compilerData);
                 }
             }
-            else if(compilerData->token.tokenType == TOKEN_EOL){
-                anotherCommand(compilerData);
+
+            //POKUD IHNED ZA ID NASLEDUJE ZAVORKA, PATRNE JDE O VOLANI FCE BEZ PRIRAZENI
+            else if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
+
+                //VYHODNOCENI HODNOT FCE
+                finalState = Values(&compilerData);
+                //TODO generate volani funkce
+
+            }
+
+            else{
+                return 2;
             }
      }
+
     else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
-           getToken(&compilerData->token);
+           getToken(&compilerData->token, &compilerData->IndentationStack);
     }
 
 
 }
 static int Values(CompilerData *compilerData){
 
-    getToken(&compilerData->token);
+    getToken(&compilerData->token, &compilerData->IndentationStack);
 
     int loadedParametrs = 0;
 
-    if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-        
-        while(compilerData->token.tokenType != TOKEN_LEFT_BRACKET){
+        while(compilerData->token.tokenType != TOKEN_RIGHT_BRACKET){
 
             loadedParametrs++;
 
-            getToken(&compilerData->token);        
+            getToken(&compilerData->token, &compilerData->IndentationStack);
 
             //VALUES ->  VAL VALUES
             switch(compilerData->token.tokenType){
+
                 //VAL ->  id
                 case TOKEN_IDENTIFIER:
 
-                        break;
-                    
+                        //pristup na polozku v symTablu
+                        //pristup na typ polozky a opet stejny case jako tento, akorat bez case ID
+
+                        switch (STSearch(&compilerData->localTable, &compilerData->token.stringValue)->type){
+                             //VAL ->  integer
+                            case TOKEN_INTEGER:
+                                    //kontrola, zda-li odpovida typ parametru fce
+                                    //pokud string - chyba
+                                    //pokud double - nutno pretypovat
+
+                                    break;
+                            //VAL ->  double
+                            case TOKEN_DOUBLE:
+                                    //kontrola, zda-li odpovida typ parametru fce
+                                    //pokud string - chyba
+                                    //pokud int - nutno pretypovat
+
+                                    break;
+                            //VAL ->  string
+                            case TOKEN_STRING:
+                                    //kontrola, zda li odpovida parametru fce
+                                    //pokud ne - chyba
+
+                                    break;
+                            default:
+                                return 3;
+                         }
+
+                     break;
+
                 //VAL ->  integer
                 case TOKEN_INTEGER:
+                        //kontrola, zda-li odpovida typ parametru fce
+                        //pokud string - chyba
+                        //pokud double - nutno pretypovat
 
                         break;
                 //VAL ->  double
                 case TOKEN_DOUBLE:
+                        //kontrola, zda-li odpovida typ parametru fce
+                        //pokud string - chyba
+                        //pokud int - nutno pretypovat
 
                         break;
                 //VAL ->  string
                 case TOKEN_STRING:
+                        //kontrola, zda li odpovida parametru fce
+                        //pokud ne - chyba
 
                         break;
 
                 //VALUES ->  eps
                 case TOKEN_LEFT_BRACKET:
-                    
+
                         break;
 
-                default: 
+                default:
                     return 2;
-            
+
             }
         }
-        
-    }
-    else{
-        return 2;
-    }
+
 
     //kontrola poctu parametru
     if ( loadedParametrs != STSearch(&compilerData->globalTable, &compilerData->current_id)->numberOfParams){
         return 2;
     }
-   
 
-    //compilerData->printedValues = DSAddStr
+
 
 }
 
 static int anotherCommand (CompilerData *compilerData){
-    getToken(&compilerData->token);
+    getToken(&compilerData->token, &compilerData->IndentationStack);
 
 }
 
@@ -333,6 +368,15 @@ static int commandValue (CompilerData *compilerData){
             //generateWrite();
         }
     }
+
+    if(compilerData->token.tokenType == TOKEN_IDENTIFIER ){
+
+            getToken(&compilerData->token, &compilerData->IndentationStack);
+
+
+
+
+    }
     return 0;
 
 }
@@ -343,7 +387,7 @@ static int Params(CompilerData *compilerData){
     if (compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
         STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
-        getToken(&compilerData->token);
+        getToken(&compilerData->token, &compilerData->IndentationStack);
 
         anotherParam(compilerData);
 
@@ -359,12 +403,12 @@ static int Params(CompilerData *compilerData){
 static int anotherParam (CompilerData *compilerData){
 
     if(compilerData->token.tokenType == TOKEN_COLON){
-        getToken(&compilerData->token);
+        getToken(&compilerData->token, &compilerData->IndentationStack);
 
         if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
             STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
-            getToken(&compilerData->token);
+            getToken(&compilerData->token, &compilerData->IndentationStack);
 
             return anotherParam(compilerData);
         }

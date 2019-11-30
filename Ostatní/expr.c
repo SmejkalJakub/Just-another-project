@@ -664,5 +664,4 @@ int main(int argc, char *argv[])
 
     solveExpr(&token);
     printf("%s", dynamicString.str);
-
 }
