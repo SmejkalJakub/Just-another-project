@@ -597,13 +597,13 @@ int solveExpr(tokenStruct *token)
             case EQ:
                 {
                     symStackPush(&stack, currentSym, getTokenType(token, dummyTable));
-                    returnValue = getToken(token);
+                    //returnValue = getToken(token);
                 }
                 break;
             case S:
                 {
                     shift(currentSym, token);
-                    returnValue = getToken(token);
+                    //returnValue = getToken(token);
                 }
                 break;
             case R:
@@ -635,7 +635,7 @@ int main(int argc, char *argv[])
 
     generateHeader();
 
-    FILE *sourceCode;
+    /*FILE *sourceCode;
 
     if(argc == 2)
     {
@@ -660,6 +660,7 @@ int main(int argc, char *argv[])
 
     getToken(&token);
 
-    solveExpr(&token);
+    solveExpr(&token);*/
+
     printf("%s", dynamicString.str);
 }

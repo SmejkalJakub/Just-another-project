@@ -19,7 +19,6 @@ void generateHeader()
     addInstruction("DEFVAR GF@%convertHelpVar0\n");
     addInstruction("DEFVAR GF@%convertHelpVar1\n\n");
 
-    addInstruction("DEFVAR GF@%conditionRes\n");
     addInstruction("DEFVAR GF@%lastExpresionResult\n\n");
 
 }
@@ -83,8 +82,63 @@ void generateExpresion(int exprRule)
     {
         addInstruction("LTS");
     }
+    else if(exprRule == EXPR_LESS_EQ)
+    {
+
+    }   
+    else if(exprRule == EXPR_MORE_EQ)
+    {
+
+    }
+}
+
+
+void generateIfStart(int numberOfPrevIfs, char *functionName)
+{
+    char str[12];
+    sprintf(str, "%d", numberOfPrevIfs);
+    
+
+    addInstruction("JUMPIFNEQ ");
+    addInstruction(functionName); 
+    addInstruction("$else%");
+
+
+    addInstruction(str);
+    addInstruction(" GF@%lastExpresionResult bool@true\n");
+}
+
+void generateElseStart(int numberOfPrevIfs, char *functionName)
+{
+
+    char str[12];
+    sprintf(str, "%d", numberOfPrevIfs);
+
+    addInstruction("JUMP ");
+    addInstruction(functionName);
+    addInstruction("$end%");
+    addInstruction(str);
+    addInstruction("\n");
     
     
+    addInstruction("LABEL ");
+    addInstruction(functionName);
+    addInstruction("$else%");
+    addInstruction(str);
+    addInstruction("\n");
+}
+
+void generateElseEnd(int numberOfPrevIfs, char *functionName)
+{
+
+    char str[12];
+    sprintf(str, "%d", numberOfPrevIfs);
+
+    addInstruction("LABEL ");
+    addInstruction(functionName);
+    addInstruction("$end%");
+    addInstruction(str);
+    addInstruction("\n");
 }
 
 void generateConcatenateString(bool firstConcat)
@@ -381,6 +435,52 @@ void generateJump(char *functionName)
 {
     addInstruction("JUMP $");
     addInstruction(functionName);
+    addInstruction("\n");
+}
+
+void generateWhileLabel(int numberOfPrevWhiles, char *functionName)
+{
+    char str[12];
+    sprintf(str, "%d", numberOfPrevWhiles);
+
+    addInstruction("LABEL ");
+    addInstruction(functionName);
+    addInstruction("$while%");
+    addInstruction(str);
+    addInstruction("\n");
+}
+
+void generateWhileStart(int numberOfPrevWhiles, char *functionName)
+{
+    char str[12];
+    sprintf(str, "%d", numberOfPrevWhiles);
+
+
+    addInstruction("JUMPIFEQ ");
+    addInstruction(functionName);
+    addInstruction("$while$end%");
+    addInstruction(str);
+    addInstruction(" GF@%lastExpresionResult bool@false\n");
+
+}
+
+void generateWhileEnd(int numberOfPrevWhiles, char *functionName)
+{
+    char str[12];
+    sprintf(str, "%d", numberOfPrevWhiles);
+
+    addInstruction("JUMP ");
+    addInstruction(functionName);
+    addInstruction("$while%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("\n");
+
+    addInstruction("LABEL ");
+    addInstruction(functionName);
+    addInstruction("$while$end%");
+    addInstruction(str);
     addInstruction("\n");
 }
 

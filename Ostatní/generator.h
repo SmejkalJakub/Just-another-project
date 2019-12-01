@@ -30,5 +30,12 @@ void generateFunctionReturn(char *functionName, tokenStruct *token);
 void generateJump(char *functionName);
 void generateStackPush(tokenStruct *token);
 void generateExpresion(int exprRule);
+void generateIfStart(int numberOfPrevIfs, char *functionName);
+void generateElseStart(int numberOfPrevIfs, char *functionName);
+void generateElseEnd(int numberOfPrevIfs, char *functionName);
+void generateWhileLabel(int numberOfPrevWhiles, char *functionName);
+void generateWhileStart(int numberOfPrevWhiles, char *functionName);
+void generateWhileEnd(int numberOfPrevWhiles, char *functionName);
+
 
 #endif
