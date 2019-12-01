@@ -9,6 +9,8 @@
 #include "symtable.h"
 #include "expr.h"
 
+
+
 typedef struct {
     symTable localTable;
     symTable globalTable;
@@ -33,11 +35,14 @@ static int Prikaz (CompilerData *compilerData);
 static int Hodnoty(CompilerData *compilerData);
 static int Hodnota(CompilerData *compilerData);
 static int anotherCommand (CompilerData *compilerData);
-static int commandValue (CompilerData *compilerData);
-static int Params(CompilerData *compilerData);
-static int anotherParam (CompilerData *compilerData);
+static int navratHodnoty (CompilerData *compilerData);
+static int Parametry(CompilerData *compilerData);
+static int dalsiParametr (CompilerData *compilerData);
 static int listCommandFunction();
 static int volaniNeboPrirazeni(CompilerData *compilerData);
+static int prikazyFunkce(CompilerData * compilerData);
+static int prikazySekv(CompilerData *compilerData);
+static int dalsiPrikaz(CompilerData *compilerData);
 
 #endif
 
