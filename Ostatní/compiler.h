@@ -12,7 +12,7 @@
 typedef struct {
     symTable localTable;
     symTable globalTable;
-    DS* printedValues;
+
 
     Stack* IndentationStack;
 
@@ -29,15 +29,15 @@ typedef struct {
 
 int compilerDataInit(CompilerData* compilerData);
 static int Prog (CompilerData *compilerData);
-static int Commands (CompilerData *compilerData);
-static int Values(CompilerData *compilerData);
-static int Value(CompilerData *compilerData);
+static int Prikaz (CompilerData *compilerData);
+static int Hodnoty(CompilerData *compilerData);
+static int Hodnota(CompilerData *compilerData);
 static int anotherCommand (CompilerData *compilerData);
 static int commandValue (CompilerData *compilerData);
 static int Params(CompilerData *compilerData);
 static int anotherParam (CompilerData *compilerData);
 static int listCommandFunction();
-static int callOrAssign(CompilerData *compilerData);
+static int volaniNeboPrirazeni(CompilerData *compilerData);
 
 #endif
 
