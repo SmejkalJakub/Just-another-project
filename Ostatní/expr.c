@@ -555,8 +555,6 @@ void shift(precedenceTabSym currentSym, tokenStruct *token)
 
 int solveExpr(tokenStruct *token)
 {
-
-
     int returnValue;
 
     bool end = false;

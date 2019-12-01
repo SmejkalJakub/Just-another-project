@@ -2,11 +2,6 @@
 #include "compiler.h"
 
 
-DS dynamicString;
-
-
-
-
 /*char* doubleToString(double convertedNumber){
 
     char doubleInString[50];
@@ -181,7 +176,7 @@ static int Commands (CompilerData *compilerData){
         else return 2;
     }
 
-     //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
+     //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKONANI FUNKCE
     if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == PRINT){
          //TODO generateWrite()
         getToken(&compilerData->token, *(&compilerData->IndentationStack));
@@ -241,8 +236,8 @@ static int defFunctionOrIncluded(CompilerData *compilerData){
 
     //v pripade, ze je prvni token identifikator fce
     if (compilerData->token.tokenType == TOKEN_IDENTIFIER &&
-        ( (STSearch(&compilerData->localTable, &compilerData->token.stringValue)->function) ||
-        (STSearch(&compilerData->globalTable, compilerData->token.stringValue)->function) ) )
+        ( (STSearch(&compilerData->localTable, compilerData->token.stringValue->str)->function) ||
+        (STSearch(&compilerData->globalTable, compilerData->token.stringValue->str)->function) ) )
     {
 
         getToken(&compilerData->token, *(&compilerData->IndentationStack));
@@ -272,7 +267,7 @@ static int callOrAssign(CompilerData *compilerData){
 
         //TODO functionCall
 
-        getToken(&compilerData->token, &compilerData->IndentationStack);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
         Values(*(&compilerData));
 
@@ -304,7 +299,7 @@ static int Values(CompilerData *compilerData){
                         //pristup na polozku v symTablu
                         //pristup na typ polozky a opet stejny case jako tento, akorat bez case ID
 
-                        switch (STSearch(&compilerData->localTable, &compilerData->token.stringValue)->type){
+                        switch (STSearch(&compilerData->localTable, compilerData->token.stringValue->str)->type){
                              //VAL ->  integer
                             case TOKEN_INTEGER:
                                     //kontrola, zda-li odpovida typ parametru fce
@@ -365,7 +360,7 @@ static int Values(CompilerData *compilerData){
 
 
     //kontrola poctu parametru
-    if ( loadedParametrs != STSearch(&compilerData->globalTable, &compilerData->current_id)->numberOfParams){
+    if ( loadedParametrs != STSearch(&compilerData->globalTable, compilerData->current_id)->numberOfParams){
         return 2;
     }
 
