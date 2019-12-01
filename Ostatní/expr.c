@@ -410,7 +410,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
     bool thirdOperandToInteger = false;
     bool firstOperandToDouble = false;
     bool thirdOperandToDouble = false;
-    
+
 
     switch(rule){
 
@@ -583,7 +583,7 @@ int solveExpr(tokenStruct *token)
 
         switch (precedenceTable[symStackTopSymType][currentSymType])
         {
-            
+
             case ER:
                 {
                     if(currentSym == SYM_DOLAR && symStackTopSym->symbol == SYM_DOLAR)
@@ -618,7 +618,7 @@ int solveExpr(tokenStruct *token)
                 break;
         }
     }
-    
+
     if(stack.top->type != STRING)
     {
         generateSaveLastExpresionValue();

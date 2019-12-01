@@ -73,36 +73,42 @@ static int Prog (CompilerData *compilerData){
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
         compilerData->current_id = STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
         generateFunctionStart(compilerData->current_id->key);
+         getToken(&compilerData->token, &compilerData->IndentationStack);
     }
-
-    getToken(&compilerData->token, &compilerData->IndentationStack);
+    else return 2;
 
     if (compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
         getToken(&compilerData->token, &compilerData->IndentationStack);
-        return (Params(compilerData));
+        Params(compilerData);
     }
+    else return 2;
 
     if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
         getToken(&compilerData->token, &compilerData->IndentationStack);
     }
+    else return 2;
 
     if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
         getToken(&compilerData->token, &compilerData->IndentationStack);
     }
+    else return 2;
 
     if((compilerData->token.tokenType == TOKEN_EOL)){
         getToken(&compilerData->token, &compilerData->IndentationStack);
     }
+    else return 2;
 
     if(compilerData->token.tokenType == TOKEN_INDENT){
         getToken(&compilerData->token, &compilerData->IndentationStack);
-        return Commands(&compilerData);
+        Commands(&compilerData);
     }
+    else return 2;
 
     if (compilerData->token.tokenType == TOKEN_DEDENT){
         compilerData->inFunction = false;
         return Prog(compilerData);
     }
+    else return 2;
 
 
 }
@@ -111,54 +117,48 @@ static int Prog (CompilerData *compilerData){
 
 
 static int Commands (CompilerData *compilerData){
+
     int finalState;
 
     //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
     if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTS){
+        getToken(&compilerData->token, &compilerData->IndentationStack);
+
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
+                getToken(&compilerData->token, &compilerData->IndentationStack);
+        }
+        else return 2;
+                    
+        if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
             getToken(&compilerData->token, &compilerData->IndentationStack);
-            if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+        }
+        else return 2;
 
-                    //TODO generateRead()
-                    getToken(&compilerData->token, &compilerData->IndentationStack);
-                    if(compilerData->token.tokenType == TOKEN_EOL){
-                        return anotherCommand(compilerData);
-                    }
-                    else{
-                        return 2;
-                    }
-            }
-            else{
-                return 2;
-            }
+        if(compilerData->token.tokenType == TOKEN_EOL){
+            anotherCommand(compilerData);
         }
-        else{
-            return 2;
-        }
+        else return 2;
+
+
     }
-
+    
      //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
    if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTF){
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
             getToken(&compilerData->token, &compilerData->IndentationStack);
-            if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+        }
+        else return 2;
+            
+        if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+            //TODO generateRead()
+            getToken(&compilerData->token, &compilerData->IndentationStack);
+        }
+        else return 2;
 
-                    //TODO generateRead()
-                    getToken(&compilerData->token, &compilerData->IndentationStack);
-                    if(compilerData->token.tokenType == TOKEN_EOL){
-                        anotherCommand(compilerData);
-                    }
-                    else{
-                        return 2;
-                    }
-            }
-            else{
-                return 2;
-            }
+        if(compilerData->token.tokenType == TOKEN_EOL){
+            anotherCommand(compilerData);
         }
-        else{
-            return 2;
-        }
+        else return 2;
     }
 
     //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
@@ -166,51 +166,43 @@ static int Commands (CompilerData *compilerData){
     if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTI){
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
             getToken(&compilerData->token, &compilerData->IndentationStack);
-            if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-
-                    //TODO generateRead()
-                    getToken(&compilerData->token, &compilerData->IndentationStack);
-                    if(compilerData->token.tokenType == TOKEN_EOL){
+        }
+        else return 2;
+            
+        if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+            //TODO generateRead()
+            getToken(&compilerData->token, &compilerData->IndentationStack);
+        }
+        else return 2;
+        
+        if(compilerData->token.tokenType == TOKEN_EOL){
                         anotherCommand(compilerData);
-                    }
-                    else{
-                        return 2;
-                    }
-            }
-            else{
-                return 2;
-            }
         }
-        else{
-            return 2;
-        }
+        else return 2;
     }
 
      //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
     if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == PRINT){
-            //TODO generateWrite()
+         //TODO generateWrite()
         getToken(&compilerData->token, &compilerData->IndentationStack);
 
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-
-            return Values(compilerData);
-
-            if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-
-                getToken(&compilerData->token, &compilerData->IndentationStack);
-
-                if(compilerData->token.tokenType == TOKEN_EOL){
-                    anotherCommand(compilerData);
-                }
-                else{
-                    return 2;
-                }
-            }
-            else{
-                return 2;
-            }
-            //generateWrite(&compilerData->printedValues, )
+           // puvodni - dle me nesmysl Values(compilerData);
+            solveExpr(&compilerData->token);
+            //print DS ulozeny v compilerData
         }
+        else return 2;
+        
+        if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+            getToken(&compilerData->token, &compilerData->IndentationStack);
+        }
+        else return 2;
+
+        if(compilerData->token.tokenType == TOKEN_EOL){
+                    anotherCommand(compilerData);
+        }
+        else return 2;
+          
     }
 
     //V PRIPADE, ZE JE PRVNI ID
@@ -225,33 +217,10 @@ static int Commands (CompilerData *compilerData){
         }
 
         getToken(&compilerData->token, &compilerData->IndentationStack);
-            //PRIRAZENI
-            if(compilerData->token.tokenType == TOKEN_EQUALS){
-                getToken(&compilerData->token, &compilerData->IndentationStack);
 
-
-                //TODO prirazeni
-
-                //VOLANI COMMVALUE PRO VYHODNOCENI PRIRAZENE HODNOTY
-                commandValue(compilerData);
-
-                if(compilerData->token.tokenType == TOKEN_EOL){
-                    anotherCommand(compilerData);
-                }
-            }
-
-            //POKUD IHNED ZA ID NASLEDUJE ZAVORKA, PATRNE JDE O VOLANI FCE BEZ PRIRAZENI
-            else if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-
-                //VYHODNOCENI HODNOT FCE
-                finalState = Values(&compilerData);
-                //TODO generate volani funkce
-
-            }
-
-            else{
-                return 2;
-            }
+        callOrAssign(&compilerData);
+            
+           
      }
 
     else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
@@ -259,6 +228,46 @@ static int Commands (CompilerData *compilerData){
     }
 
 
+}
+
+static int defFunctionOrIncluded(CompilerData *compilerData){
+
+    if (compilerData->token.tokenType == TOKEN_IDENTIFIER){
+        getToken(&compilerData->token, &compilerData->IndentationStack);
+
+        //NUTNO ROZLISOVAT, JESTLI JE TO ZACATEK FCE CI VYRAZU - VYHODNOCOVAL BYCH VSE ZA = JAKO VYRAZ :-)
+    }
+
+    else {
+        commandValue(&compilerData);
+    }
+
+}
+
+static int callOrAssign(CompilerData *compilerData){
+
+    if(compilerData->token.tokenType == TOKEN_EQUALS){
+
+         getToken(&compilerData->token, &compilerData->IndentationStack);
+
+         defFunctionOrIncluded(&compilerData);
+
+
+    }      
+    else if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
+
+        //TODO functionCall
+
+        getToken(&compilerData->token, &compilerData->IndentationStack);
+
+        Values(&compilerData);
+
+        if (compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+            return 0;
+        }
+        else return 2;
+    }
+    else return 2;
 }
 static int Values(CompilerData *compilerData){
 

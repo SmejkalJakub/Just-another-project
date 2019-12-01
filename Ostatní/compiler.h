@@ -7,6 +7,7 @@
 #include "generator.h"
 #include "dynamicString.h"
 #include "symtable.h"
+#include "expr.h"
 
 typedef struct {
     symTable localTable;
@@ -36,5 +37,7 @@ static int commandValue (CompilerData *compilerData);
 static int Params(CompilerData *compilerData);
 static int anotherParam (CompilerData *compilerData);
 static int listCommandFunction();
+static int callOrAssign(CompilerData *compilerData);
+
 #endif
 
