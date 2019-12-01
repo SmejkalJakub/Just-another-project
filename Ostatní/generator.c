@@ -190,6 +190,164 @@ void generateStackPush(tokenStruct *token)
     addInstruction("\n");
 }
 
+void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken)
+{
+    char str[12];
+    sprintf(str, "%d", paramNumber);
+
+    if(paramNumber == 0)
+    {
+        addInstruction("CREATEFRAME\n");
+    }
+    addInstruction("DEFVAR TF@%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("MOVE TF@%");
+    addInstruction(str);
+    addInstruction(" ");
+
+    if(paramToken->tokenType == TOKEN_INTEGER)
+    {
+        char str[12];
+        sprintf(str, "%d", paramToken->integerValue);
+        addInstruction("int@");
+        addInstruction(str);
+    }
+    else if(paramToken->tokenType == TOKEN_DOUBLE)
+    {
+        char str[30];
+        sprintf(str, "%a", paramToken->doubleValue);
+        addInstruction("float@");
+        addInstruction(str);
+    }
+    else if(paramToken->tokenType == TOKEN_STRING)
+    {
+        addInstruction("string@");
+        addInstruction(paramToken->stringValue->str);
+    }
+    else if(paramToken->tokenType == TOKEN_IDENTIFIER)
+    {
+        addInstruction("LF@");
+        addInstruction(paramToken->stringValue->str);
+    }
+
+    addInstruction("\n");
+
+}
+
+void generateFunctionLen()
+{
+    addInstruction("\n\nLABEL $len\n");
+    addInstruction("PUSHFRAME\n");
+    
+    addInstruction("DEFVAR LF@%retval\n");
+
+    addInstruction("STRLEN LF@%retval LF@%0\n");
+
+    addInstruction("POPFRAME\n");
+    addInstruction("RETURN\n\n\n");
+}
+
+void generateFunctionChr()
+{
+    addInstruction("\n\nLABEL $chr\n");
+    addInstruction("PUSHFRAME\n");
+    
+    addInstruction("DEFVAR LF@%retval\n");
+
+    addInstruction("INT2CHAR LF@%retval LF@%0\n");
+
+    addInstruction("POPFRAME\n");
+    addInstruction("RETURN\n\n\n");
+}
+
+void generateFunctionSubstr()
+{
+    addInstruction("\n\nLABEL $substr\n");
+    addInstruction("PUSHFRAME\n");
+    
+    addInstruction("DEFVAR LF@%retval\n");
+    addInstruction("MOVE LF@%retval string@\n");
+
+    addInstruction("DEFVAR LF@result\n");
+    addInstruction("DEFVAR LF@strLen\n");
+
+    addInstruction("STRLEN LF@strLen LF@%0\n");
+
+    addInstruction("LT LF@result LF@%2 int@0\n");
+    addInstruction("JUMPIFEQ $substr$end LF@result bool@true\n");
+
+    addInstruction("LT LF@result LF@%1 int@0\n");
+    addInstruction("JUMPIFEQ $substr$end LF@result bool@true\n");
+
+    addInstruction("GT LF@result LF@%1 LF@strLen\n");
+    addInstruction("JUMPIFEQ $substr$end LF@result bool@true\n");
+
+    addInstruction("EQ LF@result LF@%2 int@0\n");
+    addInstruction("JUMPIFEQ $substr$end LF@result bool@true\n");
+
+    addInstruction("EQ LF@result LF@strLen int@0\n");
+    addInstruction("JUMPIFEQ $substr$end LF@result bool@true\n");
+
+    addInstruction("DEFVAR LF@tempChar\n");
+    addInstruction("DEFVAR LF@tempVar\n");
+    addInstruction("SUB LF@tempVar LF@strLen LF@%1\n");
+
+    addInstruction("LT LF@result LF@%2 LF@tempVar\n");
+    addInstruction("JUMPIFEQ $substr$concat LF@result bool@true\n");
+
+    addInstruction("SUB LF@%2 LF@strLen LF@%1\n");
+
+    addInstruction("LABEL $substr$concat\n");
+
+    addInstruction("EQ LF@result LF@%2 int@0\n");
+    addInstruction("JUMPIFEQ $substr$end LF@result bool@true\n");
+
+    addInstruction("GETCHAR LF@tempChar LF@%0 LF@%1\n");
+    addInstruction("CONCAT LF@%retval LF@%retval LF@tempChar\n");
+    
+    addInstruction("ADD LF@%1 LF@%1 int@1\n");
+    addInstruction("SUB LF@%2 LF@%2 int@1\n");
+
+    addInstruction("JUMP $substr$concat\n");
+
+
+    addInstruction("LABEL $substr$end\n");
+    addInstruction("POPFRAME\n");
+    addInstruction("RETURN\n\n\n");
+}
+
+void generateFunctionOrd()
+{
+    addInstruction("\n\nLABEL $ord\n");
+    addInstruction("PUSHFRAME\n");
+    
+    addInstruction("DEFVAR LF@%retval\n");
+    addInstruction("MOVE LF@%retval string@\n\n");
+
+    addInstruction("DEFVAR LF@result\n");
+    addInstruction("DEFVAR LF@strLen\n");
+
+    addInstruction("STRLEN LF@strLen LF@%0\n");
+
+
+    addInstruction("LT LF@result LF@%1 int@0\n");
+    addInstruction("JUMPIFEQ $ord$end LF@result bool@true\n");
+
+    addInstruction("SUB LF@strLen LF@strLen int@1\n");
+
+    addInstruction("GT LF@result LF@%1 LF@strLen\n");
+    addInstruction("JUMPIFEQ $ord$end LF@result bool@true\n");
+
+    addInstruction("STRI2INT LF@%retval LF@%0 LF@%1\n");
+
+    addInstruction("LABEL $ord$end\n");
+
+    addInstruction("POPFRAME\n");
+    addInstruction("RETURN\n\n\n");
+}
+
 void generateFunctionStart(char *functionName)
 {
     addInstruction("LABEL $");
@@ -242,11 +400,6 @@ void generateFunctionReturn(char *functionName, tokenStruct *token)
 
 }
 
-void generateConvert(char *inVar, char *outVar)
-{
-
-}
-
 void generateVariableDef(char *varName, int frame)
 {
     char *varFrame = "GF@";
@@ -274,18 +427,27 @@ void generateMoveVariableToVariable(char *toVar, char *fromVar, int toFrame, int
     {
         fromVarFrame = "LF@";
     }
-    else
+    else if(fromFrame == GLOBAL_VAR)
     {
         fromVarFrame = "GF@";
     }
+    else
+    {
+        fromVarFrame = "TF@";
+    }
+    
 
     if(toFrame == LOCAL_VAR)
     {
         toVarFrame = "LF@";
     }
-    else
+    else if(toFrame == GLOBAL_VAR)
     {
         toVarFrame = "GF@";
+    }
+    else
+    {
+        toVarFrame = "TF@";
     }
 
     addInstruction("MOVE ");
@@ -408,6 +570,16 @@ void generateRead(char *var, int frame, char *type)
     addInstruction(var);
     addInstruction(" ");
     addInstruction(type);
+    addInstruction("\n");
+}
+
+void generateChr(int value)
+{
+    char str[12];
+    sprintf(str, "%d", value);
+
+    addInstruction("INT2CHAR GF@%lastExpresionResult int@");
+    addInstruction(str);
     addInstruction("\n");
 }
 

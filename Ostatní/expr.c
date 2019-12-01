@@ -662,5 +662,42 @@ int main(int argc, char *argv[])
 
     solveExpr(&token);*/
 
+    tokenStruct token;
+    token.stringValue = malloc(sizeof(DS));
+
+
+    token.tokenType = TOKEN_STRING;
+    DSAddStr(token.stringValue, "nazdar");
+
+    tokenStruct token2;
+    token2.stringValue = malloc(sizeof(DS));
+
+
+    token2.tokenType = TOKEN_INTEGER;
+    token2.integerValue = 2;
+
+    tokenStruct token3;
+    token3.stringValue = malloc(sizeof(DS));
+
+
+    token3.tokenType = TOKEN_INTEGER;
+    token3.integerValue = 4;
+
+    generateVariableDef("c", GLOBAL_VAR);
+
+    generateJump("MAIN");
+    generateFunctionSubstr();
+
+    generateLabel("MAIN");
+
+    generateFunctionParamsPass(0, &token);
+    generateFunctionParamsPass(1, &token2);
+    generateFunctionParamsPass(2, &token3);
+    generateCall("substr");
+
+    generateMoveVariableToVariable("c", "%retval", GLOBAL_VAR, TEMP_VAR);
+
+    generateWrite("c", GLOBAL_VAR);
+
     printf("%s", dynamicString.str);
 }

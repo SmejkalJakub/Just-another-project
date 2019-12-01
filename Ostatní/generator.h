@@ -36,6 +36,13 @@ void generateElseEnd(int numberOfPrevIfs, char *functionName);
 void generateWhileLabel(int numberOfPrevWhiles, char *functionName);
 void generateWhileStart(int numberOfPrevWhiles, char *functionName);
 void generateWhileEnd(int numberOfPrevWhiles, char *functionName);
+void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken);
+
+void generateChr(int value);
+void generateFunctionLen();
+void generateFunctionOrd();
+void generateFunctionChr();
+void generateFunctionSubstr();
 
 
 #endif
