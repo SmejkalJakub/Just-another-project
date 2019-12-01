@@ -136,7 +136,7 @@ int checkKeyword(DS *word, tokenStruct *token)
     return SCAN_OK;
 }
 
-int getToken(Stack *indentStack, tokenStruct *token)
+int getToken(tokenStruct *token, Stack *indentStack)
 {
     DS DString;
 

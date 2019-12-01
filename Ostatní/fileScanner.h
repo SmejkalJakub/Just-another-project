@@ -101,7 +101,7 @@ typedef struct
 
 }tokenStruct;
 
-int getToken(Stack *indentStack, tokenStruct *token);
+int getToken(tokenStruct *token, Stack *indentStack);
 void setSourceCodeFile(FILE *sourceCodeFile);
 
 #endif

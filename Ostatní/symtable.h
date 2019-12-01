@@ -16,7 +16,7 @@ typedef struct hashTableItem{
     int type;
     int numberOfParams;
     DS *params;
-    bool global;
+    bool function;
     struct hashTableItem *next;
 } symTableItem;
 

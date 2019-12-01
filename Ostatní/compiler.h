@@ -18,7 +18,7 @@ typedef struct {
 
     tokenStruct token;
 
-    symTableItem *current_id;
+    char *current_id;
 
     bool inFunction;
 	bool inDefinition;

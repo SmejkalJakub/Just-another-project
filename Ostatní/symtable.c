@@ -65,7 +65,7 @@ symTableItem *STInsert(symTable* STptr, char *key)
     strcpy(newItem->key, key);
 
     newItem->type = TYPE_NONE;
-    newItem->global = false;
+    newItem->function = false;
 
     unsigned long index = hashFunction(key);
 

@@ -44,14 +44,14 @@ int compilerDataInit(CompilerData* compilerData){
 
 static int Prog (CompilerData *compilerData){
 
-    getToken(&compilerData->token, &compilerData->IndentationStack);
+    getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
    // PROG → def id PARAMS eol indent LIST_COMMAND_FUNC eol dedent PROG
     if ((compilerData->token.tokenType == TOKEN_KEYWORD) && (compilerData->token.keyword == DEF)){
 
         compilerData->inFunction = true;
 
-        getToken(&compilerData->token, &compilerData->IndentationStack);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
     }
 
      //PROG →  eol PROG
@@ -71,36 +71,37 @@ static int Prog (CompilerData *compilerData){
     }
 
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
-        compilerData->current_id = STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
-        generateFunctionStart(compilerData->current_id->key);
-         getToken(&compilerData->token, &compilerData->IndentationStack);
+        compilerData->current_id = STInsert(&compilerData->localTable, compilerData->token.stringValue->str)->key;
+        STSearch(&compilerData->globalTable, compilerData->current_id)->function = true;
+        generateFunctionStart(compilerData->current_id);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
     }
     else return 2;
 
     if (compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-        getToken(&compilerData->token, &compilerData->IndentationStack);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
         Params(compilerData);
     }
     else return 2;
 
     if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-        getToken(&compilerData->token, &compilerData->IndentationStack);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
     }
     else return 2;
 
     if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
-        getToken(&compilerData->token, &compilerData->IndentationStack);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
     }
     else return 2;
 
     if((compilerData->token.tokenType == TOKEN_EOL)){
-        getToken(&compilerData->token, &compilerData->IndentationStack);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
     }
     else return 2;
 
     if(compilerData->token.tokenType == TOKEN_INDENT){
-        getToken(&compilerData->token, &compilerData->IndentationStack);
-        Commands(&compilerData);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
+        Commands(compilerData);
     }
     else return 2;
 
@@ -118,19 +119,18 @@ static int Prog (CompilerData *compilerData){
 
 static int Commands (CompilerData *compilerData){
 
-    int finalState;
 
     //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
     if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTS){
-        getToken(&compilerData->token, &compilerData->IndentationStack);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-                getToken(&compilerData->token, &compilerData->IndentationStack);
+                getToken(&compilerData->token, *(&compilerData->IndentationStack));
         }
         else return 2;
-                    
+
         if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-            getToken(&compilerData->token, &compilerData->IndentationStack);
+            getToken(&compilerData->token, *(&compilerData->IndentationStack));
         }
         else return 2;
 
@@ -141,17 +141,17 @@ static int Commands (CompilerData *compilerData){
 
 
     }
-    
+
      //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
    if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTF){
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-            getToken(&compilerData->token, &compilerData->IndentationStack);
+            getToken(&compilerData->token, *(&compilerData->IndentationStack));
         }
         else return 2;
-            
+
         if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
             //TODO generateRead()
-            getToken(&compilerData->token, &compilerData->IndentationStack);
+            getToken(&compilerData->token, *(&compilerData->IndentationStack));
         }
         else return 2;
 
@@ -165,18 +165,18 @@ static int Commands (CompilerData *compilerData){
 
     if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == INPUTI){
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-            getToken(&compilerData->token, &compilerData->IndentationStack);
+            getToken(&compilerData->token, *(&compilerData->IndentationStack));
         }
         else return 2;
-            
+
         if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
             //TODO generateRead()
-            getToken(&compilerData->token, &compilerData->IndentationStack);
+            getToken(&compilerData->token, *(&compilerData->IndentationStack));
         }
         else return 2;
-        
+
         if(compilerData->token.tokenType == TOKEN_EOL){
-                        anotherCommand(compilerData);
+            anotherCommand(compilerData);
         }
         else return 2;
     }
@@ -184,7 +184,7 @@ static int Commands (CompilerData *compilerData){
      //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
     if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == PRINT){
          //TODO generateWrite()
-        getToken(&compilerData->token, &compilerData->IndentationStack);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
            // puvodni - dle me nesmysl Values(compilerData);
@@ -192,9 +192,9 @@ static int Commands (CompilerData *compilerData){
             //print DS ulozeny v compilerData
         }
         else return 2;
-        
+
         if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
-            getToken(&compilerData->token, &compilerData->IndentationStack);
+            getToken(&compilerData->token, *(&compilerData->IndentationStack));
         }
         else return 2;
 
@@ -202,29 +202,34 @@ static int Commands (CompilerData *compilerData){
                     anotherCommand(compilerData);
         }
         else return 2;
-          
+
     }
 
     //V PRIPADE, ZE JE PRVNI ID
     else if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
-        //ULOZIME ID DO SYMTABLU
-        if(!compilerData->inFunction){
-            compilerData->current_id = STInsert(&compilerData->globalTable, compilerData->token.stringValue->str);
+        compilerData->current_id = compilerData->token.stringValue->str;
+
+        //Najdeme ID v symtablu, pokud ne, vlozime jej
+        if( ( !compilerData->inFunction ) && ( !STSearch(&compilerData->localTable, compilerData->current_id) ) ){
+
+            compilerData->current_id = STInsert(&compilerData->localTable, compilerData->current_id)->key;
+
         }
-        else{
-            compilerData->current_id = STInsert(&compilerData->globalTable, compilerData->token.stringValue->str);
+        else if(!STSearch(&compilerData->globalTable, compilerData->current_id)){
+                compilerData->current_id = STInsert(&compilerData->globalTable, compilerData->current_id)->key;
         }
 
-        getToken(&compilerData->token, &compilerData->IndentationStack);
 
-        callOrAssign(&compilerData);
-            
-           
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
+
+        callOrAssign(compilerData);
+
+
      }
 
     else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
-           getToken(&compilerData->token, &compilerData->IndentationStack);
+           getToken(&compilerData->token, *(&compilerData->IndentationStack));
     }
 
 
@@ -232,15 +237,24 @@ static int Commands (CompilerData *compilerData){
 
 static int defFunctionOrIncluded(CompilerData *compilerData){
 
-    if (compilerData->token.tokenType == TOKEN_IDENTIFIER){
-        getToken(&compilerData->token, &compilerData->IndentationStack);
 
-        //NUTNO ROZLISOVAT, JESTLI JE TO ZACATEK FCE CI VYRAZU - VYHODNOCOVAL BYCH VSE ZA = JAKO VYRAZ :-)
+
+    //v pripade, ze je prvni token identifikator fce
+    if (compilerData->token.tokenType == TOKEN_IDENTIFIER &&
+        ( (STSearch(&compilerData->localTable, &compilerData->token.stringValue)->function) ||
+        (STSearch(&compilerData->globalTable, compilerData->token.stringValue)->function) ) )
+    {
+
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
+
+        Values(compilerData);
     }
 
-    else {
-        commandValue(&compilerData);
+    //jinak prirazujeme hodnotu vyrazu
+    else{
+        commandValue(compilerData);
     }
+
 
 }
 
@@ -248,19 +262,19 @@ static int callOrAssign(CompilerData *compilerData){
 
     if(compilerData->token.tokenType == TOKEN_EQUALS){
 
-         getToken(&compilerData->token, &compilerData->IndentationStack);
+         getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
-         defFunctionOrIncluded(&compilerData);
+         defFunctionOrIncluded(*(&compilerData));
 
 
-    }      
+    }
     else if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
 
         //TODO functionCall
 
         getToken(&compilerData->token, &compilerData->IndentationStack);
 
-        Values(&compilerData);
+        Values(*(&compilerData));
 
         if (compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
             return 0;
@@ -271,7 +285,7 @@ static int callOrAssign(CompilerData *compilerData){
 }
 static int Values(CompilerData *compilerData){
 
-    getToken(&compilerData->token, &compilerData->IndentationStack);
+    getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
     int loadedParametrs = 0;
 
@@ -279,7 +293,7 @@ static int Values(CompilerData *compilerData){
 
             loadedParametrs++;
 
-            getToken(&compilerData->token, &compilerData->IndentationStack);
+            getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
             //VALUES ->  VAL VALUES
             switch(compilerData->token.tokenType){
@@ -360,7 +374,7 @@ static int Values(CompilerData *compilerData){
 }
 
 static int anotherCommand (CompilerData *compilerData){
-    getToken(&compilerData->token, &compilerData->IndentationStack);
+    getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
 }
 
@@ -378,11 +392,44 @@ static int commandValue (CompilerData *compilerData){
         else if(compilerData->token.keyword == PRINT){
             //generateWrite();
         }
+
+        else if(compilerData->token.keyword == LEN){
+            /*
+            len(s) – Vrátí délku (počet znaků) řetězce zadaného jediným parametrem 𝑠. Např.
+            len('x\nz') vrací 3.
+            */
+        }
+        else if(compilerData->token.keyword == SUBSTR){
+            /*
+            substr(s, i, n) – Vrátí podřetězec zadaného řetězce 𝑠. Druhým parametrem 𝑖 je dán
+            začátek požadovaného podřetězce (počítáno od nuly) a třetí parametr 𝑛 určuje délku
+            podřetězce. Je-li index 𝑖 mimo meze 0 až len(s) nebo 𝑛 < 0, vrací funkce None.
+            Jeli 𝑛 > len(s)−𝑖, jsou jako řetězec vráceny od 𝑖-tého znaku všechny zbývající znaky řetězce 𝑠.
+
+            */
+
+        }
+        else if(compilerData->token.keyword == CHR){
+
+            /*
+            – Vrátí jednoznakový řetězec se znakem, jehož ASCII kód je zadán parametrem 𝑖.
+            Případ, kdy je 𝑖 mimo interval [0; 255], vede na běhovou chybu při práci s řetězcem
+            */
+
+        }
+        else if(compilerData->token.keyword == ORD){
+            /*
+                Vrátí ordinální hodnotu (ASCII) znaku na pozici 𝑖 v řetězci 𝑠. Je-li
+                pozice mimo meze řetězce (0 až len(s) - 1), vrací None
+            */
+        }
+
+
     }
 
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER ){
 
-            getToken(&compilerData->token, &compilerData->IndentationStack);
+            getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
 
 
@@ -398,7 +445,7 @@ static int Params(CompilerData *compilerData){
     if (compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
         STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
-        getToken(&compilerData->token, &compilerData->IndentationStack);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
         anotherParam(compilerData);
 
@@ -414,12 +461,12 @@ static int Params(CompilerData *compilerData){
 static int anotherParam (CompilerData *compilerData){
 
     if(compilerData->token.tokenType == TOKEN_COLON){
-        getToken(&compilerData->token, &compilerData->IndentationStack);
+        getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
         if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
 
             STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
-            getToken(&compilerData->token, &compilerData->IndentationStack);
+            getToken(&compilerData->token, *(&compilerData->IndentationStack));
 
             return anotherParam(compilerData);
         }
