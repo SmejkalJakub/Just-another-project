@@ -26,5 +26,7 @@ void STInit(symTable *STptr);
 symTableItem *STSearch(symTable* STptr, char *key);
 symTableItem *STInsert(symTable* STptr, char *key);
 bool STAddParam(symTableItem *item, int type);
+void STDeleteItem(symTable *STptr, char *key);
+void STDelete(symTable *STptr);
 
 #endif
