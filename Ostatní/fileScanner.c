@@ -1,7 +1,6 @@
 #include "fileScanner.h"
 
 
-char hexSeq[] = "0x00";
 
 FILE *sourceCode;
 
@@ -140,8 +139,11 @@ int getToken(tokenStruct *token, Stack *indentStack)
 {
     DS DString;
 
+    char hexSeq[] = "0x00";
+
     static bool newLine = true;
     static bool returningDedent = false;
+    
     bool CommentStr = newLine;
 
     static int numOfSpaces = 0;
