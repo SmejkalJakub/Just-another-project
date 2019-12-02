@@ -10,6 +10,15 @@
 #include "expr.h"
 
 
+#define LEX_ERROR 1
+#define SYNTAX_ERROR 2
+#define SEM_ERROR_DEF 3
+#define SEM_ERROR_COMPATIBILITY 4
+#define SEM_ERROR_PARAMS 5
+#define SEM_ERROR 6
+#define SEM_ERROR_DIV_ZERO 9
+#define INTERNAL_ERROR 99
+
 
 typedef struct {
     symTable localTable;

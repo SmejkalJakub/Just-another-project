@@ -22,4 +22,5 @@ bool symStackPush(symStack* stack, precedenceTabSym symbol, int type);
 bool symStackPop(symStack* stack);
 symStackItem* symStackTop(symStack* stack);
 void symStackFree(symStack* stack);
+void symStackPushStop(symStack *stack);
 #endif

@@ -18,7 +18,7 @@ int checkInt(DS *word, tokenStruct *token)
     if(word->str[0] == '0' && word->actIndex > 1)
     {
         DSDelete(word);
-        return ERROR_LEX;
+        return LEX_ERROR;
     }
 
     int number = (int) strtol(word->str, &eptr, 10);
@@ -26,7 +26,7 @@ int checkInt(DS *word, tokenStruct *token)
     if(*eptr)
     {
         DSDelete(word);
-        return ERROR_INTERNAL;
+        return INTERNAL_ERROR;
     }
     token->tokenType = TOKEN_INTEGER;
     token->integerValue = number;
@@ -42,7 +42,7 @@ int checkDouble(DS *word, tokenStruct *token)
     if(word->str[0] == '0' && word->actIndex > 1 && word->str[1] != '.')
     {
         DSDelete(word);
-        return ERROR_LEX;
+        return LEX_ERROR;
     }
 
     double number = strtod(word->str, &eptr);
@@ -50,7 +50,7 @@ int checkDouble(DS *word, tokenStruct *token)
     if(*eptr)
     {
         DSDelete(word);
-        return ERROR_INTERNAL;
+        return INTERNAL_ERROR;
     }
 
     token->doubleValue = number;
@@ -129,7 +129,7 @@ int checkKeyword(DS *word, tokenStruct *token)
     }
     if(!DSAddStr(token->stringValue, word->str))
     {
-        return ERROR_INTERNAL;
+        return INTERNAL_ERROR;
     }
     DSDelete(word);
     return SCAN_OK;
@@ -180,7 +180,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                         if(stackTop(indentStack) == 0)
                         {
                             DSDelete(&DString);
-                            return ERROR_LEX;
+                            return LEX_ERROR;
                         }
                         else
                         {
@@ -215,7 +215,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                         if(!stackPush(indentStack, numOfSpaces))
                         {
                             DSDelete(&DString);
-                            return ERROR_INTERNAL;
+                            return INTERNAL_ERROR;
                         }
                         token->tokenType = TOKEN_INDENT;
                         DSDelete(&DString);
@@ -267,7 +267,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = KEYWORD_ID_STATE;
                 }
@@ -276,7 +276,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = DIGIT_STATE;
                 }
@@ -351,7 +351,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 else
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 break;
             case ASSIGN_STATE:
@@ -418,7 +418,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 if(c < 32)
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 else if(c == '\'')
                 {
@@ -434,7 +434,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 else if(c == '\n')
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 else
                 {
@@ -442,7 +442,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                 }
                 break;
@@ -456,21 +456,21 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 else
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 break;
             case STRING_ESCAPE_SEQ_STATE:
                 if(c < 32)
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 else if(c == '\\')
                 {
                     if(!DSAddChar(&DString, '\\'))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = STRING_STATE;
                 }
@@ -479,7 +479,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, '\''))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = STRING_STATE;
                 }
@@ -488,7 +488,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, '\"'))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = STRING_STATE;
                 }
@@ -497,7 +497,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, '\n'))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = STRING_STATE;
                 }
@@ -506,7 +506,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, '\t'))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = STRING_STATE;
                 }
@@ -519,12 +519,12 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, '\\'))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = STRING_STATE;
                 }
@@ -538,7 +538,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 else
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 break;
             case STRING_ESCAPE_SEQ_SECOND_HEX_STATE:
@@ -548,14 +548,14 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, (char)strtol(hexSeq, &eptr, 16)))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = STRING_STATE;
                 }
                 else
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 break;
             case LONG_COMMENT_START_FIRST_STATE:
@@ -566,7 +566,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 else
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 break;
             case LONG_COMMENT_START_SECOND_STATE:
@@ -577,7 +577,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 else
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 break;
             case LONG_COMMENT_STATE:
@@ -588,7 +588,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 else if(c == EOF)
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 else if(!CommentStr)
                 {
@@ -599,7 +599,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     else if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                 }
                 break;
@@ -607,14 +607,14 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 if(c < 32)
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 else if(c == '"')
                 {
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = LONG_COMMENT_STATE;
                 }
@@ -623,12 +623,12 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, '\\'))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = LONG_COMMENT_STATE;
                 }
@@ -645,13 +645,13 @@ int getToken(tokenStruct *token, Stack *indentStack)
                         if(!DSAddChar(&DString, '"'))
                         {
                             DSDelete(&DString);
-                            return ERROR_INTERNAL;
+                            return INTERNAL_ERROR;
                         }
 
                         if(!DSAddChar(&DString, c))
                         {
                             DSDelete(&DString);
-                            return ERROR_INTERNAL;
+                            return INTERNAL_ERROR;
                         }
                     }
 
@@ -680,14 +680,14 @@ int getToken(tokenStruct *token, Stack *indentStack)
                             if(!DSAddChar(&DString, '"'))
                             {
                                 DSDelete(&DString);
-                                return ERROR_INTERNAL;
+                                return INTERNAL_ERROR;
                             }
                         }
 
                         if(!DSAddChar(&DString, c))
                         {
                             DSDelete(&DString);
-                            return ERROR_INTERNAL;
+                            return INTERNAL_ERROR;
                         }
                     }
 
@@ -702,7 +702,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 else if(!isspace(c))
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 break;
             case KEYWORD_ID_STATE:
@@ -711,7 +711,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                 }
                 else
@@ -726,7 +726,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                 }
                 else if(c == '.')
@@ -734,7 +734,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = DECIMAL_POINT_STATE;
                 }
@@ -744,7 +744,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
 					if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
 				}
                 else
@@ -759,14 +759,14 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = DOUBLE_NUMBER_STATE;
                 }
                 else
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 break;
             case DOUBLE_NUMBER_STATE:
@@ -775,7 +775,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                 }
                 else if(tolower(c) == 'e')
@@ -783,7 +783,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = DOUBLE_EXPONENT_STATE;
                 }
@@ -799,7 +799,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = REST_OF_DOUBLE_NUMBER_STATE;
                 }
@@ -808,14 +808,14 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                     state = DOUBLE_NUMBER_SIGN_STATE;
                 }
                 else
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 break;
             case DOUBLE_NUMBER_SIGN_STATE:
@@ -825,13 +825,13 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                 }
                 else
                 {
                     DSDelete(&DString);
-                    return ERROR_LEX;
+                    return LEX_ERROR;
                 }
                 break;
             case REST_OF_DOUBLE_NUMBER_STATE:
@@ -840,7 +840,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
                     if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
-                        return ERROR_INTERNAL;
+                        return INTERNAL_ERROR;
                     }
                 }
                 else

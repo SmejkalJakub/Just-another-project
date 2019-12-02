@@ -7,11 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "stack.h"
+#include "compiler.h"
 #include "dynamicString.h"
 
-#define SCAN_OK 100
-#define ERROR_LEX 1
-#define ERROR_INTERNAL 99
+#define SCAN_OK 0
 
 #define ERROR_STATE -1
 #define EOL_STATE 0

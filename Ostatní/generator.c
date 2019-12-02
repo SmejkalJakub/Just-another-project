@@ -21,6 +21,13 @@ void generateHeader()
 
     addInstruction("DEFVAR GF@%lastExpresionResult\n\n");
 
+    generateJump("main");
+
+    generateFunctionChr();
+    generateFunctionLen();
+    generateFunctionOrd();
+    generateFunctionSubstr();
+
 }
 
 void generateThirdOperandToDouble()
@@ -84,11 +91,28 @@ void generateExpresion(int exprRule)
     }
     else if(exprRule == EXPR_LESS_EQ)
     {
+        addInstruction("POPS GF@%convertHelpVar0\n");
+        addInstruction("POPS GF@%convertHelpVar1\n");
+        addInstruction("PUSHS GF@%convertHelpVar1\n");
+        addInstruction("PUSHS GF@%convertHelpVar0\n");
+        addInstruction("LTS\n");
+        addInstruction("PUSHS GF@%convertHelpVar1\n");
+        addInstruction("PUSHS GF@%convertHelpVar0\n");
+        addInstruction("EQS\n");
+        addInstruction("ORS\n");
 
     }   
     else if(exprRule == EXPR_MORE_EQ)
     {
-
+        addInstruction("POPS GF@%convertHelpVar0\n");
+        addInstruction("POPS GF@%convertHelpVar1\n");
+        addInstruction("PUSHS GF@%convertHelpVar1\n");
+        addInstruction("PUSHS GF@%convertHelpVar0\n");
+        addInstruction("GTS\n");
+        addInstruction("PUSHS GF@%convertHelpVar1\n");
+        addInstruction("PUSHS GF@%convertHelpVar0\n");
+        addInstruction("EQS\n");
+        addInstruction("ORS\n");
     }
 }
 
@@ -570,16 +594,6 @@ void generateRead(char *var, int frame, char *type)
     addInstruction(var);
     addInstruction(" ");
     addInstruction(type);
-    addInstruction("\n");
-}
-
-void generateChr(int value)
-{
-    char str[12];
-    sprintf(str, "%d", value);
-
-    addInstruction("INT2CHAR GF@%lastExpresionResult int@");
-    addInstruction(str);
     addInstruction("\n");
 }
 

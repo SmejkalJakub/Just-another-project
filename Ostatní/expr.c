@@ -3,25 +3,6 @@
 #include "symtable.h"
 #include "symstack.h"
 
-/*E ->
-(E)
-E + E
-E = E
-E – E
-E < E
-E > E
-E * E
-E / E
-E // E
-E <= E
-E >= E
-E != E
-E == E
-E
-id
-*/
-
-
 symStack stack;
 
 symTable *dummyTable;
@@ -124,14 +105,18 @@ int getTokenType(tokenStruct *token, symTable *localTable)
         symTableItem *sym;
         if((sym = STSearch(localTable, token->stringValue->str)) == NULL)
         {
-            return NONE;
+            return TYPE_NONE;
         }
         else
         {
             return sym->type;
         }
-
     }
+    else
+    {
+        return TYPE_NONE;
+    }
+    
 }
 
 int symbolToType(precedenceTabSym symbol)
@@ -461,7 +446,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
 
             //stringy delit nelze :-)
             if(operand1->type == STRING || operand3->type == STRING){
-                return 3;
+                return SEM_ERROR_COMPATIBILITY;
             }
 
 
@@ -480,7 +465,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
 
             //stringy opet nepodelime
             if(operand1->type == STRING || operand3->type == STRING){
-                return 3;
+                return SEM_ERROR_COMPATIBILITY;
             }
 
             //pokud byl nejaky z ciselnych operandu double, prevedeme jej na int
@@ -511,7 +496,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
 
             //pokud chceme porovnavat dva operandy, z nichz jeden je jineho typu nez druhy(neplati u cisel) - chyba
             else if(operand1->type != operand3->type){
-                return 3;
+                return SEM_ERROR_COMPATIBILITY;
             }
 
             break;
@@ -536,7 +521,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
         generateThirdOperandToInteger();
     }
 
-        return 0;
+    return 0;
 
 }
 
@@ -564,7 +549,10 @@ int solveExpr(tokenStruct *token)
 
     symStackInit(&stack);
 
-    symStackPush(&stack, SYM_DOLAR, NONE);
+    if(!symStackPush(&stack, SYM_DOLAR, NONE))
+    {
+        return INTERNAL_ERROR;
+    }
 
     int currentSymType;
     int symStackTopSymType;
@@ -590,13 +578,16 @@ int solveExpr(tokenStruct *token)
                     }
                     else
                     {
-                        return 2;
+                        return SYNTAX_ERROR;
                     }
                 }
                 break;
             case EQ:
                 {
-                    symStackPush(&stack, currentSym, getTokenType(token, dummyTable));
+                    if(!symStackPush(&stack, currentSym, getTokenType(token, dummyTable)))
+                    {
+                        return INTERNAL_ERROR;
+                    }
                     //returnValue = getToken(token);
                 }
                 break;
@@ -608,7 +599,11 @@ int solveExpr(tokenStruct *token)
                 break;
             case R:
                 {
-                    reduce();
+                    returnValue = reduce();
+                    if(returnValue != 0)
+                    {
+                        return returnValue;
+                    }
                 }
                 break;
 
@@ -617,12 +612,23 @@ int solveExpr(tokenStruct *token)
         }
     }
 
+    if(stack.top == NULL)
+    {
+        return INTERNAL_ERROR;
+    }
+    if(stack.top->symbol != SYM_NON_TERM)
+    {
+        return SYNTAX_ERROR;
+    }
+
     if(stack.top->type != STRING)
     {
         generateSaveLastExpresionValue();
     }
 
     generateWrite("%lastExpresionResult", GLOBAL_VAR);
+
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -662,42 +668,7 @@ int main(int argc, char *argv[])
 
     solveExpr(&token);*/
 
-    tokenStruct token;
-    token.stringValue = malloc(sizeof(DS));
-
-
-    token.tokenType = TOKEN_STRING;
-    DSAddStr(token.stringValue, "nazdar");
-
-    tokenStruct token2;
-    token2.stringValue = malloc(sizeof(DS));
-
-
-    token2.tokenType = TOKEN_INTEGER;
-    token2.integerValue = 2;
-
-    tokenStruct token3;
-    token3.stringValue = malloc(sizeof(DS));
-
-
-    token3.tokenType = TOKEN_INTEGER;
-    token3.integerValue = 4;
-
-    generateVariableDef("c", GLOBAL_VAR);
-
-    generateJump("MAIN");
-    generateFunctionSubstr();
-
-    generateLabel("MAIN");
-
-    generateFunctionParamsPass(0, &token);
-    generateFunctionParamsPass(1, &token2);
-    generateFunctionParamsPass(2, &token3);
-    generateCall("substr");
-
-    generateMoveVariableToVariable("c", "%retval", GLOBAL_VAR, TEMP_VAR);
-
-    generateWrite("c", GLOBAL_VAR);
+    generateLabel("main");
 
     printf("%s", dynamicString.str);
 }

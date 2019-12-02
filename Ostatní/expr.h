@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include "generator.h"
+#include "compiler.h"
 
 #define EQ 0
 #define S 1
