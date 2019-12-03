@@ -5,8 +5,6 @@
 
 symStack stack;
 
-symTable *dummyTable;
-
 bool firstConcat = true;
 
 int precedenceTable[TABLE_SIZE][TABLE_SIZE] =
@@ -86,8 +84,12 @@ precedenceTabSym tokenToSymbol(tokenStruct *token)
     }
 }
 
-int getTokenType(tokenStruct *token, symTable *localTable)
+int getTokenType(tokenStruct *token, STStack *symTableStack)
 {
+
+    int index;
+    symTableItem *temp;
+
     if(token->tokenType == TOKEN_INTEGER)
     {
         return INT;
@@ -102,14 +104,13 @@ int getTokenType(tokenStruct *token, symTable *localTable)
     }
     else if(token->tokenType == TOKEN_IDENTIFIER)
     {
-        symTableItem *sym;
-        if((sym = STSearch(localTable, token->stringValue->str)) == NULL)
+        if((temp = STStackSearch(symTableStack, token->stringValue->str, &index)) == NULL)
         {
             return TYPE_NONE;
         }
         else
         {
-            return sym->type;
+            return temp->type;
         }
     }
     else
@@ -525,20 +526,37 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
 
 }
 
-void shift(precedenceTabSym currentSym, tokenStruct *token)
+void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableStack)
 {
     symStackPushStop(&stack);
 
-    symStackPush(&stack, currentSym, getTokenType(token, dummyTable));
+    symStackPush(&stack, currentSym, getTokenType(token, symTableStack));
+
+    int index;
+
+
 
     if(symbolToType(currentSym) == PREC_TAB_ID)
     {
-        generateStackPush(token);
+        if(currentSym == SYM_ID)
+        {
+            STStackSearch(symTableStack, token->stringValue->str, &index);
+            if(index == 0)
+            {
+                generateStackPush(token, true);
+            }
+            else
+            {
+                generateStackPush(token, false);
+
+            }
+        }
+        generateStackPush(token, false);
     }
 }
 
 
-int solveExpr(tokenStruct *token)
+int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVar)
 {
     int returnValue;
 
@@ -584,17 +602,18 @@ int solveExpr(tokenStruct *token)
                 break;
             case EQ:
                 {
-                    if(!symStackPush(&stack, currentSym, getTokenType(token, dummyTable)))
+                    if(!symStackPush(&stack, currentSym, getTokenType(token, symTableStack)))
                     {
                         return INTERNAL_ERROR;
                     }
-                    //returnValue = getToken(token);
+                    returnValue = getToken(token);
                 }
                 break;
             case S:
                 {
-                    shift(currentSym, token);
-                    //returnValue = getToken(token);
+                    shift(currentSym, token, symTableStack);
+
+                    returnValue = getToken(token);
                 }
                 break;
             case R:
@@ -612,6 +631,7 @@ int solveExpr(tokenStruct *token)
         }
     }
 
+
     if(stack.top == NULL)
     {
         return INTERNAL_ERROR;
@@ -626,49 +646,12 @@ int solveExpr(tokenStruct *token)
         generateSaveLastExpresionValue();
     }
 
-    generateWrite("%lastExpresionResult", GLOBAL_VAR);
+    if(assignVar != NULL)
+    {
+        assignVar->type = stack.top->type;
+    }
+
+    
 
     return 0;
-}
-
-int main(int argc, char *argv[])
-{
-    DS dynamicString;
-
-    DSInit(&dynamicString);
-    setDynamicString(&dynamicString);
-
-
-    generateHeader();
-
-    /*FILE *sourceCode;
-
-    if(argc == 2)
-    {
-        sourceCode = fopen(argv[1], "r");
-    }
-    else
-    {
-        sourceCode = stdin;
-    }
-
-    setSourceCodeFile(sourceCode);
-    precedenceTabSym currentSym;
-
-    tokenStruct token;
-
-
-    token.stringValue = malloc(sizeof(DS));
-
-    DSInit(token.stringValue);
-
-    symStackItem *symStackTopSym;
-
-    getToken(&token);
-
-    solveExpr(&token);*/
-
-    generateLabel("main");
-
-    printf("%s", dynamicString.str);
 }

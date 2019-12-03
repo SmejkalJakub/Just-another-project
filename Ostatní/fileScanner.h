@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "stack.h"
-#include "compiler.h"
 #include "dynamicString.h"
 
 #define SCAN_OK 0
@@ -90,6 +89,15 @@
 #define CHR 14
 
 
+#define LEX_ERROR 1
+#define SYNTAX_ERROR 2
+#define SEM_ERROR_DEF 3
+#define SEM_ERROR_COMPATIBILITY 4
+#define SEM_ERROR_PARAMS 5
+#define SEM_ERROR 6
+#define SEM_ERROR_DIV_ZERO 9
+#define INTERNAL_ERROR 99
+
 typedef struct
 {
     int tokenType;
@@ -100,7 +108,8 @@ typedef struct
 
 }tokenStruct;
 
-int getToken(tokenStruct *token, Stack *indentStack);
+int getToken(tokenStruct *token);
 void setSourceCodeFile(FILE *sourceCodeFile);
+void setIndentationStack(Stack *_indentStack);
 
 #endif

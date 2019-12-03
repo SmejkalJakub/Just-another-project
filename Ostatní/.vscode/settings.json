@@ -5,6 +5,11 @@
         "stdio.h": "c",
         "dynamicstring.h": "c",
         "stdbool.h": "c",
-        "filescanner.h": "c"
+        "filescanner.h": "c",
+        "expr.h": "c",
+        "compiler.h": "c",
+        "symstack.h": "c",
+        "symtable.h": "c",
+        "symtablestack.h": "c"
     }
 }

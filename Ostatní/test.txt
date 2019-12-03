@@ -1,1 +1,6 @@
-'ahoj' + 'jak' + 'se' + 'mas'
+a = 5 + 4
+print('Toto je hodnot A:', a)
+a = 6 + 10
+print(a)
+
+

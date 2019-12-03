@@ -3,7 +3,8 @@
 
 #include <stdbool.h>
 #include "generator.h"
-#include "compiler.h"
+#include "symtable.h"
+#include "symTableStack.h"
 
 #define EQ 0
 #define S 1
@@ -68,7 +69,7 @@ typedef enum
 } precedenceTabSym;
 
 bool getitemsBeforeStop(int *itemsBeforeStop);
-int solveExpr(tokenStruct *token);
+int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVar);
 
 
 

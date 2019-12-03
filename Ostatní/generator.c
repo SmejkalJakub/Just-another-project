@@ -9,7 +9,10 @@ void setDynamicString(DS *dString)
 
 void addInstruction(char *instruction)
 {
-    DSAddStr(dynamicString, instruction);
+    if(!DSAddStr(dynamicString, instruction))
+    {
+
+    }
 }
 
 
@@ -21,12 +24,14 @@ void generateHeader()
 
     addInstruction("DEFVAR GF@%lastExpresionResult\n\n");
 
-    generateJump("main");
+    generateJump("afterBuildInFunctions\n");
 
     generateFunctionChr();
     generateFunctionLen();
     generateFunctionOrd();
     generateFunctionSubstr();
+
+    generateLabel("afterBuildInFunctions");
 
 }
 
@@ -183,7 +188,7 @@ void generateConcatenateString(bool firstConcat)
 }
 
 
-void generateStackPush(tokenStruct *token)
+void generateStackPush(tokenStruct *token, bool global)
 {
     addInstruction("PUSHS ");
     if(token->tokenType == TOKEN_INTEGER)
@@ -205,9 +210,14 @@ void generateStackPush(tokenStruct *token)
         addInstruction("string@");
         addInstruction(token->stringValue->str);
     }
-    else if(token->tokenType == TOKEN_IDENTIFIER)
+    else if(token->tokenType == TOKEN_IDENTIFIER && !global)
     {
         addInstruction("LF@");
+        addInstruction(token->stringValue->str);
+    }
+    else 
+    {
+        addInstruction("GF@");
         addInstruction(token->stringValue->str);
     }
 
@@ -382,6 +392,7 @@ void generateFunctionStart(char *functionName)
 
 void generateFunctionEnd(char *functionName)
 {
+    addInstruction("MOVE LF@%retval string@\n");
     addInstruction("LABEL $");
     addInstruction(functionName);
     addInstruction("$exitFunction");
@@ -390,10 +401,19 @@ void generateFunctionEnd(char *functionName)
     addInstruction("RETURN\n");
 }
 
-void generateFunctionReturn(char *functionName, tokenStruct *token)
+void generateFunctionReturn(char *functionName, bool empty)
 {
-    addInstruction("MOVE LF@%retval ");
-    if(token->tokenType == TOKEN_INTEGER)
+    if(!empty)
+    {
+        addInstruction("MOVE LF@%retval GF@%lastExpresionResult");
+    }
+    else
+    {
+        addInstruction("MOVE LF@%retval string@");
+
+    }
+    
+    /*if(token->tokenType == TOKEN_INTEGER)
     {
         char str[12];
         sprintf(str, "%d", token->integerValue);
@@ -416,7 +436,7 @@ void generateFunctionReturn(char *functionName, tokenStruct *token)
     {
         addInstruction("LF@");
         addInstruction(token->stringValue->str);
-    }
+    }*/
 
     addInstruction("\nJUMP $");
     addInstruction(functionName);
@@ -537,63 +557,71 @@ void generateSaveLastExpresionValue()
     addInstruction("POPS GF@%lastExpresionResult\n");
 }
 
-void generateWriteValue(int type, char *value)
+void generateWriteValue(tokenStruct *token)
 {
-    char *typeStr;
     addInstruction("WRITE ");
-    if(type == INT)
+    if(token->tokenType == TOKEN_INTEGER)
     {
-        typeStr = "int@";
+        char str[12];
+        sprintf(str, "%d", token->integerValue);
+        addInstruction("int@");
+        addInstruction(str);
     }
-    else if(type == DOUBLE)
+    else if(token->tokenType == TOKEN_DOUBLE)
     {
-        typeStr = "float@";
+        char str[30];
+        sprintf(str, "%a", token->doubleValue);
+        addInstruction("float@");
+        addInstruction(str);
     }
-    else if(type == STRING)
+    else if(token->tokenType == TOKEN_STRING)
     {
-        typeStr = "string@";
+        addInstruction("string@");
+        addInstruction(token->stringValue->str);
     }
-    addInstruction(typeStr);
-    addInstruction(value);
     addInstruction("\n");
 }
 
-void generateRead(char *var, int frame, char *type)
+void generateRead(char *var, int frame, int type)
 {
-    addInstruction("WRITE string@Hodnota: \n");
+    char *typeChar;
     char *frameVar = "";
 
     if(frame == LOCAL_VAR)
     {
         frameVar = "LF@";
     }
-    else
+    else if(frame = GLOBAL_VAR)
     {
         frameVar = "GF@";
     }
+    else 
+    {
+        frameVar = "TF@";
+    }
 
-    if(strcmp("i", type) == 0)
+    if(type == INT)
     {
-        type = "int";
+        typeChar = "int";
     }
-    else if(strcmp("f", type) == 0)
+    else if(type == DOUBLE)
     {
-        type = "float";
+        typeChar = "float";
     }
-    else if(strcmp("s", type) == 0)
+    else if(type == STRING)
     {
-        type = "string";
+        typeChar = "string";
     }
     else
     {
-        type = "bool";
+        typeChar = "bool";
     }
 
     addInstruction("READ ");
     addInstruction(frameVar);
     addInstruction(var);
     addInstruction(" ");
-    addInstruction(type);
+    addInstruction(typeChar);
     addInstruction("\n");
 }
 

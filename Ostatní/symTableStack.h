@@ -5,6 +5,7 @@
 
 typedef struct symTabStackItem{
     symTable *symTablePtr;
+    int index;
     struct symTabStackItem *next;
 } STStackItem;
 
@@ -19,5 +20,7 @@ void STStackPop(STStack *stack);
 bool STStackEmpty(STStack *stack);
 symTable *STStackTop(STStack *stack);
 void STStackDelete(STStack *stack);
+symTableItem *STStackSearch(STStack *stack, char *key, int *index);
+
 
 #endif

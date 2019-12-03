@@ -27,7 +27,17 @@ symTable *STStackPush(STStack *stack)
     STInit(newItem->symTablePtr);
 
     newItem->next = stack->top;
+    if(stack->top == NULL)
+    {
+        newItem->index = 0;
+    }
+    else
+    {
+        newItem->index = stack->top->index + 1;
+    }
+    
     stack->top = newItem;
+
 
     return newItem->symTablePtr;
 }
@@ -72,6 +82,31 @@ void STStackDelete(STStack *stack)
     {
         STStackPop(stack);
     }
+}
+
+symTableItem *STStackSearch(STStack *stack, char *key, int *index)
+{
+
+    STStackItem *temp = stack->top;
+    
+    symTableItem *retValue;
+
+    while (temp != NULL)
+    {
+        retValue = STSearch(temp->symTablePtr, key);
+
+        if(retValue == NULL)
+        {
+            (*index)++;
+            temp = temp->next;
+        }
+        else
+        {
+            return retValue;
+        }  
+    }    
+    return NULL;
+    
 }
 
 

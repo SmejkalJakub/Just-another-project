@@ -7,29 +7,28 @@
 #include "generator.h"
 #include "dynamicString.h"
 #include "symtable.h"
+#include "fileScanner.h"
 #include "expr.h"
+#include "symTableStack.h"
 
 
-#define LEX_ERROR 1
-#define SYNTAX_ERROR 2
-#define SEM_ERROR_DEF 3
-#define SEM_ERROR_COMPATIBILITY 4
-#define SEM_ERROR_PARAMS 5
-#define SEM_ERROR 6
-#define SEM_ERROR_DIV_ZERO 9
-#define INTERNAL_ERROR 99
 
 
 typedef struct {
     symTable localTable;
     symTable globalTable;
 
+    STStack *tablesStack;
 
     Stack* IndentationStack;
 
     tokenStruct token;
 
+    char varToAssign[10];
+
     char *current_id;
+
+    bool global;
 
     bool inFunction;
 	bool inDefinition;
@@ -52,6 +51,7 @@ static int volaniNeboPrirazeni(CompilerData *compilerData);
 static int prikazyFunkce(CompilerData * compilerData);
 static int prikazySekv(CompilerData *compilerData);
 static int dalsiPrikaz(CompilerData *compilerData);
+static int fceDefNeboVest(CompilerData *compilerData);
 
 #endif
 

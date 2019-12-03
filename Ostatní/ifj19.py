@@ -11,8 +11,8 @@ print('Zadejte serazenou posloupnost vsech malych pismen a-h, ')
 print('pricemz se pismena nesmeji v posloupnosti opakovat: ')
 s1 = inputs()
 if s1 != None:
-while s1 != 'abcdefgh':
-print('Spatne zadana posloupnost, zkuste znovu: ')
-s1 = inputs()
+    while s1 != 'abcdefgh':
+        print('Spatne zadana posloupnost, zkuste znovu: ')
+        s1 = inputs()
 else: # nezadan zadny vstup (EOF)
-pass
+    pass

@@ -4,6 +4,13 @@
 
 FILE *sourceCode;
 
+Stack *indentStack;
+
+
+void setIndentationStack(Stack *_indentStack)
+{
+    indentStack = _indentStack;
+}
 
 void setSourceCodeFile(FILE *sourceCodeFile)
 {
@@ -135,7 +142,7 @@ int checkKeyword(DS *word, tokenStruct *token)
     return SCAN_OK;
 }
 
-int getToken(tokenStruct *token, Stack *indentStack)
+int getToken(tokenStruct *token)
 {
     DS DString;
 
@@ -172,6 +179,7 @@ int getToken(tokenStruct *token, Stack *indentStack)
         switch(state)
         {
             case NEW_LINE_START_STATE:
+
                 newLine = false;
                 if(returningDedent)
                 {
@@ -200,12 +208,10 @@ int getToken(tokenStruct *token, Stack *indentStack)
                         state = START_TOKEN_STATE;
                     }
                 }
-                if(isspace(c))
+                if(isspace(c) && (c != '\n' && c != '\r'))
                 {
-                    if(c != '\n')
-                    {
-                        numOfSpaces++;
-                    }
+                    numOfSpaces++;
+                    
                 }
                 else if(c != '#')
                 {
@@ -439,11 +445,23 @@ int getToken(tokenStruct *token, Stack *indentStack)
                 else
                 {
                     state = STRING_STATE;
-                    if(!DSAddChar(&DString, c))
+                    if(c != ' ')
                     {
-                        DSDelete(&DString);
-                        return INTERNAL_ERROR;
+                        if(!DSAddChar(&DString, c))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
                     }
+                    else
+                    {
+                        if(!DSAddStr(&DString, "\\032"))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                    }
+                    
                 }
                 break;
             case NOT_EQUAL_START_STATE:
@@ -868,7 +886,6 @@ int getToken(tokenStruct *token, Stack *indentStack)
                         token->tokenType = TOKEN_EOL;
                         return SCAN_OK;
                     }
-
                     state = NEW_LINE_START_STATE;
                 }
                 break;
