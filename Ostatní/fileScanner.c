@@ -4,12 +4,13 @@
 
 FILE *sourceCode;
 
-Stack *indentStack;
+Stack indentStack;
 
 
-void setIndentationStack(Stack *_indentStack)
+void initIndentationStack()
 {
-    indentStack = _indentStack;
+    initStack(&indentStack);
+    stackPush(&indentStack, 0);
 }
 
 void setSourceCodeFile(FILE *sourceCodeFile)
@@ -150,7 +151,7 @@ int getToken(tokenStruct *token)
 
     static bool newLine = true;
     static bool returningDedent = false;
-    
+
     bool CommentStr = newLine;
 
     static int numOfSpaces = 0;
@@ -183,16 +184,16 @@ int getToken(tokenStruct *token)
                 newLine = false;
                 if(returningDedent)
                 {
-                    if(numOfSpaces != stackTop(indentStack))
+                    if(numOfSpaces != stackTop(&indentStack))
                     {
-                        if(stackTop(indentStack) == 0)
+                        if(stackTop(&indentStack) == 0)
                         {
                             DSDelete(&DString);
                             return LEX_ERROR;
                         }
                         else
                         {
-                            stackPop(indentStack);
+                            stackPop(&indentStack);
                         }
 
                         ungetc(c, sourceCode);
@@ -211,14 +212,14 @@ int getToken(tokenStruct *token)
                 if(isspace(c) && (c != '\n' && c != '\r'))
                 {
                     numOfSpaces++;
-                    
+
                 }
                 else if(c != '#')
                 {
                     ungetc(c, sourceCode);
-                    if(numOfSpaces > stackTop(indentStack))
+                    if(numOfSpaces > stackTop(&indentStack))
                     {
-                        if(!stackPush(indentStack, numOfSpaces))
+                        if(!stackPush(&indentStack, numOfSpaces))
                         {
                             DSDelete(&DString);
                             return INTERNAL_ERROR;
@@ -227,14 +228,14 @@ int getToken(tokenStruct *token)
                         DSDelete(&DString);
                         return SCAN_OK;
                     }
-                    else if(numOfSpaces == stackTop(indentStack))
+                    else if(numOfSpaces == stackTop(&indentStack))
                     {
                         state = START_TOKEN_STATE;
                     }
-                    else if(numOfSpaces < stackTop(indentStack))
+                    else if(numOfSpaces < stackTop(&indentStack))
                     {
                         returningDedent = true;
-                        stackPop(indentStack);
+                        stackPop(&indentStack);
                         DSDelete(&DString);
                         token->tokenType = TOKEN_DEDENT;
                         return SCAN_OK;
@@ -461,7 +462,7 @@ int getToken(tokenStruct *token)
                             return INTERNAL_ERROR;
                         }
                     }
-                    
+
                 }
                 break;
             case NOT_EQUAL_START_STATE:

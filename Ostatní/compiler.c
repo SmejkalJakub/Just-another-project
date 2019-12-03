@@ -39,8 +39,6 @@ int compilerDataInit(CompilerData* compilerData){
     //compilerData->localTable = malloc(sizeof(symTable));
 
     //inicializace indentStacku, prvotni pushnuti 0
-    initStack(compilerData->IndentationStack);
-    stackPush(compilerData->IndentationStack, 0);
 
     compilerData->token.stringValue = malloc(sizeof(DS));
     DSInit(compilerData->token.stringValue);
@@ -124,7 +122,7 @@ static int Prog (CompilerData *compilerData){
         GET_TOKEN;
         //vytvoreni tabulky symbolu na zasobnik tabulek symbolu
 
-        prikazyFunkce(compilerData);
+        prikazySekv(compilerData);
     }
     else return 2;
 
@@ -137,17 +135,6 @@ static int Prog (CompilerData *compilerData){
     else return 2;
 
 
-}
-
-static int prikazyFunkce(CompilerData * compilerData){
-    //PRIKAZY_FUNKCE -> eps
-    if(compilerData->token.tokenType == TOKEN_DEDENT){
-        return 0;
-    }
-    //PRIKAZY_FUNKCE -> PRIKAZY_SEKV
-    else{
-        return prikazySekv(compilerData);
-    }
 }
 
 static int prikazySekv(CompilerData *compilerData){
@@ -210,12 +197,12 @@ static int fceDefNeboVest(CompilerData *compilerData)
 
 static int Prikaz (CompilerData *compilerData){
 
-    int tableIndex = 0;
+    bool global;
 
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
     {
 
-        symTableItem *temp = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &tableIndex);
+        symTableItem *temp = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &global);
         if(temp == NULL)
         {
             strcpy(compilerData->varToAssign, compilerData->token.stringValue->str);
@@ -249,15 +236,15 @@ static int Prikaz (CompilerData *compilerData){
         }
         else
         {
-            strcpy(compilerData->varToAssign, temp->key);            
-            compilerData->global = !tableIndex;
+            strcpy(compilerData->varToAssign, temp->key);
+            compilerData->global = global;
 
             GET_TOKEN;
             volaniNeboPrirazeni(compilerData);
         }
         return 0;
     }
-    
+
     else if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == RETURN)
     {
         compilerData->inFunction = true;
@@ -283,10 +270,10 @@ static int Prikaz (CompilerData *compilerData){
     else
     {
         navratHodnoty(compilerData);
-        
+
         return 0;
     }
-    
+
 
     //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
 
@@ -726,15 +713,15 @@ static int navratHodnoty (CompilerData *compilerData)
                     if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
                     {
                         symTableItem *temp;
-                        int index = 0;
-                        temp = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &index);
+                        bool global;
+                        temp = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &global);
                         if(temp == NULL)
                         {
                             return SEM_ERROR_DEF;
                         }
                         else
                         {
-                            if(index == 0)
+                            if(global == true)
                             {
                                 generateWrite(temp->key, GLOBAL_VAR);
                             }
@@ -744,7 +731,7 @@ static int navratHodnoty (CompilerData *compilerData)
                             }
                         }
                     }
-                    else if(compilerData->token.tokenType == TOKEN_INTEGER || compilerData->token.tokenType == TOKEN_DOUBLE 
+                    else if(compilerData->token.tokenType == TOKEN_INTEGER || compilerData->token.tokenType == TOKEN_DOUBLE
                             || compilerData->token.tokenType == TOKEN_STRING)
                             {
                                 generateWriteValue(&compilerData->token);
@@ -758,7 +745,7 @@ static int navratHodnoty (CompilerData *compilerData)
                     {
                         addInstruction("WRITE string@\\032\n");
                     }
-  
+
                 }
                 addInstruction("WRITE string@\\010\n");
                 GET_TOKEN;
@@ -806,7 +793,7 @@ static int navratHodnoty (CompilerData *compilerData)
 
     }
 
-    if(compilerData->token.tokenType == TOKEN_IDENTIFIER || compilerData->token.tokenType == TOKEN_INTEGER 
+    if(compilerData->token.tokenType == TOKEN_IDENTIFIER || compilerData->token.tokenType == TOKEN_INTEGER
     || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING)
     {
         solveExpr(&compilerData->token, compilerData->tablesStack, STStackSearch(compilerData->tablesStack, compilerData->varToAssign, NULL));
@@ -818,14 +805,14 @@ static int navratHodnoty (CompilerData *compilerData)
         {
             generateMoveVariableToVariable(compilerData->varToAssign, "%lastExpresionResult", LOCAL_VAR, GLOBAL_VAR);
         }
-        
+
     }
     else
     {
         printf("err\n");
         return SYNTAX_ERROR;
     }
-    
+
     return 0;
 
 }
@@ -881,16 +868,13 @@ int main(int argc, char *argv[])
     DSInit(&dynamicString);
     setDynamicString(&dynamicString);
 
+    initIndentationStack();
 
     CompilerData *compilerData = (CompilerData *) malloc(sizeof(CompilerData));
-
-    compilerData->IndentationStack = (Stack *) malloc(sizeof(Stack));
 
     compilerData->tablesStack = (STStack *) malloc(sizeof(STStack));
 
     compilerDataInit(compilerData);
-
-    setIndentationStack(compilerData->IndentationStack);
 
 
     compilerData->token.stringValue = malloc(sizeof(DS));

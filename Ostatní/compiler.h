@@ -20,8 +20,6 @@ typedef struct {
 
     STStack *tablesStack;
 
-    Stack* IndentationStack;
-
     tokenStruct token;
 
     char varToAssign[10];
@@ -48,7 +46,6 @@ static int Parametry(CompilerData *compilerData);
 static int dalsiParametr (CompilerData *compilerData);
 static int listCommandFunction();
 static int volaniNeboPrirazeni(CompilerData *compilerData);
-static int prikazyFunkce(CompilerData * compilerData);
 static int prikazySekv(CompilerData *compilerData);
 static int dalsiPrikaz(CompilerData *compilerData);
 static int fceDefNeboVest(CompilerData *compilerData);

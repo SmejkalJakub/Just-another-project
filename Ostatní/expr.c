@@ -87,7 +87,6 @@ precedenceTabSym tokenToSymbol(tokenStruct *token)
 int getTokenType(tokenStruct *token, STStack *symTableStack)
 {
 
-    int index;
     symTableItem *temp;
 
     if(token->tokenType == TOKEN_INTEGER)
@@ -104,7 +103,7 @@ int getTokenType(tokenStruct *token, STStack *symTableStack)
     }
     else if(token->tokenType == TOKEN_IDENTIFIER)
     {
-        if((temp = STStackSearch(symTableStack, token->stringValue->str, &index)) == NULL)
+        if((temp = STStackSearch(symTableStack, token->stringValue->str, NULL)) == NULL)
         {
             return TYPE_NONE;
         }
@@ -117,7 +116,7 @@ int getTokenType(tokenStruct *token, STStack *symTableStack)
     {
         return TYPE_NONE;
     }
-    
+
 }
 
 int symbolToType(precedenceTabSym symbol)
@@ -532,7 +531,7 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
 
     symStackPush(&stack, currentSym, getTokenType(token, symTableStack));
 
-    int index;
+    bool global;
 
 
 
@@ -540,8 +539,8 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
     {
         if(currentSym == SYM_ID)
         {
-            STStackSearch(symTableStack, token->stringValue->str, &index);
-            if(index == 0)
+            STStackSearch(symTableStack, token->stringValue->str, &global);
+            if(global == true)
             {
                 generateStackPush(token, true);
             }
@@ -651,7 +650,7 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
         assignVar->type = stack.top->type;
     }
 
-    
+
 
     return 0;
 }

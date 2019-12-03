@@ -20,7 +20,7 @@ void STStackPop(STStack *stack);
 bool STStackEmpty(STStack *stack);
 symTable *STStackTop(STStack *stack);
 void STStackDelete(STStack *stack);
-symTableItem *STStackSearch(STStack *stack, char *key, int *index);
+symTableItem *STStackSearch(STStack *stack, char *key, bool *global);
 
 
 #endif
