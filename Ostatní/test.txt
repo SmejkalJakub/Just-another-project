@@ -10,5 +10,3 @@ if a < 5:
         pass
 else:
     pass
-
-

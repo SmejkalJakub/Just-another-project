@@ -90,11 +90,16 @@ static int Prog (CompilerData *compilerData){
         {
             return result;
         }
-        if(compilerData->token.tokenType == TOKEN_EOF)
+        else if(compilerData->token.tokenType == TOKEN_EOF)
         {
             return 0;
         }
-        if(compilerData->token.tokenType == TOKEN_EOL){
+        else if(compilerData->token.tokenType == TOKEN_EOL){
+            return Prog(compilerData);
+        }
+        else
+        {
+            result = Prikaz(compilerData);
             return Prog(compilerData);
         }
         return SYNTAX_ERROR;
@@ -157,14 +162,21 @@ static int Prog (CompilerData *compilerData){
 static int prikazySekv(CompilerData *compilerData){
     //PRIKAZY_SEK -> PRIKAZ eol DALSI_PRIKAZ
 
-    printf("jsem tady %d %s\n", compilerData->token.tokenType, compilerData->token.stringValue->str);
-    Prikaz(compilerData);
+    result = Prikaz(compilerData);
+    
+    if(result != 0)
+    {
+        return result;
+    }
 
 
     if(compilerData->token.tokenType == TOKEN_EOL){
         return dalsiPrikaz(compilerData);
     }
-    else return SYNTAX_ERROR;
+    else
+    {
+        return SYNTAX_ERROR;
+    }
 }
 
 static int dalsiPrikaz(CompilerData *compilerData){
@@ -210,7 +222,9 @@ static int fceDefNeboVest(CompilerData *compilerData)
     }
     else
     {
-        navratHodnoty(compilerData);
+        result = navratHodnoty(compilerData);
+        if(result != 0)
+            return result;
     }
     return 0;
 
@@ -293,6 +307,7 @@ static int Prikaz (CompilerData *compilerData)
         int ifNumber = compilerData->numberOfIfs;
         int startIndent = compilerData->indentationStack->arr[compilerData->indentationStack->top];
         compilerData->numberOfIfs++;
+
         GET_TOKEN;
 
         result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL);
@@ -322,20 +337,36 @@ static int Prikaz (CompilerData *compilerData)
         else return SYNTAX_ERROR;
         result = prikazySekv(compilerData);
 
-            printf("tady tohle tady: %d %d %d\n", compilerData->token.tokenType, ifNumber, result);   
+
+        if(result != 0)
+        {
+            return result;
+        }
         if(compilerData->indentationStack->arr[compilerData->indentationStack->top] != startIndent)
         {
-            prikazySekv(compilerData);
+            GET_TOKEN;
+            result = prikazySekv(compilerData);
+
+
+            if(result != 0)
+            {
+                return result;
+            }
+
         }
+
 
         if(compilerData->token.tokenType == TOKEN_DEDENT){
 
             GET_TOKEN;
         }
         else return SYNTAX_ERROR;
+        
+
+
 
         if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == ELSE){
-
+            
             GET_TOKEN;
         }
         else
@@ -363,11 +394,11 @@ static int Prikaz (CompilerData *compilerData)
         }
         else return SYNTAX_ERROR;
 
-        prikazySekv(compilerData);
+        result = prikazySekv(compilerData);
 
-        if(compilerData->indentationStack->arr[compilerData->indentationStack->top] != startIndent)
+        if(result != 0)
         {
-            prikazySekv(compilerData);
+            return result;
         }
 
         if(compilerData->token.tokenType == TOKEN_DEDENT){
@@ -375,6 +406,7 @@ static int Prikaz (CompilerData *compilerData)
             GET_TOKEN;
         }
         else return SYNTAX_ERROR;
+        printf("konec %d %d %s\n", ifNumber, compilerData->token.tokenType, compilerData->token.stringValue->str);
 
         generateElseEnd(ifNumber, compilerData->current_id);
         return 0;
@@ -384,6 +416,9 @@ static int Prikaz (CompilerData *compilerData)
 
         int whileNumber = compilerData->numberOfWhiles;
         compilerData->numberOfWhiles++;
+        int startIndent = compilerData->indentationStack->arr[compilerData->indentationStack->top];
+
+
         GET_TOKEN;
 
         generateWhileLabel(whileNumber, compilerData->current_id);
@@ -407,21 +442,31 @@ static int Prikaz (CompilerData *compilerData)
 
             GET_TOKEN;
         }
-        else return 2;
+        else return SYNTAX_ERROR;
 
 
-        prikazySekv(compilerData);
+        result = prikazySekv(compilerData);
+        printf("jsem tudas dasd asd ays %d\n", whileNumber);
 
-
-        if(compilerData->indentationStack->arr[compilerData->indentationStack->top] != 0)
+        if(result != 0)
         {
-            prikazySekv(compilerData);
+            return result;
+        }
+
+        if(compilerData->indentationStack->arr[compilerData->indentationStack->top] != startIndent)
+        {
+            result = prikazySekv(compilerData);
+
+            if(result != 0)
+            {
+                return result;
+            }
         }
 
         if(compilerData->token.tokenType == TOKEN_DEDENT){
             GET_TOKEN;
         }
-        else return 2;
+        else return SYNTAX_ERROR;
 
         generateWhileEnd(whileNumber, compilerData->current_id);
         return 0;
@@ -434,7 +479,11 @@ static int Prikaz (CompilerData *compilerData)
 
     else
     {
-        navratHodnoty(compilerData);
+        result = navratHodnoty(compilerData);
+        if(result != 0)
+        {
+            return result;
+        }
 
         return 0;
     }
@@ -554,7 +603,6 @@ static int Hodnoty(CompilerData *compilerData){
 static int navratHodnoty (CompilerData *compilerData)
 {
 
-    printf("jsem tu a cekam\n");
     if(compilerData->token.tokenType == TOKEN_KEYWORD)
     {
         if(compilerData->token.keyword == INPUTS)
@@ -658,7 +706,6 @@ static int navratHodnoty (CompilerData *compilerData)
 
         else if(compilerData->token.keyword == PRINT)
         {
-
             GET_TOKEN;
             if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
             {
@@ -764,7 +811,7 @@ static int navratHodnoty (CompilerData *compilerData)
     }
     else
     {
-        printf("err\n");
+        printf("err %d\n", compilerData->token.stringValue->str);
         return SYNTAX_ERROR;
     }
 
@@ -860,6 +907,6 @@ int main(int argc, char *argv[])
         return result;
     }
 
-    //printf("%s", dynamicString.str);
+    printf("%s", dynamicString.str);
     fclose(sourceCode);
 }
