@@ -1,4 +1,5 @@
 #include "stack.h"
+#include <stdio.h>
 
 
 
@@ -35,12 +36,11 @@ bool stackPop(Stack *stack){
 
 int stackEmpty(Stack *stack)
 {
-    return stack->top == -1;
+    return stack->arr[stack->top] == 0;
 }
 
 
 int stackTop(Stack* stack){
 
-    //return stack->arr[stack->top];
-    return stack->top;
+    return stack->arr[stack->top];
 }

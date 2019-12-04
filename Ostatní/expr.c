@@ -351,17 +351,17 @@ int reduce()
             }
             else
             {
-                return 2;
+                return SYNTAX_ERROR;
             }
 
         }
         else
         {
-            return 2;
+            return SYNTAX_ERROR;
         }
 
         if (rule == EXPR_ERR){
-            return EXPR_ERR;
+            return SYNTAX_ERROR;
         }
         else
         {
@@ -540,7 +540,7 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
         if(currentSym == SYM_ID)
         {
             STStackSearch(symTableStack, token->stringValue->str, &global);
-            if(global == true)
+            if(global)
             {
                 generateStackPush(token, true);
             }
@@ -550,7 +550,11 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
 
             }
         }
-        generateStackPush(token, false);
+        else
+        {
+            generateStackPush(token, false);
+        }
+        
     }
 }
 
@@ -600,7 +604,8 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
                 }
                 break;
             case EQ:
-                {
+                {                    
+
                     if(!symStackPush(&stack, currentSym, getTokenType(token, symTableStack)))
                     {
                         return INTERNAL_ERROR;
@@ -640,7 +645,7 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
         return SYNTAX_ERROR;
     }
 
-    if(stack.top->type != STRING)
+    if(stack.top->type != STRING || firstConcat)
     {
         generateSaveLastExpresionValue();
     }
@@ -649,8 +654,12 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
     {
         assignVar->type = stack.top->type;
     }
-
-
-
+    else
+    {
+        if(stack.top->type != BOOL)
+        {
+            return SYNTAX_ERROR;
+        }
+    } 
     return 0;
 }

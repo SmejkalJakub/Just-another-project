@@ -16,7 +16,7 @@
 
 typedef struct {
     symTable localTable;
-    symTable globalTable;
+    symTable *globalTable;
 
     STStack *tablesStack;
 
@@ -26,11 +26,16 @@ typedef struct {
 
     char *current_id;
 
+    int numberOfIfs;
+    int numberOfWhiles;
+
     bool global;
 
     bool inFunction;
 	bool inDefinition;
 	bool inWhileOrIf;
+
+    Stack *indentationStack;
 
 }CompilerData;
 

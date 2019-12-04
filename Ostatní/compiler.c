@@ -1,6 +1,8 @@
 #include "compiler.h"
 
 
+int result;
+
 #define GET_TOKEN                                                                 \
         getToken(&compilerData->token)
 
@@ -35,25 +37,32 @@ int compilerDataInit(CompilerData* compilerData){
 
     STStackPush(compilerData->tablesStack);
 
+
+    setIndentationStack(compilerData->indentationStack);
+
+    compilerData->globalTable = STStackTop(compilerData->tablesStack);
+
     //compilerData->globalTable = malloc(sizeof(symTable));
     //compilerData->localTable = malloc(sizeof(symTable));
 
     //inicializace indentStacku, prvotni pushnuti 0
 
+    compilerData->numberOfIfs = 0;
+    compilerData->numberOfWhiles = 0;
+
+    compilerData->current_id = "";
+
     compilerData->token.stringValue = malloc(sizeof(DS));
     DSInit(compilerData->token.stringValue);
 
-    compilerData->current_id = NULL;
     compilerData -> inFunction = NULL;
 	compilerData -> inWhileOrIf = NULL;
-
 }
 
 
 static int Prog (CompilerData *compilerData){
 
     GET_TOKEN;
-
 
    // PROG → def id PARAMS eol indent LIST_COMMAND_FUNC eol dedent PROG
     if ((compilerData->token.tokenType == TOKEN_KEYWORD) && (compilerData->token.keyword == DEF)){
@@ -76,11 +85,19 @@ static int Prog (CompilerData *compilerData){
 
     //PROG →  COMMANDS eol PROG
     else{
-        Prikaz(compilerData);
-        if(compilerData->token.tokenType == TOKEN_EOL ){
+        result = Prikaz(compilerData);
+        if(result != 0)
+        {
+            return result;
+        }
+        if(compilerData->token.tokenType == TOKEN_EOF)
+        {
+            return 0;
+        }
+        if(compilerData->token.tokenType == TOKEN_EOL){
             return Prog(compilerData);
         }
-        return 2;
+        return SYNTAX_ERROR;
 
     }
 
@@ -124,7 +141,7 @@ static int Prog (CompilerData *compilerData){
 
         prikazySekv(compilerData);
     }
-    else return 2;
+    else return SYNTAX_ERROR;
 
     //popnuti tabuky symbolu ze zasobniku
 
@@ -132,7 +149,7 @@ static int Prog (CompilerData *compilerData){
         compilerData->inFunction = false;
         return Prog(compilerData);
     }
-    else return 2;
+    else return SYNTAX_ERROR;
 
 
 }
@@ -140,25 +157,26 @@ static int Prog (CompilerData *compilerData){
 static int prikazySekv(CompilerData *compilerData){
     //PRIKAZY_SEK -> PRIKAZ eol DALSI_PRIKAZ
 
+    printf("jsem tady %d %s\n", compilerData->token.tokenType, compilerData->token.stringValue->str);
     Prikaz(compilerData);
+
+
     if(compilerData->token.tokenType == TOKEN_EOL){
         return dalsiPrikaz(compilerData);
     }
-    else return 2;
+    else return SYNTAX_ERROR;
 }
 
 static int dalsiPrikaz(CompilerData *compilerData){
     //DEDENT = konec aktualni sekvence prikazu
     //DALSI_PRIKAZ -> eps
+    GET_TOKEN;
+
     if (compilerData->token.tokenType == TOKEN_DEDENT)
     {
-
         return 0;
     }
-    else if(compilerData->token.tokenType == TOKEN_EOL || compilerData->token.tokenType == TOKEN_EOF)
-    {
-        return 0;
-    }
+    
     //DALSI_PRIKAZ -> PRIKAZY_SEKV
     else
     {
@@ -170,16 +188,19 @@ static int dalsiPrikaz(CompilerData *compilerData){
 
 static int volaniNeboPrirazeni(CompilerData *compilerData)
 {
+
     if(compilerData->token.tokenType == TOKEN_ASSIGN_SIGN)
     {
+
         GET_TOKEN;
         fceDefNeboVest(compilerData);
+        return 0;
     }
 }
 
 static int fceDefNeboVest(CompilerData *compilerData)
 {
-    if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
+    if(compilerData->token.tokenType == TOKEN_IDENTIFIER && (STSearch(compilerData->globalTable, compilerData->token.stringValue->str)->function))
     {
         GET_TOKEN;
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
@@ -191,17 +212,17 @@ static int fceDefNeboVest(CompilerData *compilerData)
     {
         navratHodnoty(compilerData);
     }
+    return 0;
 
 }
 
 
-static int Prikaz (CompilerData *compilerData){
-
+static int Prikaz (CompilerData *compilerData)
+{
     bool global;
 
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
     {
-
         symTableItem *temp = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &global);
         if(temp == NULL)
         {
@@ -229,9 +250,9 @@ static int Prikaz (CompilerData *compilerData){
             GET_TOKEN;
             if(compilerData->token.tokenType == TOKEN_EOL)
             {
-                printf("err\n");
                 return SYNTAX_ERROR;
             }
+
             volaniNeboPrirazeni(compilerData);
         }
         else
@@ -267,168 +288,108 @@ static int Prikaz (CompilerData *compilerData){
 
         }
     }
-    else
+    else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD)
     {
-        navratHodnoty(compilerData);
-
-        return 0;
-    }
-
-
-    //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKOANI FUNKCE
-
-     //POKUD JE TOKEN KLICOVE SLOVO FCE, GENERUJE SE KOD PRO VYKONANI FUNKCE
-    if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == PRINT){
-         //TODO generateWrite()
-
+        int ifNumber = compilerData->numberOfIfs;
+        int startIndent = compilerData->indentationStack->arr[compilerData->indentationStack->top];
+        compilerData->numberOfIfs++;
         GET_TOKEN;
 
-        if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET){
-           // puvodni - dle me nesmysl Hodnoty(compilerData);
-            //solveExpr(&compilerData->token);
-            //print DS ulozeny v compilerData
+        result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL);
 
-
-            //VOLAL BYCH Hodnoty A KAZDOU TISKL. ZA POSLEDNI VYTISK KONCE RADKU//
-
-            while(compilerData->token.tokenType != TOKEN_RIGHT_BRACKET){
-
-                GET_TOKEN;
-
-                //generate PRINT VAL
-
-
-            }
-
-            //generate PRINT \n
+        if(result != 0)
+        {
+            return result;
         }
-        else return 2;
 
-        if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET){
+        generateIfStart(ifNumber, compilerData->current_id);
+
+        if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
             GET_TOKEN;
         }
-        else return 2;
+        else return SYNTAX_ERROR;
 
         if(compilerData->token.tokenType == TOKEN_EOL){
-                    dalsiPrikaz(compilerData);
+            GET_TOKEN;
         }
-        else return 2;
+        else return SYNTAX_ERROR;
 
+        if(compilerData->token.tokenType == TOKEN_INDENT){
+            //generate true exp sekvence
+            GET_TOKEN;
+
+        }
+        else return SYNTAX_ERROR;
+        result = prikazySekv(compilerData);
+
+            printf("tady tohle tady: %d %d %d\n", compilerData->token.tokenType, ifNumber, result);   
+        if(compilerData->indentationStack->arr[compilerData->indentationStack->top] != startIndent)
+        {
+            prikazySekv(compilerData);
+        }
+
+        if(compilerData->token.tokenType == TOKEN_DEDENT){
+
+            GET_TOKEN;
+        }
+        else return SYNTAX_ERROR;
+
+        if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == ELSE){
+
+            GET_TOKEN;
+        }
+        else
+        {
+            return SYNTAX_ERROR;
+        }
+
+        if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
+
+            GET_TOKEN;
+        }
+        else return SYNTAX_ERROR;
+
+        if(compilerData->token.tokenType == TOKEN_EOL){
+
+            GET_TOKEN;
+        }
+        else return SYNTAX_ERROR;
+
+        generateElseStart(ifNumber, compilerData->current_id);
+
+        if(compilerData->token.tokenType == TOKEN_INDENT){
+
+            GET_TOKEN;
+        }
+        else return SYNTAX_ERROR;
+
+        prikazySekv(compilerData);
+
+        if(compilerData->indentationStack->arr[compilerData->indentationStack->top] != startIndent)
+        {
+            prikazySekv(compilerData);
+        }
+
+        if(compilerData->token.tokenType == TOKEN_DEDENT){
+
+            GET_TOKEN;
+        }
+        else return SYNTAX_ERROR;
+
+        generateElseEnd(ifNumber, compilerData->current_id);
+        return 0;
+        //generate label end
     }
-
-    //V PRIPADE, ZE JE PRVNI ID
-    else if(compilerData->token.tokenType == TOKEN_IDENTIFIER){
-
-        compilerData->current_id = compilerData->token.stringValue->str;
-
-        //Najdeme ID v symtablu, pokud ne, vlozime jej
-        if( ( !compilerData->inFunction ) && ( !STSearch(&compilerData->localTable, compilerData->current_id) ) ){
-
-            compilerData->current_id = STInsert(&compilerData->localTable, compilerData->current_id)->key;
-
-        }
-        else if(!STSearch(&compilerData->globalTable, compilerData->current_id)){
-                compilerData->current_id = STInsert(&compilerData->globalTable, compilerData->current_id)->key;
-        }
-
-
-        GET_TOKEN;
-
-        volaniNeboPrirazeni(compilerData);
-
-
-     }
-
-    else if(compilerData->token.keyword == IF && compilerData->token.tokenType == TOKEN_KEYWORD){
-           GET_TOKEN;
-
-           //generate IF
-
-           //solveExpr(&compilerData->token);
-           //generate podmineny jump
-           GET_TOKEN;
-
-           if(compilerData->token.tokenType == TOKEN_COLON){
-             GET_TOKEN;
-
-           }
-           else return 2;
-
-           if(compilerData->token.tokenType == TOKEN_EOL){
-                GET_TOKEN;
-           }
-           else return 2;
-
-           if(compilerData->token.tokenType == TOKEN_INDENT){
-               //generate true exp sekvence
-                GET_TOKEN;
-
-           }
-           else return 2;
-
-           //vytvoreni tabulky symbolu a pushnuti na zasobnik tabulek symbolu
-
-           Prikaz(compilerData);
-
-           if(compilerData->token.tokenType == TOKEN_DEDENT){
-
-                GET_TOKEN;
-           }
-           else return 2;
-
-           //generate jump end
-
-            if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == ELSE){
-
-                GET_TOKEN;
-           }
-           else return 2;
-
-           if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
-
-                GET_TOKEN;
-           }
-           else return 2;
-
-           if(compilerData->token.tokenType == TOKEN_EOL){
-
-                GET_TOKEN;
-           }
-           else return 2;
-
-
-
-            if(compilerData->token.tokenType == TOKEN_INDENT){
-
-                GET_TOKEN;
-           }
-           else return 2;
-
-           //vytvoreni tabulky symbolu a pushnuti na zasobnik symbolu. v else se tvori nova tabulka symbolu :-) aspon myslim podle Discordu
-
-           Prikaz(compilerData);
-
-           //popnuti tabuky symbolu ze zasobniku
-
-            if(compilerData->token.tokenType == TOKEN_DEDENT){
-
-                GET_TOKEN;
-           }
-           else return 2;
-
-           //generate label end
-    }
-
     else if(compilerData->token.keyword == WHILE && compilerData->token.tokenType == TOKEN_KEYWORD){
+
+        int whileNumber = compilerData->numberOfWhiles;
+        compilerData->numberOfWhiles++;
         GET_TOKEN;
 
-
-
-        //generate while start
-
-        //generate WHILE JUMP LABEL
-
+        generateWhileLabel(whileNumber, compilerData->current_id);
         solveExpr(&compilerData->token, compilerData->tablesStack, NULL);
+
+        generateWhileStart(whileNumber, compilerData->current_id);
 
         if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT){
 
@@ -440,51 +401,43 @@ static int Prikaz (CompilerData *compilerData){
 
             GET_TOKEN;
         }
-         else return 2;
-
-        //generate podm jump end while
-
+            else return 2;
 
         if(compilerData->token.tokenType == TOKEN_INDENT){
 
             GET_TOKEN;
         }
-       else return 2;
+        else return 2;
 
-        //vytvoreni tabulky symbolu a pushnuti na zasobnik symbolu. v else se tvori nova tabulka symbolu :-) aspon myslim podle Discordu
 
-       Prikaz(compilerData);
+        prikazySekv(compilerData);
 
-       //generate jump while start
 
-       //popnuti tabuky symbolu ze zasobniku
-       if(compilerData->token.tokenType == TOKEN_DEDENT){
+        if(compilerData->indentationStack->arr[compilerData->indentationStack->top] != 0)
+        {
+            prikazySekv(compilerData);
+        }
+
+        if(compilerData->token.tokenType == TOKEN_DEDENT){
             GET_TOKEN;
         }
         else return 2;
 
+        generateWhileEnd(whileNumber, compilerData->current_id);
+        return 0;
 
-
-        //generate while end
     }
-
     //PRIKAZ -> pass
     else if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == PASS){
         GET_TOKEN;
     }
 
-    else if(compilerData->token.tokenType == TOKEN_KEYWORD && compilerData->token.keyword == RETURN){
-        GET_TOKEN;
+    else
+    {
+        navratHodnoty(compilerData);
 
-        //solveExpr(&compilerData->token);
-
-        //generate return vysledku expressionu
+        return 0;
     }
-
-
-
-
-
 }
 
 static int Hodnota(CompilerData *compilerData){
@@ -601,6 +554,7 @@ static int Hodnoty(CompilerData *compilerData){
 static int navratHodnoty (CompilerData *compilerData)
 {
 
+    printf("jsem tu a cekam\n");
     if(compilerData->token.tokenType == TOKEN_KEYWORD)
     {
         if(compilerData->token.keyword == INPUTS)
@@ -696,6 +650,7 @@ static int navratHodnoty (CompilerData *compilerData)
                 {
                     generateRead(compilerData->varToAssign, LOCAL_VAR, INT);
                 }
+                STSearch(compilerData->tablesStack->top->symTablePtr, compilerData->varToAssign)->type = INT;
                 dalsiPrikaz(compilerData);
             }
             else return 2;
@@ -721,7 +676,7 @@ static int navratHodnoty (CompilerData *compilerData)
                         }
                         else
                         {
-                            if(global == true)
+                            if(global)
                             {
                                 generateWrite(temp->key, GLOBAL_VAR);
                             }
@@ -793,7 +748,7 @@ static int navratHodnoty (CompilerData *compilerData)
 
     }
 
-    if(compilerData->token.tokenType == TOKEN_IDENTIFIER || compilerData->token.tokenType == TOKEN_INTEGER
+    else if(compilerData->token.tokenType == TOKEN_IDENTIFIER || compilerData->token.tokenType == TOKEN_INTEGER
     || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING)
     {
         solveExpr(&compilerData->token, compilerData->tablesStack, STStackSearch(compilerData->tablesStack, compilerData->varToAssign, NULL));
@@ -868,9 +823,9 @@ int main(int argc, char *argv[])
     DSInit(&dynamicString);
     setDynamicString(&dynamicString);
 
-    initIndentationStack();
-
     CompilerData *compilerData = (CompilerData *) malloc(sizeof(CompilerData));
+
+    compilerData->indentationStack = (Stack *) malloc(sizeof(Stack));
 
     compilerData->tablesStack = (STStack *) malloc(sizeof(STStack));
 
@@ -897,108 +852,14 @@ int main(int argc, char *argv[])
 
     generateHeader();
 
+    result = Prog(compilerData);
 
-    Prog(compilerData);
-
-
-    printf("%s", dynamicString.str);
-    fclose(sourceCode);
-
-
-
-}
-
-
-  /*  while(token->tokenType != TOKEN_EOF)
+    if(result != 0)
     {
-        if(getToken(token, compilerData->indentationStack) == ERROR_LEX)
-        {
-            printf("LEX ERROR");
-            free(token);
-            fclose(sourceCode);
+        printf("ERR\n");
+        return result;
+    }
 
-            return -1;
-        }
-        if(token->tokenType == TOKEN_KEYWORD && token->keyword == PRINT)
-        {
-            getToken(token, false, compilerData->indentationStack);
-            if(token->tokenType == TOKEN_LEFT_BRACKET)
-            {
-                while ( getToken(token, false, compilerData->indentationStack ) ){//prochazim termy a ukladam je do tisknuteho retezce dokud nenarazim na pravou zavorku
-                    if ( token->tokenType == TOKEN_RIGHT_BRACKET ){
-                        break;
-                    }
-
-                    //do dynamicStringu ukladam hodnoty jednotlivych termu a generuji vysledny tisknutelny retezec
-                    //jak je uluzena hodnota tokenu po prvotni analyze? vse ve stringu?
-                    else if ( token->tokenType == TOKEN_STRING){
-                        dynamicString.str = DSAddStr(dynamicString.str, token->stringValue);
-                    }
-                    else if( token->tokenType == TOKEN_DOUBLE){
-                        dynamicString.str = DSAddStr(dynamicString.str, doubleToString( token->doubleValue));
-                    }
-                     else if( token->tokenType == TOKEN_INTEGER)
-                    {
-                        dynamicString.str = DSAddStr(dynamicString.str, token->integerValue);
-                    }
-                    else if( token->tokenType == TOKEN_IDENTIFIER){
-                        //patri sem hodnota z tabluky symbolu
-                    }
-                    else{
-                        printf("SYNTAX ERROR");
-                        return -6;
-                    }
-
-                    getToken(token, false, compilerData->indentationStack );
-                     if ( token->tokenType == TOKEN_RIGHT_BRACKET ){
-                        break;
-                    }
-                    else if ( token->tokenType == TOKEN_COLON){
-                        ;
-                    }
-                    else{
-                        printf("SYNTAX ERROR");
-                        return -6;
-                    }
-                }
-
-                if (token->tokenType == TOKEN_RIGHT_BRACKET){
-                        generateWriteValue("s", token->stringValue->str);
-                }
-                else{
-                    printf("SYNTAX ERROR");
-                    return -6;
-                }
-
-
-            }
-            else
-            {
-                printf("SYNTAX ERROR");
-                return -6;
-            }
-
-        }
-        if(token->tokenType == TOKEN_KEYWORD && token->keyword == DEF)
-        {
-            getToken(token, false, compilerData->indentationStack);
-            if(token->tokenType == TOKEN_IDENTIFIER)
-            {
-                generateFunctionStart(token->stringValue->str);
-            }
-            else
-            {
-                printf("SYNTAX ERROR");
-                return -6;
-            }
-
-        }
-        if(token->tokenType == TOKEN_KEYWORD && token->keyword == RETURN)
-        {
-            getToken(token, false, compilerData->indentationStack);
-            generateFunctionReturn("test", token);
-        }
-    }*/
-
-
-
+    //printf("%s", dynamicString.str);
+    fclose(sourceCode);
+}

@@ -1,6 +1,14 @@
-a = 5 + 4
-print('Toto je hodnot A:', a)
-a = 6 + 10
-print(a)
+a = inputi()
+b = inputi()
+
+c = 0
+if a < 5:
+    print('ahoj')
+    if b < 10:
+        print('nazdar')
+    else:
+        pass
+else:
+    pass
 
 

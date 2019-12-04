@@ -88,11 +88,11 @@ void generateExpresion(int exprRule)
     }
     else if(exprRule == EXPR_MORE)
     {
-        addInstruction("GTS");
+        addInstruction("GTS\n");
     }
     else if(exprRule == EXPR_LESS)
     {
-        addInstruction("LTS");
+        addInstruction("LTS\n");
     }
     else if(exprRule == EXPR_LESS_EQ)
     {
@@ -233,13 +233,22 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken)
     {
         addInstruction("CREATEFRAME\n");
     }
-    addInstruction("DEFVAR TF@%");
-    addInstruction(str);
-    addInstruction("\n");
+    if(paramToken->tokenType == TOKEN_INTEGER || paramToken->tokenType == TOKEN_DOUBLE
+    || paramToken->tokenType == TOKEN_STRING || paramToken->tokenType == TOKEN_IDENTIFIER)
+    {
+        addInstruction("DEFVAR TF@%");
+        addInstruction(str);
+        addInstruction("\n");
 
-    addInstruction("MOVE TF@%");
-    addInstruction(str);
-    addInstruction(" ");
+        addInstruction("MOVE TF@%");
+        addInstruction(str);
+        addInstruction(" ");
+    }
+    else
+    {
+        return;
+    }
+    
 
     if(paramToken->tokenType == TOKEN_INTEGER)
     {
@@ -265,6 +274,7 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken)
         addInstruction("LF@");
         addInstruction(paramToken->stringValue->str);
     }
+    
 
     addInstruction("\n");
 
@@ -388,6 +398,8 @@ void generateFunctionStart(char *functionName)
     addInstruction(functionName);
     addInstruction("\n");
     addInstruction("PUSHFRAME\n");
+    addInstruction("DEFVAR LF@%retval\n");
+    addInstruction("MOVE LF@%retval string@\n\n");
 }
 
 void generateFunctionEnd(char *functionName)

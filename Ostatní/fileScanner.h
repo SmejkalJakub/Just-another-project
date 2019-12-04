@@ -110,6 +110,8 @@ typedef struct
 
 int getToken(tokenStruct *token);
 void setSourceCodeFile(FILE *sourceCodeFile);
-void initIndentationStack();
+//void initIndentationStack();
+void setIndentationStack(Stack *_indentStack);
+
 
 #endif
