@@ -150,6 +150,7 @@ int getToken(tokenStruct *token)
 
     static bool newLine = true;
     static bool returningDedent = false;
+    static bool returnExtraNewline = true;
 
     bool CommentStr = newLine;
 
@@ -190,6 +191,14 @@ int getToken(tokenStruct *token)
                             DSDelete(&DString);
                             return LEX_ERROR;
                         }
+                        else if(returnExtraNewline)
+                        {
+                            ungetc(c, sourceCode);
+
+                            token->tokenType = TOKEN_EOL;
+                            returnExtraNewline = false;
+                            return SCAN_OK;
+                        }
                         else
                         {
                             stackPop(indentStack);
@@ -199,6 +208,8 @@ int getToken(tokenStruct *token)
 
                         DSDelete(&DString);
                         token->tokenType = TOKEN_DEDENT;
+
+                        returnExtraNewline = true;
 
                         return SCAN_OK;
                     }
