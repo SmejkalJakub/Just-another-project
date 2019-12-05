@@ -1,0 +1,3 @@
+b = inputi()
+
+print(b)

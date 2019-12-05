@@ -1,0 +1,1 @@
+inputi(a)
