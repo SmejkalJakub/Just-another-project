@@ -56,13 +56,13 @@ void generateFirstOperandToInteger()
 {
     addInstruction("POPS GF@%convertHelpVar0\n");
     addInstruction("FLOAT2INTS\n");
-    addInstruction("PUSHS GF@%convertHelpVar0\n");    
+    addInstruction("PUSHS GF@%convertHelpVar0\n");
 }
 
 void generateExpresion(int exprRule)
 {
     if(exprRule == EXPR_PLUS)
-    {   
+    {
         addInstruction("ADDS\n");
     }
     else if(exprRule == EXPR_MINUS)
@@ -106,7 +106,7 @@ void generateExpresion(int exprRule)
         addInstruction("EQS\n");
         addInstruction("ORS\n");
 
-    }   
+    }
     else if(exprRule == EXPR_MORE_EQ)
     {
         addInstruction("POPS GF@%convertHelpVar0\n");
@@ -126,10 +126,15 @@ void generateIfStart(int numberOfPrevIfs, char *functionName)
 {
     char str[12];
     sprintf(str, "%d", numberOfPrevIfs);
-    
+
 
     addInstruction("JUMPIFNEQ ");
-    addInstruction(functionName); 
+
+    if(functionName != NULL)
+    {
+        addInstruction(functionName);
+    }
+
     addInstruction("$else%");
 
 
@@ -144,14 +149,24 @@ void generateElseStart(int numberOfPrevIfs, char *functionName)
     sprintf(str, "%d", numberOfPrevIfs);
 
     addInstruction("JUMP ");
-    addInstruction(functionName);
+
+    if(functionName != NULL)
+    {
+        addInstruction(functionName);
+    }
+
     addInstruction("$end%");
     addInstruction(str);
     addInstruction("\n");
-    
-    
+
+
     addInstruction("LABEL ");
-    addInstruction(functionName);
+
+    if(functionName != NULL)
+    {
+        addInstruction(functionName);
+    }
+
     addInstruction("$else%");
     addInstruction(str);
     addInstruction("\n");
@@ -164,7 +179,12 @@ void generateElseEnd(int numberOfPrevIfs, char *functionName)
     sprintf(str, "%d", numberOfPrevIfs);
 
     addInstruction("LABEL ");
-    addInstruction(functionName);
+
+    if(functionName != NULL)
+    {
+        addInstruction(functionName);
+    }
+
     addInstruction("$end%");
     addInstruction(str);
     addInstruction("\n");
@@ -176,7 +196,7 @@ void generateConcatenateString(bool firstConcat)
     {
         addInstruction("POPS GF@%convertHelpVar0\n");
         addInstruction("POPS GF@%convertHelpVar1\n");
-        
+
         addInstruction("CONCAT GF@%lastExpresionResult GF@%convertHelpVar1 GF@%convertHelpVar0\n");
     }
     else
@@ -215,7 +235,7 @@ void generateStackPush(tokenStruct *token, bool global)
         addInstruction("LF@");
         addInstruction(token->stringValue->str);
     }
-    else 
+    else
     {
         addInstruction("GF@");
         addInstruction(token->stringValue->str);
@@ -248,7 +268,7 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken)
     {
         return;
     }
-    
+
 
     if(paramToken->tokenType == TOKEN_INTEGER)
     {
@@ -274,7 +294,7 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken)
         addInstruction("LF@");
         addInstruction(paramToken->stringValue->str);
     }
-    
+
 
     addInstruction("\n");
 
@@ -284,7 +304,7 @@ void generateFunctionLen()
 {
     addInstruction("\n\nLABEL $len\n");
     addInstruction("PUSHFRAME\n");
-    
+
     addInstruction("DEFVAR LF@%retval\n");
 
     addInstruction("STRLEN LF@%retval LF@%0\n");
@@ -297,7 +317,7 @@ void generateFunctionChr()
 {
     addInstruction("\n\nLABEL $chr\n");
     addInstruction("PUSHFRAME\n");
-    
+
     addInstruction("DEFVAR LF@%retval\n");
 
     addInstruction("INT2CHAR LF@%retval LF@%0\n");
@@ -310,7 +330,7 @@ void generateFunctionSubstr()
 {
     addInstruction("\n\nLABEL $substr\n");
     addInstruction("PUSHFRAME\n");
-    
+
     addInstruction("DEFVAR LF@%retval\n");
     addInstruction("MOVE LF@%retval string@\n");
 
@@ -350,7 +370,7 @@ void generateFunctionSubstr()
 
     addInstruction("GETCHAR LF@tempChar LF@%0 LF@%1\n");
     addInstruction("CONCAT LF@%retval LF@%retval LF@tempChar\n");
-    
+
     addInstruction("ADD LF@%1 LF@%1 int@1\n");
     addInstruction("SUB LF@%2 LF@%2 int@1\n");
 
@@ -366,7 +386,7 @@ void generateFunctionOrd()
 {
     addInstruction("\n\nLABEL $ord\n");
     addInstruction("PUSHFRAME\n");
-    
+
     addInstruction("DEFVAR LF@%retval\n");
     addInstruction("MOVE LF@%retval string@\n\n");
 
@@ -424,7 +444,7 @@ void generateFunctionReturn(char *functionName, bool empty)
         addInstruction("MOVE LF@%retval string@");
 
     }
-    
+
     /*if(token->tokenType == TOKEN_INTEGER)
     {
         char str[12];
@@ -491,7 +511,7 @@ void generateMoveVariableToVariable(char *toVar, char *fromVar, int toFrame, int
     {
         fromVarFrame = "TF@";
     }
-    
+
 
     if(toFrame == LOCAL_VAR)
     {
@@ -603,11 +623,11 @@ void generateRead(char *var, int frame, int type)
     {
         frameVar = "LF@";
     }
-    else if(frame = GLOBAL_VAR)
+    else if(frame == GLOBAL_VAR)
     {
         frameVar = "GF@";
     }
-    else 
+    else
     {
         frameVar = "TF@";
     }
@@ -670,7 +690,12 @@ void generateWhileLabel(int numberOfPrevWhiles, char *functionName)
     sprintf(str, "%d", numberOfPrevWhiles);
 
     addInstruction("LABEL ");
-    addInstruction(functionName);
+
+    if(functionName != NULL)
+    {
+        addInstruction(functionName);
+    }
+
     addInstruction("$while%");
     addInstruction(str);
     addInstruction("\n");
@@ -681,9 +706,13 @@ void generateWhileStart(int numberOfPrevWhiles, char *functionName)
     char str[12];
     sprintf(str, "%d", numberOfPrevWhiles);
 
-
     addInstruction("JUMPIFEQ ");
-    addInstruction(functionName);
+
+    if(functionName != NULL)
+    {
+        addInstruction(functionName);
+    }
+
     addInstruction("$while$end%");
     addInstruction(str);
     addInstruction(" GF@%lastExpresionResult bool@false\n");
@@ -696,7 +725,12 @@ void generateWhileEnd(int numberOfPrevWhiles, char *functionName)
     sprintf(str, "%d", numberOfPrevWhiles);
 
     addInstruction("JUMP ");
-    addInstruction(functionName);
+
+    if(functionName != NULL)
+    {
+        addInstruction(functionName);
+    }
+
     addInstruction("$while%");
     addInstruction(str);
     addInstruction("\n");
@@ -704,7 +738,12 @@ void generateWhileEnd(int numberOfPrevWhiles, char *functionName)
     addInstruction("\n");
 
     addInstruction("LABEL ");
-    addInstruction(functionName);
+
+    if(functionName != NULL)
+    {
+        addInstruction(functionName);
+    }
+
     addInstruction("$while$end%");
     addInstruction(str);
     addInstruction("\n");

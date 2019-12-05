@@ -554,7 +554,7 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
         {
             generateStackPush(token, false);
         }
-        
+
     }
 }
 
@@ -604,7 +604,7 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
                 }
                 break;
             case EQ:
-                {                    
+                {
 
                     if(!symStackPush(&stack, currentSym, getTokenType(token, symTableStack)))
                     {
@@ -660,6 +660,6 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
         {
             return SYNTAX_ERROR;
         }
-    } 
+    }
     return 0;
 }

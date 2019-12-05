@@ -191,14 +191,6 @@ int getToken(tokenStruct *token)
                             DSDelete(&DString);
                             return LEX_ERROR;
                         }
-                        else if(returnExtraNewline)
-                        {
-                            ungetc(c, sourceCode);
-
-                            token->tokenType = TOKEN_EOL;
-                            returnExtraNewline = false;
-                            return SCAN_OK;
-                        }
                         else
                         {
                             stackPop(indentStack);
@@ -209,8 +201,6 @@ int getToken(tokenStruct *token)
                         DSDelete(&DString);
                         token->tokenType = TOKEN_DEDENT;
 
-                        returnExtraNewline = true;
-
                         return SCAN_OK;
                     }
                     else
@@ -219,10 +209,12 @@ int getToken(tokenStruct *token)
                         state = START_TOKEN_STATE;
                     }
                 }
-                if(isspace(c) && (c != '\n' && c != '\r'))
+                if(isspace(c))
                 {
-                    numOfSpaces++;
-
+                    if(c != '\n')
+                    {
+                        numOfSpaces++;
+                    }
                 }
                 else if(c != '#')
                 {
@@ -234,6 +226,7 @@ int getToken(tokenStruct *token)
                             DSDelete(&DString);
                             return INTERNAL_ERROR;
                         }
+
                         token->tokenType = TOKEN_INDENT;
                         DSDelete(&DString);
                         return SCAN_OK;
@@ -244,7 +237,6 @@ int getToken(tokenStruct *token)
                     }
                     else if(numOfSpaces < stackTop(indentStack))
                     {
-
                         returningDedent = true;
                         stackPop(indentStack);
                         DSDelete(&DString);
@@ -357,19 +349,17 @@ int getToken(tokenStruct *token)
                 }
                 else if(c == EOF)
                 {
-                    if(stackTop(indentStack) != 0)
+                    if(!CommentStr && returnExtraNewline)
                     {
-                        if(!CommentStr)
-                        {
-                            state = EOL_STATE;
-                        }
-                        else
-                        {
-                            token->tokenType = TOKEN_DEDENT;
-                            stackPop(indentStack);
-                            ungetc(c, sourceCode);
-                            return SCAN_OK;
-                        }
+                        returnExtraNewline = false;
+                        state = EOL_STATE;
+                    }
+                    else if(stackTop(indentStack) != 0)
+                    {
+                        token->tokenType = TOKEN_DEDENT;
+                        stackPop(indentStack);
+                        ungetc(c, sourceCode);
+                        return SCAN_OK;
                     }
                     else
                     {
