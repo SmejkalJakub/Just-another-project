@@ -2,11 +2,13 @@ a = inputi()
 b = inputi()
 
 c = 0
+
 if a < 5:
-    print('ahoj')
-    if b < 10:
-        print('nazdar')
-    else:
-        pass
-else:
+  print('ahoj')
+  if b < 10:
+    print('nazdar')
+  else:
     pass
+else:
+  pass
+  
