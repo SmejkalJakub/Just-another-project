@@ -151,7 +151,7 @@
 1575310412 source:c:\users\kubaa\onedrive\ifj\ostatní\filescanner.c
 	"fileScanner.h"
 
-1575303958 c:\users\kubaa\onedrive\ifj\ostatní\filescanner.h
+1575421556 c:\users\kubaa\onedrive\ifj\ostatní\filescanner.h
 	<stdio.h>
 	<ctype.h>
 	<stdbool.h>
@@ -170,11 +170,13 @@
 	"symtable.h"
 	"symstack.h"
 
-1575303165 c:\users\kubaa\onedrive\ifj\ostatní\expr.h
+1575328070 c:\users\kubaa\onedrive\ifj\ostatní\expr.h
 	<stdbool.h>
 	"generator.h"
+	"symtable.h"
+	"symTableStack.h"
 
-1575314358 c:\users\kubaa\onedrive\ifj\ostatní\symtable.h
+1575319420 c:\users\kubaa\onedrive\ifj\ostatní\symtable.h
 	"dynamicString.h"
 
 1575303148 c:\users\kubaa\onedrive\ifj\ostatní\symstack.h
@@ -184,7 +186,7 @@
 1575317989 source:c:\users\kubaa\onedrive\ifj\ostatní\generator.c
 	"generator.h"
 
-1575310481 c:\users\kubaa\onedrive\ifj\ostatní\generator.h
+1575329647 c:\users\kubaa\onedrive\ifj\ostatní\generator.h
 	<stdlib.h>
 	<stdio.h>
 	"dynamicString.h"
@@ -239,7 +241,7 @@
 	<stdbool.h>
 	"symstack.h"
 
-1575314330 c:\users\kubaa\onedrive\ifj\ostatní\symtablestack.h
+1575399289 c:\users\kubaa\onedrive\ifj\ostatní\symtablestack.h
 	"symtable.h"
 
 1575316103 source:c:\users\kubaa\onedrive\ifj\ostatní\symtablestack.c

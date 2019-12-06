@@ -152,6 +152,11 @@ int symbolToType(precedenceTabSym symbol)
     {
         return PREC_TAB_DOLAR;
     }
+    else
+    {
+        return EXPR_ERR;
+    }
+    
 }
 
 
@@ -269,6 +274,7 @@ int checkExprRule(symStackItem *firstItem, symStackItem *secondItem, symStackIte
     {
         return EXPR_ERR;
     }
+    return EXPR_ERR;
 }
 
 int checkItems(symStackItem *firstItem, symStackItem *secondItem, symStackItem *thirdItem, int exprRule)
@@ -314,6 +320,7 @@ int checkItems(symStackItem *firstItem, symStackItem *secondItem, symStackItem *
             }
         }
     }
+    return EXPR_ERR;
 
 }
 
