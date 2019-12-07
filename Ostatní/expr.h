@@ -71,7 +71,4 @@ typedef enum
 bool getitemsBeforeStop(int *itemsBeforeStop);
 int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVar);
 
-
-
-
 #endif

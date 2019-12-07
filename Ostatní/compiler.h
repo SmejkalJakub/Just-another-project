@@ -24,7 +24,7 @@ typedef struct {
 
     symTableItem *varToAssign;
 
-    char *current_id;
+    symTableItem *current_function;
 
     int numberOfIfs;
     int numberOfWhiles;

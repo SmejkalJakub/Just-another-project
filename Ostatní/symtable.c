@@ -40,7 +40,14 @@ symTableItem *STSearch(symTable* STptr, char *key)
 
 symTableItem *STInsert(symTable* STptr, char *key)
 {
-    symTableItem *newItem = malloc(sizeof(symTableItem));
+    symTableItem *newItem = STSearch(STptr, key);
+
+    if(newItem)
+    {
+        return newItem;
+    }
+
+    newItem = malloc(sizeof(symTableItem));
 
     if(!newItem)
     {
@@ -66,6 +73,8 @@ symTableItem *STInsert(symTable* STptr, char *key)
 
     newItem->type = TYPE_NONE;
     newItem->function = false;
+    newItem->defined = false;
+    newItem->numberOfParams = 0;
 
     unsigned long index = hashFunction(key);
 

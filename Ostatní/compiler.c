@@ -47,7 +47,7 @@ int compilerDataInit(CompilerData* compilerData){
     compilerData->numberOfIfs = 0;
     compilerData->numberOfWhiles = 0;
 
-    compilerData->current_id = NULL;
+    compilerData->current_function = NULL;
 
     if((compilerData->token.stringValue = malloc(sizeof(DS))) == NULL)
     {
@@ -107,11 +107,11 @@ static int Prog (CompilerData *compilerData)
             return INTERNAL_ERROR;
         }
 
-        compilerData->current_id = newTabItem->key;
+        compilerData->current_function = newTabItem;
 
         newTabItem->function = true;
 
-        generateFunctionStart(compilerData->current_id);
+        generateFunctionStart(compilerData->current_function);
 
         GET_TOKEN;
     }
@@ -214,9 +214,47 @@ static int dalsiPrikaz(CompilerData *compilerData)
 static int volaniNeboPrirazeni(CompilerData *compilerData)
 {
     printf("volaniNeboPrirazeni\n");
+
+    bool defNewVar = false;
+
+    compilerData->varToAssign = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &compilerData->global);
+
+    if(compilerData->varToAssign == NULL)
+    {
+        if((compilerData->varToAssign = STInsert(compilerData->tablesStack->top->symTablePtr, compilerData->token.stringValue->str)) == NULL)
+        {
+            return INTERNAL_ERROR;
+        }
+
+        if(!compilerData->inFunction)
+        {
+            compilerData->global = true;
+        }
+        else
+        {
+            compilerData->global = false;
+        }
+
+        defNewVar = true;
+    }
+
+    GET_TOKEN;
+
     //VOLANI_NEBO_PRIRAZENI -> = FCE_DEF_NEBO_VEST
     if(compilerData->token.tokenType == TOKEN_ASSIGN_SIGN)
     {
+        if(defNewVar)
+        {
+            if(compilerData->global)
+            {
+                generateVariableDef(compilerData->varToAssign->key, GLOBAL_VAR);
+            }
+            else
+            {
+                generateVariableDef(compilerData->varToAssign->key, LOCAL_VAR);
+            }
+        }
+
         GET_TOKEN;
         return fceDefNeboVest(compilerData);
     }
@@ -261,43 +299,9 @@ static int fceDefNeboVest(CompilerData *compilerData)
 static int Prikaz (CompilerData *compilerData)
 {
     printf("prikaz\n");
-    bool global;
     //PRIKAZ -> id VOLANI_NEBO_PRIRAZENI eol
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
     {
-        compilerData->varToAssign = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &global);
-        if(compilerData->varToAssign == NULL)
-        {
-            if((compilerData->varToAssign = STInsert(compilerData->tablesStack->top->symTablePtr, compilerData->token.stringValue->str)) == NULL)
-            {
-                return INTERNAL_ERROR;
-            }
-
-            if(!compilerData->inFunction && !compilerData->inWhileOrIf)
-            {
-                compilerData->global = true;
-            }
-            else
-            {
-                compilerData->global = false;
-            }
-
-            if(compilerData->global)
-            {
-                generateVariableDef(compilerData->varToAssign->key, GLOBAL_VAR);
-            }
-            else
-            {
-                generateVariableDef(compilerData->varToAssign->key, LOCAL_VAR);
-            }
-        }
-        else
-        {
-            compilerData->global = global;
-        }
-
-        GET_TOKEN;
-
         result = volaniNeboPrirazeni(compilerData);
 
         if(result != 0)
@@ -313,6 +317,8 @@ static int Prikaz (CompilerData *compilerData)
         {
             return SYNTAX_ERROR;
         }
+
+        compilerData->varToAssign = NULL;
 
         return 0;
     }
@@ -335,7 +341,7 @@ static int Prikaz (CompilerData *compilerData)
                     return result;
                 }
 
-                generateFunctionReturn(compilerData->current_id, false);
+                generateFunctionReturn(compilerData->current_function, false);
 
                 if(compilerData->token.tokenType == TOKEN_EOL)
                 {
@@ -349,7 +355,7 @@ static int Prikaz (CompilerData *compilerData)
                 return 0;
             }
 
-            generateFunctionReturn(compilerData->current_id, true);
+            generateFunctionReturn(compilerData->current_function, true);
 
             GET_TOKEN;
 
@@ -372,7 +378,7 @@ static int Prikaz (CompilerData *compilerData)
             return result;
         }
 
-        generateIfStart(numberOfIfs, compilerData->current_id);
+        generateIfStart(numberOfIfs, compilerData->current_function);
 
         if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT)
         {
@@ -437,7 +443,7 @@ static int Prikaz (CompilerData *compilerData)
             return SYNTAX_ERROR;
         }
 
-        generateElseStart(numberOfIfs, compilerData->current_id);
+        generateElseStart(numberOfIfs, compilerData->current_function);
 
         if(compilerData->token.tokenType == TOKEN_INDENT)
         {
@@ -457,7 +463,7 @@ static int Prikaz (CompilerData *compilerData)
 
         GET_TOKEN;
 
-        generateElseEnd(numberOfIfs, compilerData->current_id);
+        generateElseEnd(numberOfIfs, compilerData->current_function);
 
         return 0;
         //generate label end
@@ -471,7 +477,7 @@ static int Prikaz (CompilerData *compilerData)
 
         compilerData->numberOfWhiles++;
 
-        generateWhileLabel(numberOfWhiles, compilerData->current_id);
+        generateWhileLabel(numberOfWhiles, compilerData->current_function);
 
         result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL);
 
@@ -480,7 +486,7 @@ static int Prikaz (CompilerData *compilerData)
             return result;
         }
 
-        generateWhileStart(numberOfWhiles, compilerData->current_id);
+        generateWhileStart(numberOfWhiles, compilerData->current_function);
 
         if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT)
         {
@@ -518,7 +524,7 @@ static int Prikaz (CompilerData *compilerData)
 
         GET_TOKEN;
 
-        generateWhileEnd(numberOfWhiles, compilerData->current_id);
+        generateWhileEnd(numberOfWhiles, compilerData->current_function);
 
         return 0;
     }
@@ -564,73 +570,112 @@ static int Prikaz (CompilerData *compilerData)
 static int Hodnota(CompilerData *compilerData){
 
     printf("hodnota\n");
-    int loadedParametrs = 0;
+    printf("%d\n", compilerData->token.tokenType);
+    static int actParam = 0;
 
-    while(compilerData->token.tokenType != TOKEN_RIGHT_BRACKET)
+    char paramType = compilerData->current_function->params->str[actParam];
+
+    symTableItem *item;
+
+    bool global = true;
+
+    switch(compilerData->token.tokenType)
     {
-        loadedParametrs++;
+        case TOKEN_IDENTIFIER:
+            item = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &global);
 
-        GET_TOKEN;
+            if(item == NULL)
+            {
+                return 3;
+            }
 
-        //Hodnoty ->  VAL Hodnoty
-        switch(compilerData->token.tokenType)
-        {
-            //VAL ->  id
-            case TOKEN_IDENTIFIER:
-                //pristup na polozku v symTablu
-                //pristup na typ polozky a opet stejny case jako tento, akorat bez case ID
-                switch (STSearch(&compilerData->localTable, compilerData->token.stringValue->str)->type)
-                {
-                    //VAL ->  integer
-                    case TOKEN_INTEGER:
-                        //kontrola, zda-li odpovida typ parametru fce
-                        //pokud string - chyba
-                        //pokud double - nutno pretypovat
-                        break;
-                    //VAL ->  double
-                    case TOKEN_DOUBLE:
-                        //kontrola, zda-li odpovida typ parametru fce
-                        //pokud string - chyba
-                        //pokud int - nutno pretypovat
-                        break;
-                    //VAL ->  string
-                    case TOKEN_STRING:
-                        //kontrola, zda li odpovida parametru fce
-                        //pokud ne - chyba
-                        break;
-                    default:
-                        return 3;
+            switch(item->type)
+            {
+                case INT:
+                    if(paramType == 'i')
+                    {
+                        generateFunctionParamsPass(actParam, &compilerData->token, global);
                     }
-                break;
-            //VAL ->  integer
-            case TOKEN_INTEGER:
-                //kontrola, zda-li odpovida typ parametru fce
-                //pokud string - chyba
-                //pokud double - nutno pretypovat
-                break;
-            //VAL ->  double
-            case TOKEN_DOUBLE:
-                //kontrola, zda-li odpovida typ parametru fce
-                //pokud string - chyba
-                //pokud int - nutno pretypovat
-                break;
-            //VAL ->  string
-            case TOKEN_STRING:
-                //kontrola, zda li odpovida parametru fce
-                //pokud ne - chyba
-                break;
-            //Hodnoty ->  eps
-            case TOKEN_LEFT_BRACKET:
+                    else if(paramType == 'f')
+                    {
+                        compilerData->token.tokenType = TOKEN_DOUBLE;
+                        compilerData->token.doubleValue = (double)compilerData->token.integerValue;
+                        generateFunctionParamsPass(actParam, &compilerData->token, global);
+                    }
+                    else
+                    {
+                        return 4;
+                    }
                     break;
-            default:
-                return SYNTAX_ERROR;
-        }
+                case DOUBLE:
+                    if(paramType == 'f')
+                    {
+                        generateFunctionParamsPass(actParam, &compilerData->token, global);
+                    }
+                    else
+                    {
+                        return 4;
+                    }
+                    break;
+                case STRING:
+                    if(paramType == 's')
+                    {
+                        generateFunctionParamsPass(actParam, &compilerData->token, global);
+                    }
+                    else
+                    {
+                        return 4;
+                    }
+                    break;
+                default:
+                    return 4;
+                }
+            break;
+        case TOKEN_INTEGER:
+            if(paramType == 'i')
+            {
+                generateFunctionParamsPass(actParam, &compilerData->token, global);
+            }
+            else if(paramType == 'f')
+            {
+                compilerData->token.tokenType = TOKEN_DOUBLE;
+                compilerData->token.doubleValue = (double)compilerData->token.integerValue;
+                generateFunctionParamsPass(actParam, &compilerData->token, global);
+            }
+            else
+            {
+                return 4;
+            }
+            break;
+        case TOKEN_DOUBLE:
+            if(paramType == 'f')
+            {
+                generateFunctionParamsPass(actParam, &compilerData->token, global);
+            }
+            else
+            {
+                return 4;
+            }
+            break;
+        case TOKEN_STRING:
+            if(paramType == 's')
+            {
+                generateFunctionParamsPass(actParam, &compilerData->token, global);
+            }
+            else
+            {
+                return 4;
+            }
+            break;
+        default:
+            return SYNTAX_ERROR;
     }
 
-    //kontrola poctu parametru
-    if(loadedParametrs != STSearch(compilerData->globalTable, compilerData->current_id)->numberOfParams)
+    actParam++;
+
+    if(actParam == compilerData->current_function->numberOfParams)
     {
-        return SYNTAX_ERROR;
+        actParam = 0;
     }
 
     return 0;
@@ -639,7 +684,18 @@ static int Hodnota(CompilerData *compilerData){
 static int dalsiHodnota (CompilerData *compilerData)
 {
     printf("dalsiHodnota\n");
-    if(compilerData->token.tokenType == TOKEN_COLON){
+
+    static int numOfParams = 1;
+
+    if(compilerData->token.tokenType == TOKEN_COLON)
+    {
+        if(numOfParams == compilerData->current_function->numberOfParams)
+        {
+            return 5;
+        }
+
+        GET_TOKEN;
+
         result = Hodnota(compilerData);
 
         if(result != 0)
@@ -647,11 +703,27 @@ static int dalsiHodnota (CompilerData *compilerData)
             return result;
         }
 
+        numOfParams++;
+
+        GET_TOKEN;
+
         return dalsiHodnota(compilerData);
+    }
+    else if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET)
+    {
+        if(numOfParams == compilerData->current_function->numberOfParams)
+        {
+            numOfParams = 1;
+            return 0;
+        }
+        else
+        {
+            return 5;
+        }
     }
     else
     {
-        return 0;
+        return SYNTAX_ERROR;
     }
 }
 
@@ -660,7 +732,14 @@ static int Hodnoty(CompilerData *compilerData)
     printf("hodnoty\n");
     if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET)
     {
-        return 0;
+        if(compilerData->current_function->numberOfParams != 0)
+        {
+            return 5;
+        }
+        else
+        {
+            return 0;
+        }
     }
     else
     {
@@ -706,16 +785,19 @@ static int navratHodnoty (CompilerData *compilerData)
                 return SYNTAX_ERROR;
             }
 
-            if(compilerData->global)
+            if(compilerData->varToAssign != NULL)
             {
-                generateRead(compilerData->varToAssign->key, GLOBAL_VAR, STRING);
-            }
-            else
-            {
-                generateRead(compilerData->varToAssign->key, LOCAL_VAR, STRING);
-            }
+                if(compilerData->global)
+                {
+                    generateRead(compilerData->varToAssign->key, GLOBAL_VAR, STRING);
+                }
+                else
+                {
+                    generateRead(compilerData->varToAssign->key, LOCAL_VAR, STRING);
+                }
 
-            STSearch(compilerData->tablesStack->top->symTablePtr, compilerData->varToAssign->key)->type = STRING;
+                compilerData->varToAssign->type = STRING;
+            }
         }
         //NAVRAT_HODNOT -> inputf ( )
         else if(compilerData->token.keyword == INPUTF)
@@ -740,16 +822,19 @@ static int navratHodnoty (CompilerData *compilerData)
                 return SYNTAX_ERROR;
             }
 
-            if(compilerData->global)
+            if(compilerData->varToAssign != NULL)
             {
-                generateRead(compilerData->varToAssign->key, GLOBAL_VAR, DOUBLE);
-            }
-            else
-            {
-                generateRead(compilerData->varToAssign->key, LOCAL_VAR, DOUBLE);
-            }
+                if(compilerData->global)
+                {
+                    generateRead(compilerData->varToAssign->key, GLOBAL_VAR, DOUBLE);
+                }
+                else
+                {
+                    generateRead(compilerData->varToAssign->key, LOCAL_VAR, DOUBLE);
+                }
 
-            STSearch(compilerData->tablesStack->top->symTablePtr, compilerData->varToAssign->key)->type = DOUBLE;
+                compilerData->varToAssign->type = DOUBLE;
+            }
         }
         //NAVRAT_HODNOT -> inputi ( )
         else if(compilerData->token.keyword == INPUTI)
@@ -775,16 +860,19 @@ static int navratHodnoty (CompilerData *compilerData)
                 return SYNTAX_ERROR;
             }
 
-            if(compilerData->global)
+            if(compilerData->varToAssign != NULL)
             {
-                generateRead(compilerData->varToAssign->key, GLOBAL_VAR, INT);
-            }
-            else
-            {
-                generateRead(compilerData->varToAssign->key, LOCAL_VAR, INT);
-            }
+                if(compilerData->global)
+                {
+                    generateRead(compilerData->varToAssign->key, GLOBAL_VAR, INT);
+                }
+                else
+                {
+                    generateRead(compilerData->varToAssign->key, LOCAL_VAR, INT);
+                }
 
-            STSearch(compilerData->tablesStack->top->symTablePtr, compilerData->varToAssign->key)->type = INT;
+                compilerData->varToAssign->type = INT;
+            }
         }
         //NAVRAT_HODNOT -> print ( HODNOTY )
         else if(compilerData->token.keyword == PRINT)
@@ -851,54 +939,273 @@ static int navratHodnoty (CompilerData *compilerData)
         //NAVRAT_HODNOT -> len ( HODNOTY )
         else if(compilerData->token.keyword == LEN)
         {
-            /*
-            len(s) – Vrátí délku (počet znaků) řetězce zadaného jediným parametrem 𝑠. Např.
-            len('x\nz') vrací 3.
-            */
+            compilerData->current_function = STInsert(compilerData->globalTable, "len");
+
+            if(compilerData->current_function == NULL)
+            {
+                return INTERNAL_ERROR;
+            }
+
+            if(compilerData->current_function->defined == false)
+            {
+                compilerData->current_function->numberOfParams = 1;
+                compilerData->current_function->function = true;
+                compilerData->current_function->defined = true;
+
+                if(!STAddParam(compilerData->current_function, STRING))
+                {
+                    return INTERNAL_ERROR;
+                }
+            }
+
+            GET_TOKEN;
+
+            if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
+            {
+                GET_TOKEN;
+            }
+            else
+            {
+                return SYNTAX_ERROR;
+            }
+
+            result = Hodnoty(compilerData);
+
+            if(result != 0)
+            {
+                return result;
+            }
+
+            GET_TOKEN;
+
+            generateCall("len");
+
+            if(compilerData->varToAssign != NULL)
+            {
+                if(compilerData->global)
+                {
+                    generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", GLOBAL_VAR, TEMP_VAR);
+                }
+                else
+                {
+                    generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", LOCAL_VAR, TEMP_VAR);
+                }
+
+                compilerData->varToAssign->type = INT;
+            }
         }
         //NAVRAT_HODNOT -> substr ( HODNOTY )
         else if(compilerData->token.keyword == SUBSTR)
         {
-            /*
-            substr(s, i, n) – Vrátí podřetězec zadaného řetězce 𝑠. Druhým parametrem 𝑖 je dán
-            začátek požadovaného podřetězce (počítáno od nuly) a třetí parametr 𝑛 určuje délku
-            podřetězce. Je-li index 𝑖 mimo meze 0 až len(s) nebo 𝑛 < 0, vrací funkce None.
-            Jeli 𝑛 > len(s)−𝑖, jsou jako řetězec vráceny od 𝑖-tého znaku všechny zbývající znaky řetězce 𝑠.
-            */
+            compilerData->current_function = STInsert(compilerData->globalTable, "substr");
+
+            if(compilerData->current_function == NULL)
+            {
+                return INTERNAL_ERROR;
+            }
+
+            if(compilerData->current_function->defined == false)
+            {
+                compilerData->current_function->numberOfParams = 3;
+                compilerData->current_function->function = true;
+                compilerData->current_function->defined = true;
+
+                if(!STAddParam(compilerData->current_function, STRING))
+                {
+                    return INTERNAL_ERROR;
+                }
+
+                if(!STAddParam(compilerData->current_function, INT))
+                {
+                    return INTERNAL_ERROR;
+                }
+
+                if(!STAddParam(compilerData->current_function, INT))
+                {
+                    return INTERNAL_ERROR;
+                }
+            }
+
+            GET_TOKEN;
+
+            if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
+            {
+                GET_TOKEN;
+            }
+            else
+            {
+                return SYNTAX_ERROR;
+            }
+
+            result = Hodnoty(compilerData);
+
+            if(result != 0)
+            {
+                return result;
+            }
+
+            GET_TOKEN;
+
+            generateCall("substr");
+
+            if(compilerData->varToAssign != NULL)
+            {
+                if(compilerData->global)
+                {
+                    generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", GLOBAL_VAR, TEMP_VAR);
+                }
+                else
+                {
+                    generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", LOCAL_VAR, TEMP_VAR);
+                }
+
+                compilerData->varToAssign->type = STRING;
+            }
         }
         //NAVRAT_HODNOT -> chr ( HODNOTY )
         else if(compilerData->token.keyword == CHR)
         {
+            compilerData->current_function = STInsert(compilerData->globalTable, "chr");
 
-            /*
-            – Vrátí jednoznakový řetězec se znakem, jehož ASCII kód je zadán parametrem 𝑖.
-            Případ, kdy je 𝑖 mimo interval [0; 255], vede na běhovou chybu při práci s řetězcem
-            */
+            if(compilerData->current_function == NULL)
+            {
+                return INTERNAL_ERROR;
+            }
 
+            if(compilerData->current_function->defined == false)
+            {
+                compilerData->current_function->numberOfParams = 1;
+                compilerData->current_function->function = true;
+                compilerData->current_function->defined = true;
+
+                if(!STAddParam(compilerData->current_function, INT))
+                {
+                    return INTERNAL_ERROR;
+                }
+            }
+
+            GET_TOKEN;
+
+            if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
+            {
+                GET_TOKEN;
+            }
+            else
+            {
+                return SYNTAX_ERROR;
+            }
+
+            result = Hodnoty(compilerData);
+
+            if(result != 0)
+            {
+                return result;
+            }
+
+            GET_TOKEN;
+
+            generateCall("chr");
+
+            if(compilerData->varToAssign != NULL)
+            {
+                if(compilerData->global)
+                {
+                    generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", GLOBAL_VAR, TEMP_VAR);
+                }
+                else
+                {
+                    generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", LOCAL_VAR, TEMP_VAR);
+                }
+
+                compilerData->varToAssign->type = STRING;
+            }
         }
         //NAVRAT_HODNOT -> ord ( HODNOTY )
         else if(compilerData->token.keyword == ORD)
         {
-            /*
-                Vrátí ordinální hodnotu (ASCII) znaku na pozici 𝑖 v řetězci 𝑠. Je-li
-                pozice mimo meze řetězce (0 až len(s) - 1), vrací None
-            */
+            compilerData->current_function = STInsert(compilerData->globalTable, "ord");
+
+            if(compilerData->current_function == NULL)
+            {
+                return INTERNAL_ERROR;
+            }
+
+            if(compilerData->current_function->defined == false)
+            {
+                compilerData->current_function->numberOfParams = 1;
+                compilerData->current_function->function = true;
+                compilerData->current_function->defined = true;
+
+                if(!STAddParam(compilerData->current_function, STRING))
+                {
+                    return INTERNAL_ERROR;
+                }
+
+                if(!STAddParam(compilerData->current_function, INT))
+                {
+                    return INTERNAL_ERROR;
+                }
+            }
+
+            GET_TOKEN;
+
+            if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
+            {
+                GET_TOKEN;
+            }
+            else
+            {
+                return SYNTAX_ERROR;
+            }
+
+            result = Hodnoty(compilerData);
+
+            if(result != 0)
+            {
+                return result;
+            }
+
+            GET_TOKEN;
+
+            generateCall("ord");
+
+            if(compilerData->varToAssign != NULL)
+            {
+                if(compilerData->global)
+                {
+                    generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", GLOBAL_VAR, TEMP_VAR);
+                }
+                else
+                {
+                    generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", LOCAL_VAR, TEMP_VAR);
+                }
+
+                compilerData->varToAssign->type = INT;
+            }
         }
     }
 
     else if(compilerData->token.tokenType == TOKEN_IDENTIFIER || compilerData->token.tokenType == TOKEN_INTEGER
     || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING)
     {
-        solveExpr(&compilerData->token, compilerData->tablesStack, STStackSearch(compilerData->tablesStack, compilerData->varToAssign->key, NULL));
-        if(compilerData->global)
+        result = solveExpr(&compilerData->token, compilerData->tablesStack, STStackSearch(compilerData->tablesStack, compilerData->varToAssign->key, NULL));
+
+        if(result != 0)
         {
-            generateMoveVariableToVariable(compilerData->varToAssign->key, "%lastExpresionResult", GLOBAL_VAR, GLOBAL_VAR);
-        }
-        else
-        {
-            generateMoveVariableToVariable(compilerData->varToAssign->key, "%lastExpresionResult", LOCAL_VAR, GLOBAL_VAR);
+            return result;
         }
 
+        if(compilerData->varToAssign != NULL)
+        {
+            if(compilerData->global)
+            {
+                generateMoveVariableToVariable(compilerData->varToAssign->key, "%lastExpresionResult", GLOBAL_VAR, GLOBAL_VAR);
+            }
+            else
+            {
+                generateMoveVariableToVariable(compilerData->varToAssign->key, "%lastExpresionResult", LOCAL_VAR, GLOBAL_VAR);
+            }
+        }
     }
     else
     {
@@ -906,7 +1213,6 @@ static int navratHodnoty (CompilerData *compilerData)
     }
 
     return 0;
-
 }
 
 

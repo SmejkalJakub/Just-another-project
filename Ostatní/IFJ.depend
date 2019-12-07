@@ -245,28 +245,28 @@
 1575316103 source:c:\users\kubaa\onedrive\ifj\ostatní\symtablestack.c
 	"symTableStack.h"
 
-1575476780 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\dynamicstring.c
+1575621225 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\dynamicstring.c
 	"dynamicString.h"
 
-1575476780 c:\users\uživatel\desktop\just-another-project-master\ostatní\dynamicstring.h
+1575621225 c:\users\uživatel\desktop\just-another-project-master\ostatní\dynamicstring.h
 	<stdio.h>
 	<stdlib.h>
 	<stdbool.h>
 	<string.h>
 
-1575585779 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\expr.c
+1575637103 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\expr.c
 	"expr.h"
 	"fileScanner.h"
 	"symtable.h"
 	"symstack.h"
 
-1575476780 c:\users\uživatel\desktop\just-another-project-master\ostatní\expr.h
+1575637103 c:\users\uživatel\desktop\just-another-project-master\ostatní\expr.h
 	<stdbool.h>
 	"generator.h"
 	"symtable.h"
 	"symTableStack.h"
 
-1575476780 c:\users\uživatel\desktop\just-another-project-master\ostatní\generator.h
+1575656694 c:\users\uživatel\desktop\just-another-project-master\ostatní\generator.h
 	<stdlib.h>
 	<stdio.h>
 	"dynamicString.h"
@@ -274,7 +274,7 @@
 	"expr.h"
 	"symtable.h"
 
-1575476780 c:\users\uživatel\desktop\just-another-project-master\ostatní\filescanner.h
+1575621225 c:\users\uživatel\desktop\just-another-project-master\ostatní\filescanner.h
 	<stdio.h>
 	<ctype.h>
 	<stdbool.h>
@@ -283,45 +283,45 @@
 	"stack.h"
 	"dynamicString.h"
 
-1575565431 c:\users\uživatel\desktop\just-another-project-master\ostatní\stack.h
+1575621225 c:\users\uživatel\desktop\just-another-project-master\ostatní\stack.h
 	<stdlib.h>
 	<stdbool.h>
 
-1575549859 c:\users\uživatel\desktop\just-another-project-master\ostatní\symtable.h
+1575621225 c:\users\uživatel\desktop\just-another-project-master\ostatní\symtable.h
 	"dynamicString.h"
 
-1575476780 c:\users\uživatel\desktop\just-another-project-master\ostatní\symtablestack.h
+1575621225 c:\users\uživatel\desktop\just-another-project-master\ostatní\symtablestack.h
 	"symtable.h"
 
-1575476780 c:\users\uživatel\desktop\just-another-project-master\ostatní\symstack.h
+1575621225 c:\users\uživatel\desktop\just-another-project-master\ostatní\symstack.h
 	"expr.h"
 	"symtable.h"
 
-1575585761 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\filescanner.c
+1575621225 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\filescanner.c
 	"fileScanner.h"
 
-1575585752 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\generator.c
+1575656667 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\generator.c
 	"generator.h"
 
-1575476780 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\stack.c
+1575621225 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\stack.c
 	"stack.h"
 	<stdio.h>
 
-1575476780 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\symstack.c
+1575621225 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\symstack.c
 	<stdlib.h>
 	<stdbool.h>
 	"symstack.h"
 
-1575476780 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\symtable.c
+1575643062 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\symtable.c
 	"symtable.h"
 
-1575585770 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\symtablestack.c
+1575621225 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\symtablestack.c
 	"symTableStack.h"
 
-1575584559 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\compiler.c
+1575670230 source:c:\users\uživatel\desktop\just-another-project-master\ostatní\compiler.c
 	"compiler.h"
 
-1575551455 c:\users\uživatel\desktop\just-another-project-master\ostatní\compiler.h
+1575644241 c:\users\uživatel\desktop\just-another-project-master\ostatní\compiler.h
 	<stdbool.h>
 	"stack.h"
 	"generator.h"

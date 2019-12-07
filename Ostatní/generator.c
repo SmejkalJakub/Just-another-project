@@ -122,7 +122,7 @@ void generateExpresion(int exprRule)
 }
 
 
-void generateIfStart(int numberOfPrevIfs, char *functionName)
+void generateIfStart(int numberOfPrevIfs, symTableItem *functionName)
 {
     char str[12];
     sprintf(str, "%d", numberOfPrevIfs);
@@ -132,7 +132,7 @@ void generateIfStart(int numberOfPrevIfs, char *functionName)
 
     if(functionName != NULL)
     {
-        addInstruction(functionName);
+        addInstruction(functionName->key);
     }
 
     addInstruction("$else%");
@@ -142,7 +142,7 @@ void generateIfStart(int numberOfPrevIfs, char *functionName)
     addInstruction(" GF@%lastExpresionResult bool@true\n");
 }
 
-void generateElseStart(int numberOfPrevIfs, char *functionName)
+void generateElseStart(int numberOfPrevIfs, symTableItem *functionName)
 {
 
     char str[12];
@@ -152,7 +152,7 @@ void generateElseStart(int numberOfPrevIfs, char *functionName)
 
     if(functionName != NULL)
     {
-        addInstruction(functionName);
+        addInstruction(functionName->key);
     }
 
     addInstruction("$end%");
@@ -164,7 +164,7 @@ void generateElseStart(int numberOfPrevIfs, char *functionName)
 
     if(functionName != NULL)
     {
-        addInstruction(functionName);
+        addInstruction(functionName->key);
     }
 
     addInstruction("$else%");
@@ -172,7 +172,7 @@ void generateElseStart(int numberOfPrevIfs, char *functionName)
     addInstruction("\n");
 }
 
-void generateElseEnd(int numberOfPrevIfs, char *functionName)
+void generateElseEnd(int numberOfPrevIfs, symTableItem *functionName)
 {
 
     char str[12];
@@ -182,7 +182,7 @@ void generateElseEnd(int numberOfPrevIfs, char *functionName)
 
     if(functionName != NULL)
     {
-        addInstruction(functionName);
+        addInstruction(functionName->key);
     }
 
     addInstruction("$end%");
@@ -244,7 +244,7 @@ void generateStackPush(tokenStruct *token, bool global)
     addInstruction("\n");
 }
 
-void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken)
+void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken, bool global)
 {
     char str[12];
     sprintf(str, "%d", paramNumber);
@@ -291,7 +291,15 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken)
     }
     else if(paramToken->tokenType == TOKEN_IDENTIFIER)
     {
-        addInstruction("LF@");
+        if(global)
+        {
+            addInstruction("GF@");
+        }
+        else
+        {
+            addInstruction("LF@");
+        }
+
         addInstruction(paramToken->stringValue->str);
     }
 
@@ -412,28 +420,28 @@ void generateFunctionOrd()
     addInstruction("RETURN\n\n\n");
 }
 
-void generateFunctionStart(char *functionName)
+void generateFunctionStart(symTableItem *functionName)
 {
     addInstruction("LABEL $");
-    addInstruction(functionName);
+    addInstruction(functionName->key);
     addInstruction("\n");
     addInstruction("PUSHFRAME\n");
     addInstruction("DEFVAR LF@%retval\n");
     addInstruction("MOVE LF@%retval string@\n\n");
 }
 
-void generateFunctionEnd(char *functionName)
+void generateFunctionEnd(symTableItem *functionName)
 {
     addInstruction("MOVE LF@%retval string@\n");
     addInstruction("LABEL $");
-    addInstruction(functionName);
+    addInstruction(functionName->key);
     addInstruction("$exitFunction");
     addInstruction("\n");
     addInstruction("POPFRAME\n");
     addInstruction("RETURN\n");
 }
 
-void generateFunctionReturn(char *functionName, bool empty)
+void generateFunctionReturn(symTableItem *functionName, bool empty)
 {
     if(!empty)
     {
@@ -471,7 +479,7 @@ void generateFunctionReturn(char *functionName, bool empty)
     }*/
 
     addInstruction("\nJUMP $");
-    addInstruction(functionName);
+    addInstruction(functionName->key);
     addInstruction("$exitFunction\n");
 
 }
@@ -684,7 +692,7 @@ void generateJump(char *functionName)
     addInstruction("\n");
 }
 
-void generateWhileLabel(int numberOfPrevWhiles, char *functionName)
+void generateWhileLabel(int numberOfPrevWhiles, symTableItem *functionName)
 {
     char str[12];
     sprintf(str, "%d", numberOfPrevWhiles);
@@ -693,7 +701,7 @@ void generateWhileLabel(int numberOfPrevWhiles, char *functionName)
 
     if(functionName != NULL)
     {
-        addInstruction(functionName);
+        addInstruction(functionName->key);
     }
 
     addInstruction("$while%");
@@ -701,7 +709,7 @@ void generateWhileLabel(int numberOfPrevWhiles, char *functionName)
     addInstruction("\n");
 }
 
-void generateWhileStart(int numberOfPrevWhiles, char *functionName)
+void generateWhileStart(int numberOfPrevWhiles, symTableItem *functionName)
 {
     char str[12];
     sprintf(str, "%d", numberOfPrevWhiles);
@@ -710,7 +718,7 @@ void generateWhileStart(int numberOfPrevWhiles, char *functionName)
 
     if(functionName != NULL)
     {
-        addInstruction(functionName);
+        addInstruction(functionName->key);
     }
 
     addInstruction("$while$end%");
@@ -719,7 +727,7 @@ void generateWhileStart(int numberOfPrevWhiles, char *functionName)
 
 }
 
-void generateWhileEnd(int numberOfPrevWhiles, char *functionName)
+void generateWhileEnd(int numberOfPrevWhiles, symTableItem *functionName)
 {
     char str[12];
     sprintf(str, "%d", numberOfPrevWhiles);
@@ -728,7 +736,7 @@ void generateWhileEnd(int numberOfPrevWhiles, char *functionName)
 
     if(functionName != NULL)
     {
-        addInstruction(functionName);
+        addInstruction(functionName->key);
     }
 
     addInstruction("$while%");
@@ -741,7 +749,7 @@ void generateWhileEnd(int numberOfPrevWhiles, char *functionName)
 
     if(functionName != NULL)
     {
-        addInstruction(functionName);
+        addInstruction(functionName->key);
     }
 
     addInstruction("$while$end%");
