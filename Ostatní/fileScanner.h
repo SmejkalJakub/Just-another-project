@@ -71,7 +71,6 @@
 
 #define TOKEN_EOF 255
 
-
 #define DEF 0
 #define ELSE 1
 #define IF 2

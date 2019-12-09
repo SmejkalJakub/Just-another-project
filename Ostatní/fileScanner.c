@@ -509,7 +509,7 @@ int getToken(tokenStruct *token)
                 }
                 else if(c == '\\')
                 {
-                    if(!DSAddChar(&DString, '\\'))
+                    if(!DSAddStr(&DString, "\\092"))
                     {
                         DSDelete(&DString);
                         return INTERNAL_ERROR;
@@ -518,7 +518,7 @@ int getToken(tokenStruct *token)
                 }
                 else if(c == '\'')
                 {
-                    if(!DSAddChar(&DString, '\''))
+                    if(!DSAddStr(&DString, "\\039"))
                     {
                         DSDelete(&DString);
                         return INTERNAL_ERROR;
@@ -527,7 +527,7 @@ int getToken(tokenStruct *token)
                 }
                 else if(c == '\"')
                 {
-                    if(!DSAddChar(&DString, '\"'))
+                    if(!DSAddStr(&DString, "\\034"))
                     {
                         DSDelete(&DString);
                         return INTERNAL_ERROR;
@@ -536,7 +536,7 @@ int getToken(tokenStruct *token)
                 }
                 else if(c == 'n')
                 {
-                    if(!DSAddChar(&DString, '\n'))
+                    if(!DSAddStr(&DString, "\\010"))
                     {
                         DSDelete(&DString);
                         return INTERNAL_ERROR;
@@ -545,7 +545,7 @@ int getToken(tokenStruct *token)
                 }
                 else if(c == 't')
                 {
-                    if(!DSAddChar(&DString, '\t'))
+                    if(!DSAddStr(&DString, "\\011"))
                     {
                         DSDelete(&DString);
                         return INTERNAL_ERROR;
@@ -558,16 +558,35 @@ int getToken(tokenStruct *token)
                 }
                 else
                 {
-                    if(!DSAddChar(&DString, '\\'))
+                    char str[12];
+                    sprintf(str, "%d", c);
+                    if(!DSAddStr(&DString, "\\092"))
                     {
                         DSDelete(&DString);
                         return INTERNAL_ERROR;
                     }
-                    if(!DSAddChar(&DString, c))
+                    if(c < 100)
                     {
-                        DSDelete(&DString);
-                        return INTERNAL_ERROR;
+                        if(!DSAddStr(&DString, "\\0"))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                        if(!DSAddStr(&DString, str))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
                     }
+                    else
+                    {
+                        if(!DSAddStr(&DString, str))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                    }
+                    
                     state = STRING_STATE;
                 }
                 break;
@@ -587,10 +606,31 @@ int getToken(tokenStruct *token)
                 if(isxdigit(c))
                 {
                     hexSeq[3] = c;
-                    if(!DSAddChar(&DString, (char)strtol(hexSeq, &eptr, 16)))
+                    int value = strtol(hexSeq, &eptr, 16);
+
+                    char str[12];
+                    sprintf(str, "%d", value);
+
+                    if(value < 100)
                     {
-                        DSDelete(&DString);
-                        return INTERNAL_ERROR;
+                        if(!DSAddStr(&DString, "\\0"))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                        if(!DSAddStr(&DString, str))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                    }
+                    else
+                    {
+                        if(!DSAddStr(&DString, str))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
                     }
                     state = STRING_STATE;
                 }
@@ -638,6 +678,37 @@ int getToken(tokenStruct *token)
                     {
                         state = LONG_COMMENT_STATE_ESC;
                     }
+
+                    else if(c <= 32)
+                    {
+                        char str[12];
+                        sprintf(str, "%d", c);
+                        if(!DSAddStr(&DString, "\\0"))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                        if(!DSAddStr(&DString, str))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                    }
+                    else if(c > 126)
+                    {
+                        char str[12];
+                        sprintf(str, "%d", c);
+                        if(!DSAddStr(&DString, "\\"))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                        if(!DSAddStr(&DString, str))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                    }
                     else if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
@@ -646,12 +717,7 @@ int getToken(tokenStruct *token)
                 }
                 break;
             case LONG_COMMENT_STATE_ESC:
-                if(c < 32)
-                {
-                    DSDelete(&DString);
-                    return LEX_ERROR;
-                }
-                else if(c == '"')
+                if(c == '"')
                 {
                     if(!DSAddChar(&DString, c))
                     {
@@ -690,7 +756,37 @@ int getToken(tokenStruct *token)
                             return INTERNAL_ERROR;
                         }
 
-                        if(!DSAddChar(&DString, c))
+                        else if(c <= 32)
+                        {
+                            char str[12];
+                            sprintf(str, "%d", c);
+                            if(!DSAddStr(&DString, "\\0"))
+                            {
+                                DSDelete(&DString);
+                                return INTERNAL_ERROR;
+                            }
+                            if(!DSAddStr(&DString, str))
+                            {
+                                DSDelete(&DString);
+                                return INTERNAL_ERROR;
+                            }
+                        }
+                        else if(c > 126)
+                        {
+                            char str[12];
+                            sprintf(str, "%d", c);
+                            if(!DSAddStr(&DString, "\\"))
+                            {
+                                DSDelete(&DString);
+                                return INTERNAL_ERROR;
+                            }
+                            if(!DSAddStr(&DString, str))
+                            {
+                                DSDelete(&DString);
+                                return INTERNAL_ERROR;
+                            }
+                        }
+                        else if(!DSAddChar(&DString, c))
                         {
                             DSDelete(&DString);
                             return INTERNAL_ERROR;
@@ -726,7 +822,38 @@ int getToken(tokenStruct *token)
                             }
                         }
 
-                        if(!DSAddChar(&DString, c))
+                        if(c <= 32)
+                        {
+                            char str[12];
+                            sprintf(str, "%d", c);
+                            if(!DSAddStr(&DString, "\\0"))
+                            {
+                                DSDelete(&DString);
+                                return INTERNAL_ERROR;
+                            }
+                            if(!DSAddStr(&DString, str))
+                            {
+                                DSDelete(&DString);
+                                return INTERNAL_ERROR;
+                            }
+                        }
+                        else if(c > 126)
+                        {
+                            char str[12];
+                            sprintf(str, "%d", c);
+                            if(!DSAddStr(&DString, "\\"))
+                            {
+                                DSDelete(&DString);
+                                return INTERNAL_ERROR;
+                            }
+                            if(!DSAddStr(&DString, str))
+                            {
+                                DSDelete(&DString);
+                                return INTERNAL_ERROR;
+                            }
+                        }
+
+                        else if(!DSAddChar(&DString, c))
                         {
                             DSDelete(&DString);
                             return INTERNAL_ERROR;

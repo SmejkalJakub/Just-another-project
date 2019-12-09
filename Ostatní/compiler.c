@@ -201,7 +201,7 @@ static int dalsiPrikaz(CompilerData *compilerData)
 {
     //DEDENT = konec aktualni sekvence prikazu
     //DALSI_PRIKAZ -> eps
-    printf("dalsiPrikaz\n");
+    printf("dalsiPrikaz  %d\n", compilerData->token.tokenType);
 
     if (compilerData->token.tokenType == TOKEN_DEDENT)
     {
@@ -962,10 +962,10 @@ static int navratHodnoty (CompilerData *compilerData)
                     {
                         return SYNTAX_ERROR;
                     }
-                    /*if(compilerData->token.tokenType == TOKEN_COLON)
+                    if(compilerData->token.tokenType == TOKEN_COLON)
                     {
                         addInstruction("WRITE string@\\032\n");
-                    }*/
+                    }
 
                 }
                 addInstruction("WRITE string@\\010\n");
