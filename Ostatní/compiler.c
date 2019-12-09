@@ -4,8 +4,11 @@
 int result;
 
 #define GET_TOKEN                                                                 \
-        getToken(&compilerData->token)
-
+        result = getToken(&compilerData->token);                                     \
+        if(result != 0)                                                         \
+        {                                                                       \
+            return result;                                                        \
+        }                                                                           \
 
 /*
 
@@ -58,6 +61,8 @@ int compilerDataInit(CompilerData* compilerData){
 
     compilerData -> inFunction = NULL;
 	compilerData -> inWhileOrIf = NULL;
+    
+    compilerData->varToAssign = NULL;
 
 	return 0;
 }
@@ -298,7 +303,7 @@ static int fceDefNeboVest(CompilerData *compilerData)
 
 static int Prikaz (CompilerData *compilerData)
 {
-    printf("prikaz\n");
+    printf("prikaz %d %s\n", compilerData->token.tokenType, compilerData->token.stringValue->str);
     //PRIKAZ -> id VOLANI_NEBO_PRIRAZENI eol
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
     {
@@ -472,7 +477,6 @@ static int Prikaz (CompilerData *compilerData)
     else if(compilerData->token.keyword == WHILE && compilerData->token.tokenType == TOKEN_KEYWORD)
     {
         GET_TOKEN;
-
         int numberOfWhiles = compilerData->numberOfWhiles;
 
         compilerData->numberOfWhiles++;
@@ -759,8 +763,41 @@ static int Hodnoty(CompilerData *compilerData)
 
 static int navratHodnoty (CompilerData *compilerData)
 {
-    printf("navratHodnoty\n");
-    if(compilerData->token.tokenType == TOKEN_KEYWORD)
+    printf("navratHodnoty %d %s\n", compilerData->token.tokenType, compilerData->token.stringValue->str);
+
+    if(compilerData->token.tokenType == TOKEN_IDENTIFIER || compilerData->token.tokenType == TOKEN_INTEGER
+    || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING || (compilerData->token.tokenType == TOKEN_KEYWORD
+     && strcmp(compilerData->token.stringValue->str, "None") == 0) || compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
+    {
+        if(compilerData->varToAssign != NULL)
+        {
+            result = solveExpr(&compilerData->token, compilerData->tablesStack, STStackSearch(compilerData->tablesStack, compilerData->varToAssign->key, NULL));
+        }
+        else
+        {
+            symTableItem temp;
+            temp.type = EMPTY_TYPE;
+            result = solveExpr(&compilerData->token, compilerData->tablesStack, &temp);
+        }
+        
+        if(result != 0)
+        {
+            return result;
+        }
+
+        if(compilerData->varToAssign != NULL)
+        {
+            if(compilerData->global)
+            {
+                generateMoveVariableToVariable(compilerData->varToAssign->key, "%lastExpresionResult", GLOBAL_VAR, GLOBAL_VAR);
+            }
+            else
+            {
+                generateMoveVariableToVariable(compilerData->varToAssign->key, "%lastExpresionResult", LOCAL_VAR, GLOBAL_VAR);
+            }
+        }
+    }
+    else if(compilerData->token.tokenType == TOKEN_KEYWORD)
     {
         //NAVRAT_HODNOT -> inputs ( )
         if(compilerData->token.keyword == INPUTS)
@@ -769,7 +806,7 @@ static int navratHodnoty (CompilerData *compilerData)
 
             if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
             {
-                    GET_TOKEN;
+                GET_TOKEN;
             }
             else
             {
@@ -925,10 +962,10 @@ static int navratHodnoty (CompilerData *compilerData)
                     {
                         return SYNTAX_ERROR;
                     }
-                    if(compilerData->token.tokenType == TOKEN_COLON)
+                    /*if(compilerData->token.tokenType == TOKEN_COLON)
                     {
                         addInstruction("WRITE string@\\032\n");
-                    }
+                    }*/
 
                 }
                 addInstruction("WRITE string@\\010\n");
@@ -1105,7 +1142,6 @@ static int navratHodnoty (CompilerData *compilerData)
             GET_TOKEN;
 
             generateCall("chr");
-
             if(compilerData->varToAssign != NULL)
             {
                 if(compilerData->global)
@@ -1119,6 +1155,7 @@ static int navratHodnoty (CompilerData *compilerData)
 
                 compilerData->varToAssign->type = STRING;
             }
+
         }
         //NAVRAT_HODNOT -> ord ( HODNOTY )
         else if(compilerData->token.keyword == ORD)
@@ -1181,29 +1218,6 @@ static int navratHodnoty (CompilerData *compilerData)
                 }
 
                 compilerData->varToAssign->type = INT;
-            }
-        }
-    }
-
-    else if(compilerData->token.tokenType == TOKEN_IDENTIFIER || compilerData->token.tokenType == TOKEN_INTEGER
-    || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING)
-    {
-        result = solveExpr(&compilerData->token, compilerData->tablesStack, STStackSearch(compilerData->tablesStack, compilerData->varToAssign->key, NULL));
-
-        if(result != 0)
-        {
-            return result;
-        }
-
-        if(compilerData->varToAssign != NULL)
-        {
-            if(compilerData->global)
-            {
-                generateMoveVariableToVariable(compilerData->varToAssign->key, "%lastExpresionResult", GLOBAL_VAR, GLOBAL_VAR);
-            }
-            else
-            {
-                generateMoveVariableToVariable(compilerData->varToAssign->key, "%lastExpresionResult", LOCAL_VAR, GLOBAL_VAR);
             }
         }
     }
@@ -1305,7 +1319,34 @@ int main(int argc, char *argv[])
 
     if(result != 0)
     {
-        printf("ERR\n");
+        switch (result)
+        {
+            case LEX_ERROR:
+                printf("LEX ERROR");
+                break;
+            case SYNTAX_ERROR:
+                printf("SYNTAX ERROR");
+                break;
+            case SEM_ERROR_DEF:
+                printf("SEMANTIC ERROR UNDEFINED");
+            case SEM_ERROR_COMPATIBILITY:
+                printf("SEMANTIC ERROR TYPES NOT COMPATIBLE");
+                break;
+            case SEM_ERROR_PARAMS:
+                printf("SEMANTIC ERROR WRONG NUMBER OF PARAMS");
+                break;
+            case SEM_ERROR:
+                printf("SEMANTIC ERROR");
+                break;
+            case SEM_ERROR_DIV_ZERO:
+                printf("ZERO DIVISION ERROR");
+                break;
+            case INTERNAL_ERROR:
+                printf("ERROR INTERNAL");
+                break;
+            default:
+                break;
+        }
         return result;
     }
 

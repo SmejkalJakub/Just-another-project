@@ -230,6 +230,10 @@ void generateStackPush(tokenStruct *token, bool global)
         addInstruction("string@");
         addInstruction(token->stringValue->str);
     }
+    else if(token->tokenType == TOKEN_KEYWORD && strcmp(token->stringValue->str, "None") == 0)
+    {
+        addInstruction("nil@nil");
+    }
     else if(token->tokenType == TOKEN_IDENTIFIER && !global)
     {
         addInstruction("LF@");
@@ -597,9 +601,11 @@ void generateSaveLastExpresionValue()
     addInstruction("POPS GF@%lastExpresionResult\n");
 }
 
+
 void generateWriteValue(tokenStruct *token)
 {
     addInstruction("WRITE ");
+
     if(token->tokenType == TOKEN_INTEGER)
     {
         char str[12];
@@ -617,7 +623,10 @@ void generateWriteValue(tokenStruct *token)
     else if(token->tokenType == TOKEN_STRING)
     {
         addInstruction("string@");
-        addInstruction(token->stringValue->str);
+        if(token->stringValue->actIndex !=0)
+        {
+            addInstruction(token->stringValue->str);
+        }
     }
     addInstruction("\n");
 }

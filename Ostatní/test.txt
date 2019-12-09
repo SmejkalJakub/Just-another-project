@@ -1,2 +1,3 @@
-a = chr(68)
-print(a)  
+print("""
+Faktorial nelze spocitat
+""")

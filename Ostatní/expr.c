@@ -78,6 +78,13 @@ precedenceTabSym tokenToSymbol(tokenStruct *token)
     case TOKEN_STRING:
         return SYM_STRING;
         break;
+    case TOKEN_KEYWORD:
+        if(strcmp("None", token->stringValue->str) == 0)
+        {
+            return SYM_NONE;
+        }
+        return SYM_DOLAR;
+        break;
     default:
         return SYM_DOLAR;
         break;
@@ -100,6 +107,10 @@ int getTokenType(tokenStruct *token, STStack *symTableStack)
     else if(token->tokenType == TOKEN_STRING)
     {
         return STRING;
+    }
+    else if(token->tokenType == TOKEN_KEYWORD && strcmp(token->stringValue->str, "None") == 0)
+    {
+        return SPEC_TYPE_NONE;
     }
     else if(token->tokenType == TOKEN_IDENTIFIER)
     {
@@ -136,7 +147,7 @@ int symbolToType(precedenceTabSym symbol)
     {
         return PREC_TAB_RELATION_OPERATOR;
     }
-    else if(symbol == SYM_ID || symbol == SYM_INT || symbol == SYM_DOUBLE || symbol == SYM_STRING)
+    else if(symbol == SYM_ID || symbol == SYM_INT || symbol == SYM_DOUBLE || symbol == SYM_STRING || symbol == SYM_NONE)
     {
         return PREC_TAB_ID;
     }
@@ -208,7 +219,7 @@ int checkExprRule(symStackItem *firstItem, symStackItem *secondItem, symStackIte
     }
     else if(numberOfItems == 3)
     {
-        if(firstItem->symbol == SYM_LEFT_BRACKET && secondItem->symbol == SYM_NON_TERM && firstItem->symbol == SYM_RIGHT_BRACKET){
+        if(firstItem->symbol == SYM_LEFT_BRACKET && secondItem->symbol == SYM_NON_TERM && thirdItem->symbol == SYM_RIGHT_BRACKET){
             return BRACKET_NONTERM_BRACKET;
         }
 
@@ -252,7 +263,7 @@ int checkExprRule(symStackItem *firstItem, symStackItem *secondItem, symStackIte
             }
             else if(secondItem->symbol == SYM_NOT_EQ)
             {
-                return EXPR_LESS_EQ;
+                return EXPR_NOT_EQ;
             }
             else if(secondItem->symbol == SYM_EQ)
             {
@@ -322,6 +333,8 @@ int reduce()
         int itemsBeforeStop = 0;
         int successState;
 
+        bool isFinalZero = false;
+
         hasStop = getitemsBeforeStop(&itemsBeforeStop);
 
         symStackItem* operand1 = NULL;
@@ -358,6 +371,15 @@ int reduce()
             return SYNTAX_ERROR;
         }
 
+        if(rule == EXPR_ID && operand1->isZero)
+        {
+            isFinalZero = true;
+        }
+        else if(rule == EXPR_MUL && (operand1->isZero || operand3->isZero))
+        {
+            isFinalZero = true;
+        }
+
         if (rule == EXPR_ERR){
             return SYNTAX_ERROR;
         }
@@ -383,6 +405,15 @@ int reduce()
             symStackPop(&stack);
         }
         symStackPush(&stack, SYM_NON_TERM, finalType);
+        if(isFinalZero)
+        {
+            symStackTop(&stack)->isZero = true;
+        }
+        else
+        {
+            symStackTop(&stack)->isZero = false;
+        }
+        
 
         return 0;
 }
@@ -416,13 +447,17 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             }
             //pokud byl string jen jeden, nastava chyba
             else if(operand1->type == STRING || operand3->type == STRING){
-                return 3;
+                return SEM_ERROR_COMPATIBILITY;
             }
 
             //pokud jsou oba inty, pretypovani neni nutne
             else if((operand1->type == INT) && (operand3->type == INT)){
                 *finalType = INT;
                 break;
+            }
+            else if(operand1->type == SPEC_TYPE_NONE || operand3->type == SPEC_TYPE_NONE)
+            {
+                return SEM_ERROR_COMPATIBILITY;
             }
 
 
@@ -446,6 +481,15 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             if(operand1->type == STRING || operand3->type == STRING){
                 return SEM_ERROR_COMPATIBILITY;
             }
+            else if(operand1->type == SPEC_TYPE_NONE || operand3->type == SPEC_TYPE_NONE)
+            {
+                return SEM_ERROR_COMPATIBILITY;
+            }
+            else if(operand3->isZero)
+            {
+                return SEM_ERROR_DIV_ZERO;
+            }
+            
 
 
             if(operand1->type == INT){
@@ -465,6 +509,14 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             if(operand1->type == STRING || operand3->type == STRING){
                 return SEM_ERROR_COMPATIBILITY;
             }
+            else if(operand1->type == SPEC_TYPE_NONE || operand3->type == SPEC_TYPE_NONE)
+            {
+                return SEM_ERROR_COMPATIBILITY;
+            }
+            else if(operand3->isZero)
+            {
+                return SEM_ERROR_DIV_ZERO;
+            }
 
             //pokud byl nejaky z ciselnych operandu double, prevedeme jej na int
             if(operand1->type == DOUBLE){
@@ -483,7 +535,6 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
         case EXPR_NOT_EQ:
         case EXPR_EQ:
             *finalType = BOOL;
-
             //pokud jsou oba operandy cisla, udelame z nich doubly
             if (operand1->type == INT && operand3->type == DOUBLE){
                 firstOperandToDouble = true;
@@ -491,6 +542,11 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             else if(operand3->type == INT && operand1->type == DOUBLE){
                 thirdOperandToDouble = true;
             }
+            else if(operand3->type == SPEC_TYPE_NONE)
+            {
+                break;
+            }
+            
 
             //pokud chceme porovnavat dva operandy, z nichz jeden je jineho typu nez druhy(neplati u cisel) - chyba
             else if(operand1->type != operand3->type){
@@ -527,7 +583,22 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
 {
     symStackPushStop(&stack);
 
+
     symStackPush(&stack, currentSym, getTokenType(token, symTableStack));
+    if(token->tokenType == TOKEN_INTEGER && token->integerValue == 0)
+    {
+        symStackTop(&stack)->isZero = true;
+    }
+    else if(token->tokenType == TOKEN_DOUBLE && token->doubleValue == 0.0f)
+    {
+        symStackTop(&stack)->isZero = true;
+    }
+    else
+    {
+        symStackTop(&stack)->isZero = false;
+    }
+    
+    
 
     bool global;
 
@@ -586,9 +657,9 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
         symStackTopSymType = symbolToType(symStackTopSym->symbol);
 
 
+
         switch (precedenceTable[symStackTopSymType][currentSymType])
         {
-
             case ER:
                 {
                     if(currentSym == SYM_DOLAR && symStackTopSym->symbol == SYM_DOLAR)
@@ -603,12 +674,15 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
                 break;
             case EQ:
                 {
-
                     if(!symStackPush(&stack, currentSym, getTokenType(token, symTableStack)))
                     {
                         return INTERNAL_ERROR;
                     }
                     returnValue = getToken(token);
+                    if(returnValue != 0)
+                    {
+                        return returnValue;
+                    }
                 }
                 break;
             case S:
@@ -616,6 +690,10 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
                     shift(currentSym, token, symTableStack);
 
                     returnValue = getToken(token);
+                    if(returnValue != 0)
+                    {
+                        return returnValue;
+                    }
                 }
                 break;
             case R:
@@ -631,8 +709,8 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
             default:
                 break;
         }
+        
     }
-
 
     if(stack.top == NULL)
     {
@@ -643,13 +721,14 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
         return SYNTAX_ERROR;
     }
 
-    if(stack.top->type != STRING || firstConcat)
-    {
-        generateSaveLastExpresionValue();
-    }
 
-    if(assignVar != NULL)
+
+    else if(assignVar != NULL)
     {
+        if(assignVar->type == EMPTY_TYPE)
+        {
+            return 0;
+        }
         assignVar->type = stack.top->type;
     }
     else
@@ -658,6 +737,10 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
         {
             return SYNTAX_ERROR;
         }
+    }
+    if(stack.top->type != STRING || firstConcat)
+    {
+        generateSaveLastExpresionValue();
     }
     return 0;
 }

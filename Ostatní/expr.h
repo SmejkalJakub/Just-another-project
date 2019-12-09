@@ -62,6 +62,7 @@ typedef enum
     SYM_INT,
     SYM_DOUBLE,
     SYM_STRING,
+    SYM_NONE,
     SYM_DOLAR,
     SYM_STOP,
     SYM_NON_TERM

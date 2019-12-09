@@ -447,6 +447,12 @@ int getToken(tokenStruct *token)
                 else if(c == '\'')
                 {
                     token->tokenType = TOKEN_STRING;
+                    if((&DString)->actIndex == 0)
+                    {
+                        token->stringValue->actIndex = 0;
+                        DSDelete(&DString);
+                        return SCAN_OK;
+                    }
                     DSAddStr(token->stringValue, (&DString)->str);
                     DSDelete(&DString);
                     return SCAN_OK;
@@ -530,7 +536,7 @@ int getToken(tokenStruct *token)
                 }
                 else if(c == 'n')
                 {
-                    if(!DSAddStr(&DString, "\\010"))
+                    if(!DSAddChar(&DString, '\n'))
                     {
                         DSDelete(&DString);
                         return INTERNAL_ERROR;
