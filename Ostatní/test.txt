@@ -6,4 +6,5 @@ def test(n, f):
     return f
 a = inputi()
 b = test(a, 13)
+b = b + 5
 print(b)

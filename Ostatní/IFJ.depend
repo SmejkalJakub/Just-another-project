@@ -160,7 +160,7 @@
 	"stack.h"
 	"dynamicString.h"
 
-1574798679 c:\users\kubaa\onedrive\ifj\ostatní\stack.h
+1575621225 c:\users\kubaa\onedrive\ifj\ostatní\stack.h
 	<stdlib.h>
 	<stdbool.h>
 
@@ -192,8 +192,9 @@
 	"expr.h"
 	"symtable.h"
 
-1574976872 source:c:\users\kubaa\onedrive\ifj\ostatní\stack.c
+1575621225 source:c:\users\kubaa\onedrive\ifj\ostatní\stack.c
 	"stack.h"
+	<stdio.h>
 
 1575318001 source:c:\users\kubaa\onedrive\ifj\ostatní\symtable.c
 	"symtable.h"
