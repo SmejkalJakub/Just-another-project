@@ -1,4 +1,7 @@
 def test(n):
-  a = n / '0.5'
-  print(a)
-test(5)
+  if n < 10:
+    print(n)
+  else:
+    pass
+a = inputi()
+test(a)

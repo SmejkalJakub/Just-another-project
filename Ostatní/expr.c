@@ -524,10 +524,9 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
 
         //; klasickem deleni je vzdy vysledek double
         case EXPR_DIV:
-
+            *finalType = DOUBLE;
             if(operand1->type == TYPE_NONE)
             {
-                *finalType = DOUBLE;
                 if(operand3->type == STRING)
                 {
                     return SEM_ERROR_COMPATIBILITY;
@@ -539,7 +538,6 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             }
             else if(operand3->type == TYPE_NONE)
             {
-                *finalType = DOUBLE;
                 if(operand1->type == STRING)
                 {
                     return SEM_ERROR_COMPATIBILITY;
@@ -547,8 +545,6 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
                 generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3, EXPR_DIV);
                 break;
             }
-
-            *finalType = DOUBLE;
 
             //stringy delit nelze :-)
             if(operand1->type == STRING || operand3->type == STRING){
@@ -577,6 +573,27 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
         //pri celosielnem je vysledek typu int
         case EXPR_SPEC_DIV:
             *finalType = INT;
+
+            if(operand1->type == TYPE_NONE)
+            {
+                if(operand3->type == STRING)
+                {
+                    return SEM_ERROR_COMPATIBILITY;
+                }
+                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1, EXPR_SPEC_DIV);
+                break;
+
+
+            }
+            else if(operand3->type == TYPE_NONE)
+            {
+                if(operand1->type == STRING)
+                {
+                    return SEM_ERROR_COMPATIBILITY;
+                }
+                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3, EXPR_SPEC_DIV);
+                break;
+            }
 
             //stringy opet nepodelime
             if(operand1->type == STRING || operand3->type == STRING){
@@ -608,6 +625,19 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
         case EXPR_NOT_EQ:
         case EXPR_EQ:
             *finalType = BOOL;
+
+            if(operand1->type == TYPE_NONE)
+            {
+                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1, EXPR_PLUS);
+                break;
+            }
+            else if(operand3->type == TYPE_NONE)
+            {
+                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3, EXPR_PLUS);
+                break;
+            }
+
+            
             //pokud jsou oba operandy cisla, udelame z nich doubly
             if (operand1->type == INT && operand3->type == DOUBLE){
                 firstOperandToDouble = true;

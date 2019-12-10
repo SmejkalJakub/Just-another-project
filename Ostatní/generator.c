@@ -357,14 +357,29 @@ void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int
         addInstruction("$if$");
         addInstruction(varId);
         addInstruction("$true$float\n");
-        if(operandNumber == 1)
+        if(exprRule == EXPR_SPEC_DIV)
         {
-            generateThirdOperandToDouble();
+            if(operandNumber == 1)
+            {
+                generateFirstOperandToInteger();
+            }
+            else if(operandNumber == 3)
+            {
+                generateThirdOperandToInteger();
+            }
         }
-        else if(operandNumber == 3)
+        else if(exprRule == EXPR_PLUS)
         {
-            generateFirstOperandToDouble();
+            if(operandNumber == 1)
+            {
+                generateThirdOperandToDouble();
+            }
+            else if(operandNumber == 3)
+            {
+                generateFirstOperandToDouble();
+            }
         }
+        
 
         addInstruction("LABEL $");
         addInstruction(funcName);
@@ -384,7 +399,7 @@ void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int
         }
     }
 
-    if(nextOperatorType == STRING)
+    if(nextOperatorType == STRING && exprRule != EXPR_DIV && exprRule != EXPR_SPEC_DIV)
     {
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
@@ -428,13 +443,16 @@ void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int
         addInstruction("$if$");
         addInstruction(varId);
         addInstruction("$true$int\n");
-        if(operandNumber == 1)
+        if(exprRule != EXPR_PLUS)
         {
-            generateFirstOperandToDouble();
-        }
-        else if(operandNumber == 3)
-        {
-            generateThirdOperandToDouble();
+            if(operandNumber == 1)
+            {
+                generateFirstOperandToDouble();
+            }
+            else if(operandNumber == 3)
+            {
+                generateThirdOperandToDouble();
+            }
         }
 
         addInstruction("LABEL $");
@@ -442,6 +460,18 @@ void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int
         addInstruction("$if$");
         addInstruction(varId);
         addInstruction("$true$float\n");
+        if(exprRule != EXPR_SPEC_DIV)
+        {
+            if(operandNumber == 1)
+            {
+                generateFirstOperandToInteger();
+            }
+            else if(operandNumber == 3)
+            {
+                generateThirdOperandToInteger();
+            }
+        }
+
     }
 }
 
