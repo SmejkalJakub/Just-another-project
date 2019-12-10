@@ -297,6 +297,8 @@ static int volaniNeboPrirazeni(CompilerData *compilerData)
             generateCall(compilerData->current_function->key);
         }
 
+        compilerData->current_function = NULL;
+
         return result;
     }
     else
@@ -328,7 +330,6 @@ static int fceDefNeboVest(CompilerData *compilerData)
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
         {
             compilerData->current_function = item;
-            compilerData->varToAssign->type = TYPE_NONE;
 
             GET_TOKEN;
             result = Hodnoty(compilerData);
@@ -345,7 +346,11 @@ static int fceDefNeboVest(CompilerData *compilerData)
                 {
                     generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", LOCAL_VAR, TEMP_VAR);
                 }
+
+                compilerData->varToAssign = TYPE_NONE;
             }
+
+            compilerData->current_function = NULL;
 
             return result;
         }
@@ -858,11 +863,11 @@ static int navratHodnoty (CompilerData *compilerData)
 
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER || compilerData->token.tokenType == TOKEN_INTEGER
     || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING || (compilerData->token.tokenType == TOKEN_KEYWORD
-     && strcmp(compilerData->token.stringValue->str, "None") == 0) || compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
+     && compilerData->token.keyword == NONE) || compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
     {
         if(compilerData->varToAssign != NULL)
         {
-            result = solveExpr(&compilerData->token, compilerData->tablesStack, STStackSearch(compilerData->tablesStack, compilerData->varToAssign->key, NULL), compilerData->current_function);
+            result = solveExpr(&compilerData->token, compilerData->tablesStack, compilerData->varToAssign, compilerData->current_function);
         }
         else
         {
@@ -1117,7 +1122,7 @@ static int navratHodnoty (CompilerData *compilerData)
                     generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", LOCAL_VAR, TEMP_VAR);
                 }
 
-                compilerData->varToAssign->type = INT;
+                compilerData->varToAssign->type = TYPE_NONE;
             }
         }
         //NAVRAT_HODNOT -> substr ( HODNOTY )
@@ -1183,7 +1188,7 @@ static int navratHodnoty (CompilerData *compilerData)
                     generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", LOCAL_VAR, TEMP_VAR);
                 }
 
-                compilerData->varToAssign->type = STRING;
+                compilerData->varToAssign->type = TYPE_NONE;
             }
         }
         //NAVRAT_HODNOT -> chr ( HODNOTY )
@@ -1238,7 +1243,7 @@ static int navratHodnoty (CompilerData *compilerData)
                     generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", LOCAL_VAR, TEMP_VAR);
                 }
 
-                compilerData->varToAssign->type = STRING;
+                compilerData->varToAssign->type = TYPE_NONE;
             }
 
         }
@@ -1300,7 +1305,7 @@ static int navratHodnoty (CompilerData *compilerData)
                     generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", LOCAL_VAR, TEMP_VAR);
                 }
 
-                compilerData->varToAssign->type = INT;
+                compilerData->varToAssign->type = TYPE_NONE;
             }
         }
     }
@@ -1332,7 +1337,7 @@ static int Parametry(CompilerData *compilerData)
         if(STInsert(compilerData->localTable, compilerData->token.stringValue->str) == NULL)
         {
             return INTERNAL_ERROR;
-        }        
+        }
 
         generateFunctionDeclarePassedParams(compilerData->current_function->numberOfParams, compilerData->token.stringValue->str);
 
