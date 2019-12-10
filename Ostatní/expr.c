@@ -465,7 +465,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             if(operand1->type == TYPE_NONE)
             {
                 *finalType = TYPE_NONE;
-                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1);
+                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1, EXPR_PLUS);
                 if(operand3->type != STRING)
                 {
                     break;
@@ -478,7 +478,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             else if(operand3->type == TYPE_NONE)
             {
                 *finalType = TYPE_NONE;
-                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3);
+                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3, EXPR_PLUS);
                 if(operand1->type != STRING)
                 {
                     break;
@@ -528,7 +528,11 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             if(operand1->type == TYPE_NONE)
             {
                 *finalType = DOUBLE;
-                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1);
+                if(operand3->type == STRING)
+                {
+                    return SEM_ERROR_COMPATIBILITY;
+                }
+                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1, EXPR_DIV);
                 break;
 
 
@@ -536,7 +540,11 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             else if(operand3->type == TYPE_NONE)
             {
                 *finalType = DOUBLE;
-                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3);
+                if(operand1->type == STRING)
+                {
+                    return SEM_ERROR_COMPATIBILITY;
+                }
+                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3, EXPR_DIV);
                 break;
             }
 

@@ -308,7 +308,7 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken, bool g
 
 }
 
-void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int operandNumber)
+void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int operandNumber, int exprRule)
 {
     addInstruction("DEFVAR LF@");
     addInstruction(varId);
@@ -371,6 +371,17 @@ void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int
         addInstruction("$if$");
         addInstruction(varId);
         addInstruction("$true$int\n");
+        if(exprRule == EXPR_DIV)
+        {
+            if(operandNumber == 1)
+            {
+                generateFirstOperandToDouble();
+            }
+            else if(operandNumber == 3)
+            {
+                generateThirdOperandToDouble();
+            }
+        }
     }
 
     if(nextOperatorType == STRING)

@@ -1,4 +1,4 @@
 def test(n):
-  a = 5 / n
+  a = n / '0.5'
   print(a)
 test(5)
