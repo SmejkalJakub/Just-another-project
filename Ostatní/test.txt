@@ -1,7 +1,9 @@
-def test(n):
+def test(n, f):
   if n < 10:
     print(n)
   else:
     pass
+    return f
 a = inputi()
-test(a)
+b = test(a, 13)
+print(b)

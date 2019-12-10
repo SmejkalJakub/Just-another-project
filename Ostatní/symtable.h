@@ -9,6 +9,7 @@
 #define STRING 3
 #define BOOL 4
 #define SPEC_TYPE_NONE 5
+#define RETURN_TYPE 6
 #define EMPTY_TYPE -99
 
 #define ST_SIZE 65003

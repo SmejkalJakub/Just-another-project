@@ -825,8 +825,6 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
         return SYNTAX_ERROR;
     }
 
-
-
     else if(assignVar != NULL)
     {
         if(assignVar->type == EMPTY_TYPE)

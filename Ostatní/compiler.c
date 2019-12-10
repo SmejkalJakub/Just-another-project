@@ -400,7 +400,9 @@ static int Prikaz (CompilerData *compilerData)
             GET_TOKEN;
             if(compilerData->token.tokenType != TOKEN_EOL)
             {
-                result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL, compilerData->current_function);
+                symTableItem temp;
+                temp.type = RETURN_TYPE;
+                result = solveExpr(&compilerData->token, compilerData->tablesStack, &temp, compilerData->current_function);
 
                 if(result != 0)
                 {
