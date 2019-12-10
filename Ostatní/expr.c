@@ -7,6 +7,8 @@ symStack stack;
 
 bool firstConcat = true;
 
+symTableItem *currentFunc;
+
 int precedenceTable[TABLE_SIZE][TABLE_SIZE] =
 {
     {R, S, R, S, S, R, R},
@@ -93,7 +95,6 @@ precedenceTabSym tokenToSymbol(tokenStruct *token)
 
 int getTokenType(tokenStruct *token, STStack *symTableStack)
 {
-
     symTableItem *temp;
 
     if(token->tokenType == TOKEN_INTEGER)
@@ -116,7 +117,7 @@ int getTokenType(tokenStruct *token, STStack *symTableStack)
     {
         if((temp = STStackSearch(symTableStack, token->stringValue->str, NULL)) == NULL)
         {
-            return TYPE_NONE;
+            return EMPTY_TYPE;
         }
         else
         {
@@ -345,6 +346,7 @@ int reduce()
         int rule;
         int finalType;
 
+
         if(hasStop)
         {
             if(itemsBeforeStop == 1)
@@ -400,11 +402,31 @@ int reduce()
                 generateExpresion(rule);
             }
         }
+
+        char *savedId = malloc(80);
+
+        if(symStackTop(&stack)->type == TYPE_NONE)
+        {
+            strcpy(savedId, symStackTop(&stack)->id);
+        }
+        else
+        {
+            savedId = NULL;
+        }
+        
+
         for(int i = 0; i <= itemsBeforeStop; i++)
         {
             symStackPop(&stack);
         }
+
         symStackPush(&stack, SYM_NON_TERM, finalType);
+
+        if(savedId != NULL)
+        {
+            strcpy(symStackTop(&stack)->id, savedId);
+        }
+
         if(isFinalZero)
         {
             symStackTop(&stack)->isZero = true;
@@ -414,7 +436,7 @@ int reduce()
             symStackTop(&stack)->isZero = false;
         }
         
-
+        free(savedId);
         return 0;
 }
 
@@ -440,6 +462,33 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
         case EXPR_MINUS:
         case EXPR_MUL:
 
+            if(operand1->type == TYPE_NONE)
+            {
+                *finalType = TYPE_NONE;
+                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1);
+                if(operand3->type != STRING)
+                {
+                    break;
+                }
+                else
+                {
+                    operand1->type = STRING;
+                }
+            }
+            else if(operand3->type == TYPE_NONE)
+            {
+                *finalType = TYPE_NONE;
+                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3);
+                if(operand1->type != STRING)
+                {
+                    break;
+                }
+                else
+                {
+                    operand3->type = STRING;
+                }
+                
+            }
              //dva retezce jde jen scitat - konkatenace
             if(operand1->type == STRING && operand3->type == STRING && rule == EXPR_PLUS){
                 *finalType = STRING;
@@ -473,8 +522,24 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             }
             break;
 
-        //pri klasickem deleni je vzdy vysledek double
+        //; klasickem deleni je vzdy vysledek double
         case EXPR_DIV:
+
+            if(operand1->type == TYPE_NONE)
+            {
+                *finalType = DOUBLE;
+                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1);
+                break;
+
+
+            }
+            else if(operand3->type == TYPE_NONE)
+            {
+                *finalType = DOUBLE;
+                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3);
+                break;
+            }
+
             *finalType = DOUBLE;
 
             //stringy delit nelze :-)
@@ -583,7 +648,6 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
 {
     symStackPushStop(&stack);
 
-
     symStackPush(&stack, currentSym, getTokenType(token, symTableStack));
     if(token->tokenType == TOKEN_INTEGER && token->integerValue == 0)
     {
@@ -603,12 +667,13 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
     bool global;
 
 
-
     if(symbolToType(currentSym) == PREC_TAB_ID)
     {
+        symStackTop(&stack)->id = malloc(80);
         if(currentSym == SYM_ID)
         {
             STStackSearch(symTableStack, token->stringValue->str, &global);
+            strcpy(symStackTop(&stack)->id, token->stringValue->str);
             if(global)
             {
                 generateStackPush(token, true);
@@ -628,9 +693,11 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
 }
 
 
-int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVar)
+int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVar, symTableItem *currentFunction)
 {
     int returnValue;
+
+    currentFunc = currentFunction;
 
     bool end = false;
     precedenceTabSym currentSym;
@@ -646,7 +713,6 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
 
     int currentSymType;
     int symStackTopSymType;
-
 
     while(!end)
     {

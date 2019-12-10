@@ -3,6 +3,7 @@
 
 static unsigned long hashFunction(const char *str)
 {
+
     unsigned long h=0;
     const unsigned char *p;
 
@@ -26,6 +27,7 @@ void STInit(symTable *STptr)
 
 symTableItem *STSearch(symTable* STptr, char *key)
 {
+
     for(symTableItem* item = (*STptr)[hashFunction(key)]; item; item = item->next)
     {
         if(strcmp(item->key, key) == 0)

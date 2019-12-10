@@ -21,6 +21,7 @@ bool symStackPush(symStack* stack, precedenceTabSym symbol, int type)
         newItem->symbol = symbol;
         newItem->type = type;
         newItem->nextItem = stack->top;
+		newItem->id = malloc(80);
 
         stack->top = newItem;
 

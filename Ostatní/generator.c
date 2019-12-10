@@ -308,6 +308,132 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken, bool g
 
 }
 
+void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int operandNumber)
+{
+    addInstruction("DEFVAR LF@");
+    addInstruction(varId);
+    addInstruction("$type\n");
+
+    addInstruction("DEFVAR LF@");
+    addInstruction(varId);
+    addInstruction("$tmp\n");
+
+    addInstruction("TYPE LF@");
+    addInstruction(varId);
+    addInstruction("$type ");
+    addInstruction("LF@");
+    addInstruction(varId);
+    addInstruction("\n");
+
+    addInstruction("MOVE LF@");
+    addInstruction(varId);
+    addInstruction("$tmp ");
+    addInstruction("LF@");
+    addInstruction(varId);
+    addInstruction("\n");
+
+    if(nextOperatorType == INT)
+    {
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(varId);
+        addInstruction("$true$float LF@");
+        addInstruction(varId);
+        addInstruction("$type string@float\n");
+
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(varId);
+        addInstruction("$true$int LF@");
+        addInstruction(varId);
+        addInstruction("$type string@int\n");
+
+        addInstruction("EXIT int@4\n");
+
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(varId);
+        addInstruction("$true$float\n");
+        if(operandNumber == 1)
+        {
+            generateThirdOperandToDouble();
+        }
+        else if(operandNumber == 3)
+        {
+            generateFirstOperandToDouble();
+        }
+
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(varId);
+        addInstruction("$true$int\n");
+    }
+
+    if(nextOperatorType == STRING)
+    {
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(varId);
+        addInstruction("$true$string LF@");
+        addInstruction(varId);
+        addInstruction("$type string@string\n");
+
+        addInstruction("EXIT int@4\n");
+
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(varId);
+        addInstruction("$true$string\n");
+    }
+
+    if(nextOperatorType == DOUBLE)
+    {
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(varId);
+        addInstruction("$true$float LF@");
+        addInstruction(varId);
+        addInstruction("$type string@float\n");
+
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(varId);
+        addInstruction("$true$int LF@");
+        addInstruction(varId);
+        addInstruction("$type string@int\n");
+
+        addInstruction("EXIT int@4\n");
+
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(varId);
+        addInstruction("$true$int\n");
+        if(operandNumber == 1)
+        {
+            generateFirstOperandToDouble();
+        }
+        else if(operandNumber == 3)
+        {
+            generateThirdOperandToDouble();
+        }
+
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(varId);
+        addInstruction("$true$float\n");
+    }
+}
+
 void generateFunctionDeclarePassedParams(int paramNumber, char *paramName)
 {
     char str[12];

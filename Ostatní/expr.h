@@ -70,6 +70,6 @@ typedef enum
 } precedenceTabSym;
 
 bool getitemsBeforeStop(int *itemsBeforeStop);
-int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVar);
+int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVar, symTableItem *currentFunction);
 
 #endif

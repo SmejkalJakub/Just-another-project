@@ -10,6 +10,7 @@ typedef struct stackItem
 	int type;
 	struct stackItem *nextItem;
 	bool isZero;
+	char *id;
 } symStackItem;
 
 

@@ -38,7 +38,6 @@ symTable *STStackPush(STStack *stack)
 
     stack->top = newItem;
 
-
     return newItem->symTablePtr;
 }
 
@@ -87,7 +86,6 @@ void STStackDelete(STStack *stack)
 symTableItem *STStackSearch(STStack *stack, char *key, bool *global)
 {
     STStackItem *temp = stack->top;
-
     symTableItem *retValue;
 
     while (temp != NULL)

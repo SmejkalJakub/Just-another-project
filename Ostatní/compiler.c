@@ -400,7 +400,7 @@ static int Prikaz (CompilerData *compilerData)
             GET_TOKEN;
             if(compilerData->token.tokenType != TOKEN_EOL)
             {
-                result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL);
+                result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL, compilerData->current_function);
 
                 if(result != 0)
                 {
@@ -436,8 +436,7 @@ static int Prikaz (CompilerData *compilerData)
         int numberOfIfs = compilerData->numberOfIfs;
 
         compilerData->numberOfIfs++;
-        printf("%d\n", compilerData->token.tokenType);
-        result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL);
+        result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL, compilerData->current_function);
 
         if(result != 0)
         {
@@ -544,7 +543,7 @@ static int Prikaz (CompilerData *compilerData)
 
         generateWhileLabel(numberOfWhiles, compilerData->current_function);
 
-        result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL);
+        result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL, compilerData->current_function);
 
         if(result != 0)
         {
@@ -646,7 +645,6 @@ static int Hodnota(CompilerData *compilerData){
     char paramType;
 
     //Test, zda se jedn� o vestav�nou funkci.
-    //printf("jsem tu %d\n", compilerData->current_function->params->actIndex);
     if(compilerData->current_function->params->actIndex == 0)
     {
         if(compilerData->token.tokenType == TOKEN_INTEGER || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING)
@@ -862,13 +860,13 @@ static int navratHodnoty (CompilerData *compilerData)
     {
         if(compilerData->varToAssign != NULL)
         {
-            result = solveExpr(&compilerData->token, compilerData->tablesStack, STStackSearch(compilerData->tablesStack, compilerData->varToAssign->key, NULL));
+            result = solveExpr(&compilerData->token, compilerData->tablesStack, STStackSearch(compilerData->tablesStack, compilerData->varToAssign->key, NULL), compilerData->current_function);
         }
         else
         {
             symTableItem temp;
             temp.type = EMPTY_TYPE;
-            result = solveExpr(&compilerData->token, compilerData->tablesStack, &temp);
+            result = solveExpr(&compilerData->token, compilerData->tablesStack, &temp, compilerData->current_function);
         }
 
         if(result != 0)
@@ -1332,7 +1330,7 @@ static int Parametry(CompilerData *compilerData)
         if(STInsert(compilerData->localTable, compilerData->token.stringValue->str) == NULL)
         {
             return INTERNAL_ERROR;
-        }
+        }        
 
         generateFunctionDeclarePassedParams(compilerData->current_function->numberOfParams, compilerData->token.stringValue->str);
 
@@ -1467,7 +1465,7 @@ int main(int argc, char *argv[])
         }
         return result;
     }
-
     printf("%s", dynamicString.str);
+
     fclose(sourceCode);
 }

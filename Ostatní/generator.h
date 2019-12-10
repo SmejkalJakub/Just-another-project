@@ -39,6 +39,8 @@ void generateWhileEnd(int numberOfPrevWhiles, symTableItem *functionName);
 void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken, bool global);
 void generateFunctionDeclarePassedParams(int paramNumber, char *paramName);
 void generateSaveLastExpresionValue();
+void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int operandNumber);
+
 
 void generateThirdOperandToDouble();
 void generateThirdOperandToInteger();
