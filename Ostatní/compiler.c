@@ -105,6 +105,11 @@ static int Prog (CompilerData *compilerData)
     //pokracovani def fce
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
     {
+        if((STSearch(compilerData->globalTable, compilerData->token.stringValue->str)) != NULL)
+        {
+            return 3;
+        }
+
         symTableItem *newTabItem = STInsert(compilerData->globalTable, compilerData->token.stringValue->str);
 
         if(!newTabItem)
@@ -128,7 +133,12 @@ static int Prog (CompilerData *compilerData)
     if (compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
     {
         GET_TOKEN;
-        Parametry(compilerData);
+        result = Parametry(compilerData);
+
+        if(result != 0)
+        {
+            return result;
+        }
     }
     else
     {
@@ -156,7 +166,12 @@ static int Prog (CompilerData *compilerData)
     if(compilerData->token.tokenType == TOKEN_INDENT)
     {
         GET_TOKEN;
-        prikazySekv(compilerData);
+        result = prikazySekv(compilerData);
+
+        if(result != 0)
+        {
+            return result;
+        }
     }
     else
     {
@@ -255,6 +270,10 @@ static int volaniNeboPrirazeni(CompilerData *compilerData)
                 generateVariableDef(compilerData->varToAssign->key, LOCAL_VAR);
             }
         }
+        else if(compilerData->varToAssign->function == true)
+        {
+            return 3;
+        }
 
         GET_TOKEN;
         return fceDefNeboVest(compilerData);
@@ -262,6 +281,11 @@ static int volaniNeboPrirazeni(CompilerData *compilerData)
     //VOLANI_NEBO_PRIRAZENI -> ( HODNOTY )
     else if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
     {
+        if(compilerData->global == true && defNewVar == true)
+        {
+            return 3;
+        }
+
         compilerData->current_function = compilerData->varToAssign;
         compilerData->varToAssign = NULL;
 
@@ -285,14 +309,45 @@ static int fceDefNeboVest(CompilerData *compilerData)
 {
     printf("fceDefNeboVest\n");
     //FCE_DEF_NEBO_VEST -> id ( HODNOTY )
-    if(compilerData->token.tokenType == TOKEN_IDENTIFIER && (STSearch(compilerData->globalTable, compilerData->token.stringValue->str)->function))
+    symTableItem *item;
+
+    if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
     {
+        if((item = STSearch(compilerData->globalTable, compilerData->token.stringValue->str)) == NULL)
+        {
+            return navratHodnoty(compilerData);
+        }
+
+        if(item->function == false)
+        {
+            return navratHodnoty(compilerData);
+        }
+
         GET_TOKEN;
 
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
         {
+            compilerData->current_function = item;
+            compilerData->varToAssign->type = TYPE_NONE;
+
             GET_TOKEN;
-            return Hodnoty(compilerData);
+            result = Hodnoty(compilerData);
+
+            if(result == 0)
+            {
+                generateCall(compilerData->current_function->key);
+
+                if(compilerData->global)
+                {
+                    generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", GLOBAL_VAR, TEMP_VAR);
+                }
+                else
+                {
+                    generateMoveVariableToVariable(compilerData->varToAssign->key, "%retval", LOCAL_VAR, TEMP_VAR);
+                }
+            }
+
+            return result;
         }
         else
         {
@@ -381,7 +436,7 @@ static int Prikaz (CompilerData *compilerData)
         int numberOfIfs = compilerData->numberOfIfs;
 
         compilerData->numberOfIfs++;
-
+        printf("%d\n", compilerData->token.tokenType);
         result = solveExpr(&compilerData->token, compilerData->tablesStack, NULL);
 
         if(result != 0)
@@ -1264,7 +1319,7 @@ static int Parametry(CompilerData *compilerData)
     printf("parametry\n");
 
     STStackPush(compilerData->tablesStack);
-    
+
     compilerData->localTable = STStackTop(compilerData->tablesStack);
 
     if(compilerData->localTable == NULL)
@@ -1312,6 +1367,7 @@ static int dalsiParametr (CompilerData *compilerData)
             {
                 return INTERNAL_ERROR;
             }
+
             generateFunctionDeclarePassedParams(compilerData->current_function->numberOfParams, compilerData->token.stringValue->str);
 
             compilerData->current_function->numberOfParams++;
@@ -1383,27 +1439,28 @@ int main(int argc, char *argv[])
         switch (result)
         {
             case LEX_ERROR:
-                printf("LEX ERROR");
+                printf("LEX ERROR\n");
                 break;
             case SYNTAX_ERROR:
-                printf("SYNTAX ERROR");
+                printf("SYNTAX ERROR\n");
                 break;
             case SEM_ERROR_DEF:
-                printf("SEMANTIC ERROR UNDEFINED");
+                printf("SEMANTIC ERROR UNDEFINED\n");
+                break;
             case SEM_ERROR_COMPATIBILITY:
-                printf("SEMANTIC ERROR TYPES NOT COMPATIBLE");
+                printf("SEMANTIC ERROR TYPES NOT COMPATIBLE\n");
                 break;
             case SEM_ERROR_PARAMS:
-                printf("SEMANTIC ERROR WRONG NUMBER OF PARAMS");
+                printf("SEMANTIC ERROR WRONG NUMBER OF PARAMS\n");
                 break;
             case SEM_ERROR:
-                printf("SEMANTIC ERROR");
+                printf("SEMANTIC ERROR\n");
                 break;
             case SEM_ERROR_DIV_ZERO:
-                printf("ZERO DIVISION ERROR");
+                printf("ZERO DIVISION ERROR\n");
                 break;
             case INTERNAL_ERROR:
-                printf("ERROR INTERNAL");
+                printf("ERROR INTERNAL\n");
                 break;
             default:
                 break;
