@@ -588,9 +588,10 @@ static int Hodnota(CompilerData *compilerData){
 
     static int actParam = 0;
 
-    char paramType = compilerData->current_function->params->str[actParam];
+    char paramType;
 
     //Test, zda se jedná o vestavìnou funkci.
+    //printf("jsem tu %d\n", compilerData->current_function->params->actIndex);
     if(compilerData->current_function->params->actIndex == 0)
     {
         if(compilerData->token.tokenType == TOKEN_INTEGER || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING)
@@ -611,6 +612,8 @@ static int Hodnota(CompilerData *compilerData){
     }
     else
     {
+        paramType = compilerData->current_function->params->str[actParam];
+
         switch(compilerData->token.tokenType)
         {
             case TOKEN_IDENTIFIER:
