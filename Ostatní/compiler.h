@@ -15,7 +15,7 @@
 
 
 typedef struct {
-    symTable localTable;
+    symTable *localTable;
     symTable *globalTable;
 
     STStack *tablesStack;

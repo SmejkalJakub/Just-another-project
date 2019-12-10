@@ -37,6 +37,7 @@ void generateWhileLabel(int numberOfPrevWhiles, symTableItem *functionName);
 void generateWhileStart(int numberOfPrevWhiles, symTableItem *functionName);
 void generateWhileEnd(int numberOfPrevWhiles, symTableItem *functionName);
 void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken, bool global);
+void generateFunctionDeclarePassedParams(int paramNumber, char *paramName);
 void generateSaveLastExpresionValue();
 
 void generateThirdOperandToDouble();

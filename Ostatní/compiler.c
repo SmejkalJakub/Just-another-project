@@ -590,7 +590,7 @@ static int Hodnota(CompilerData *compilerData){
 
     char paramType;
 
-    //Test, zda se jedná o vestavìnou funkci.
+    //Test, zda se jednï¿½ o vestavï¿½nou funkci.
     //printf("jsem tu %d\n", compilerData->current_function->params->actIndex);
     if(compilerData->current_function->params->actIndex == 0)
     {
@@ -1263,7 +1263,9 @@ static int Parametry(CompilerData *compilerData)
 {
     printf("parametry\n");
 
-    compilerData->localTable = STStackPush(compilerData->tablesStack);
+    STStackPush(compilerData->tablesStack);
+    
+    compilerData->localTable = STStackTop(compilerData->tablesStack);
 
     if(compilerData->localTable == NULL)
     {
@@ -1276,6 +1278,8 @@ static int Parametry(CompilerData *compilerData)
         {
             return INTERNAL_ERROR;
         }
+
+        generateFunctionDeclarePassedParams(compilerData->current_function->numberOfParams, compilerData->token.stringValue->str);
 
         compilerData->current_function->numberOfParams++;
 
@@ -1308,6 +1312,7 @@ static int dalsiParametr (CompilerData *compilerData)
             {
                 return INTERNAL_ERROR;
             }
+            generateFunctionDeclarePassedParams(compilerData->current_function->numberOfParams, compilerData->token.stringValue->str);
 
             compilerData->current_function->numberOfParams++;
 

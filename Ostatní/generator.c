@@ -308,6 +308,22 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken, bool g
 
 }
 
+void generateFunctionDeclarePassedParams(int paramNumber, char *paramName)
+{
+    char str[12];
+    sprintf(str, "%d", paramNumber);
+
+	addInstruction("DEFVAR LF@"); 
+    addInstruction(paramName); 
+    addInstruction("\n");
+
+	addInstruction("MOVE LF@"); 
+    addInstruction(paramName); 
+    addInstruction(" LF@%"); 
+    addInstruction(str);
+    addInstruction("\n");
+}
+
 void generateFunctionLen()
 {
     addInstruction("\n\nLABEL $len\n");
