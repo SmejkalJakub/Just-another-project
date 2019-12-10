@@ -253,10 +253,6 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken, bool g
     char str[12];
     sprintf(str, "%d", paramNumber);
 
-    if(paramNumber == 0)
-    {
-        addInstruction("CREATEFRAME\n");
-    }
     if(paramToken->tokenType == TOKEN_INTEGER || paramToken->tokenType == TOKEN_DOUBLE
     || paramToken->tokenType == TOKEN_STRING || paramToken->tokenType == TOKEN_IDENTIFIER)
     {
@@ -426,16 +422,29 @@ void generateFunctionOrd()
 
 void generateFunctionStart(symTableItem *functionName)
 {
+    static int labelCounter = 0;
+
+    char str[13];
+    sprintf(str, "l%d", labelCounter);
+
+    generateJump(str);
     addInstruction("LABEL $");
     addInstruction(functionName->key);
     addInstruction("\n");
     addInstruction("PUSHFRAME\n");
     addInstruction("DEFVAR LF@%retval\n");
     addInstruction("MOVE LF@%retval string@\n\n");
+
+    labelCounter++;
 }
 
 void generateFunctionEnd(symTableItem *functionName)
 {
+    static int labelCounter = 0;
+
+    char str[13];
+    sprintf(str, "l%d", labelCounter);
+
     addInstruction("MOVE LF@%retval string@\n");
     addInstruction("LABEL $");
     addInstruction(functionName->key);
@@ -443,6 +452,9 @@ void generateFunctionEnd(symTableItem *functionName)
     addInstruction("\n");
     addInstruction("POPFRAME\n");
     addInstruction("RETURN\n");
+    generateLabel(str);
+
+    labelCounter++;
 }
 
 void generateFunctionReturn(symTableItem *functionName, bool empty)

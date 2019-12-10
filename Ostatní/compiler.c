@@ -3,12 +3,12 @@
 
 int result;
 
-#define GET_TOKEN                                                                 \
-        result = getToken(&compilerData->token);                                     \
-        if(result != 0)                                                         \
-        {                                                                       \
-            return result;                                                        \
-        }                                                                           \
+#define GET_TOKEN \
+        result = getToken(&compilerData->token); \
+        if(result != 0) \
+        { \
+            return result; \
+        } \
 
 /*
 
@@ -61,7 +61,7 @@ int compilerDataInit(CompilerData* compilerData){
 
     compilerData -> inFunction = NULL;
 	compilerData -> inWhileOrIf = NULL;
-    
+
     compilerData->varToAssign = NULL;
 
 	return 0;
@@ -135,15 +135,6 @@ static int Prog (CompilerData *compilerData)
         return SYNTAX_ERROR;
     }
 
-    if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET)
-    {
-        GET_TOKEN;
-    }
-    else
-    {
-        return SYNTAX_ERROR;
-    }
-
     if(compilerData->token.tokenType == TOKEN_DOUBLE_DOT)
     {
         GET_TOKEN;
@@ -165,8 +156,6 @@ static int Prog (CompilerData *compilerData)
     if(compilerData->token.tokenType == TOKEN_INDENT)
     {
         GET_TOKEN;
-        //vytvoreni tabulky symbolu na zasobnik tabulek symbolu
-
         prikazySekv(compilerData);
     }
     else
@@ -174,7 +163,14 @@ static int Prog (CompilerData *compilerData)
         return SYNTAX_ERROR;
     }
 
-    //popnuti tabuky symbolu ze zasobniku
+    GET_TOKEN;
+
+    generateFunctionEnd(compilerData->current_function);
+
+    STStackPop(compilerData->tablesStack);
+
+    compilerData->localTable = NULL;
+    compilerData->current_function = NULL;
 
     compilerData->inFunction = false;
     return Prog(compilerData);
@@ -201,7 +197,7 @@ static int dalsiPrikaz(CompilerData *compilerData)
 {
     //DEDENT = konec aktualni sekvence prikazu
     //DALSI_PRIKAZ -> eps
-    printf("dalsiPrikaz  %d\n", compilerData->token.tokenType);
+    printf("dalsiPrikaz\n");
 
     if (compilerData->token.tokenType == TOKEN_DEDENT)
     {
@@ -266,8 +262,18 @@ static int volaniNeboPrirazeni(CompilerData *compilerData)
     //VOLANI_NEBO_PRIRAZENI -> ( HODNOTY )
     else if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
     {
+        compilerData->current_function = compilerData->varToAssign;
+        compilerData->varToAssign = NULL;
+
         GET_TOKEN;
-        return Hodnoty(compilerData);
+        result = Hodnoty(compilerData);
+
+        if(result == 0)
+        {
+            generateCall(compilerData->current_function->key);
+        }
+
+        return result;
     }
     else
     {
@@ -575,17 +581,24 @@ static int Hodnota(CompilerData *compilerData){
 
     printf("hodnota\n");
     printf("%d\n", compilerData->token.tokenType);
-    static int actParam = 0;
-
-    char paramType = compilerData->current_function->params->str[actParam];
 
     symTableItem *item;
 
     bool global = true;
 
-    switch(compilerData->token.tokenType)
+    static int actParam = 0;
+
+    char paramType = compilerData->current_function->params->str[actParam];
+
+    //Test, zda se jedná o vestavìnou funkci.
+    if(compilerData->current_function->params->actIndex == 0)
     {
-        case TOKEN_IDENTIFIER:
+        if(compilerData->token.tokenType == TOKEN_INTEGER || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING)
+        {
+            generateFunctionParamsPass(actParam, &compilerData->token, global);
+        }
+        else if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
+        {
             item = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &global);
 
             if(item == NULL)
@@ -593,86 +606,102 @@ static int Hodnota(CompilerData *compilerData){
                 return 3;
             }
 
-            switch(item->type)
-            {
-                case INT:
-                    if(paramType == 'i')
-                    {
-                        generateFunctionParamsPass(actParam, &compilerData->token, global);
-                    }
-                    else if(paramType == 'f')
-                    {
-                        compilerData->token.tokenType = TOKEN_DOUBLE;
-                        compilerData->token.doubleValue = (double)compilerData->token.integerValue;
-                        generateFunctionParamsPass(actParam, &compilerData->token, global);
-                    }
-                    else
-                    {
+            generateFunctionParamsPass(actParam, &compilerData->token, global);
+        }
+    }
+    else
+    {
+        switch(compilerData->token.tokenType)
+        {
+            case TOKEN_IDENTIFIER:
+                item = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &global);
+
+                if(item == NULL)
+                {
+                    return 3;
+                }
+
+                switch(item->type)
+                {
+                    case INT:
+                        if(paramType == 'i')
+                        {
+                            generateFunctionParamsPass(actParam, &compilerData->token, global);
+                        }
+                        else if(paramType == 'f')
+                        {
+                            compilerData->token.tokenType = TOKEN_DOUBLE;
+                            compilerData->token.doubleValue = (double)compilerData->token.integerValue;
+                            generateFunctionParamsPass(actParam, &compilerData->token, global);
+                        }
+                        else
+                        {
+                            return 4;
+                        }
+                        break;
+                    case DOUBLE:
+                        if(paramType == 'f')
+                        {
+                            generateFunctionParamsPass(actParam, &compilerData->token, global);
+                        }
+                        else
+                        {
+                            return 4;
+                        }
+                        break;
+                    case STRING:
+                        if(paramType == 's')
+                        {
+                            generateFunctionParamsPass(actParam, &compilerData->token, global);
+                        }
+                        else
+                        {
+                            return 4;
+                        }
+                        break;
+                    default:
                         return 4;
                     }
-                    break;
-                case DOUBLE:
-                    if(paramType == 'f')
-                    {
-                        generateFunctionParamsPass(actParam, &compilerData->token, global);
-                    }
-                    else
-                    {
-                        return 4;
-                    }
-                    break;
-                case STRING:
-                    if(paramType == 's')
-                    {
-                        generateFunctionParamsPass(actParam, &compilerData->token, global);
-                    }
-                    else
-                    {
-                        return 4;
-                    }
-                    break;
-                default:
+                break;
+            case TOKEN_INTEGER:
+                if(paramType == 'i')
+                {
+                    generateFunctionParamsPass(actParam, &compilerData->token, global);
+                }
+                else if(paramType == 'f')
+                {
+                    compilerData->token.tokenType = TOKEN_DOUBLE;
+                    compilerData->token.doubleValue = (double)compilerData->token.integerValue;
+                    generateFunctionParamsPass(actParam, &compilerData->token, global);
+                }
+                else
+                {
                     return 4;
                 }
-            break;
-        case TOKEN_INTEGER:
-            if(paramType == 'i')
-            {
-                generateFunctionParamsPass(actParam, &compilerData->token, global);
-            }
-            else if(paramType == 'f')
-            {
-                compilerData->token.tokenType = TOKEN_DOUBLE;
-                compilerData->token.doubleValue = (double)compilerData->token.integerValue;
-                generateFunctionParamsPass(actParam, &compilerData->token, global);
-            }
-            else
-            {
-                return 4;
-            }
-            break;
-        case TOKEN_DOUBLE:
-            if(paramType == 'f')
-            {
-                generateFunctionParamsPass(actParam, &compilerData->token, global);
-            }
-            else
-            {
-                return 4;
-            }
-            break;
-        case TOKEN_STRING:
-            if(paramType == 's')
-            {
-                generateFunctionParamsPass(actParam, &compilerData->token, global);
-            }
-            else
-            {
-                return 4;
-            }
-            break;
-        default:
-            return SYNTAX_ERROR;
+                break;
+            case TOKEN_DOUBLE:
+                if(paramType == 'f')
+                {
+                    generateFunctionParamsPass(actParam, &compilerData->token, global);
+                }
+                else
+                {
+                    return 4;
+                }
+                break;
+            case TOKEN_STRING:
+                if(paramType == 's')
+                {
+                    generateFunctionParamsPass(actParam, &compilerData->token, global);
+                }
+                else
+                {
+                    return 4;
+                }
+                break;
+            default:
+                return SYNTAX_ERROR;
+        }
     }
 
     actParam++;
@@ -717,6 +746,7 @@ static int dalsiHodnota (CompilerData *compilerData)
     {
         if(numOfParams == compilerData->current_function->numberOfParams)
         {
+            GET_TOKEN;
             numOfParams = 1;
             return 0;
         }
@@ -734,6 +764,9 @@ static int dalsiHodnota (CompilerData *compilerData)
 static int Hodnoty(CompilerData *compilerData)
 {
     printf("hodnoty\n");
+
+    addInstruction("CREATEFRAME\n");
+
     if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET)
     {
         if(compilerData->current_function->numberOfParams != 0)
@@ -741,7 +774,7 @@ static int Hodnoty(CompilerData *compilerData)
             return 5;
         }
         else
-        {
+        {   GET_TOKEN;
             return 0;
         }
     }
@@ -779,7 +812,7 @@ static int navratHodnoty (CompilerData *compilerData)
             temp.type = EMPTY_TYPE;
             result = solveExpr(&compilerData->token, compilerData->tablesStack, &temp);
         }
-        
+
         if(result != 0)
         {
             return result;
@@ -1013,8 +1046,6 @@ static int navratHodnoty (CompilerData *compilerData)
                 return result;
             }
 
-            GET_TOKEN;
-
             generateCall("len");
 
             if(compilerData->varToAssign != NULL)
@@ -1081,8 +1112,6 @@ static int navratHodnoty (CompilerData *compilerData)
                 return result;
             }
 
-            GET_TOKEN;
-
             generateCall("substr");
 
             if(compilerData->varToAssign != NULL)
@@ -1138,8 +1167,6 @@ static int navratHodnoty (CompilerData *compilerData)
             {
                 return result;
             }
-
-            GET_TOKEN;
 
             generateCall("chr");
             if(compilerData->varToAssign != NULL)
@@ -1202,8 +1229,6 @@ static int navratHodnoty (CompilerData *compilerData)
                 return result;
             }
 
-            GET_TOKEN;
-
             generateCall("ord");
 
             if(compilerData->varToAssign != NULL)
@@ -1234,33 +1259,56 @@ static int navratHodnoty (CompilerData *compilerData)
 static int Parametry(CompilerData *compilerData)
 {
     printf("parametry\n");
+
+    compilerData->localTable = STStackPush(compilerData->tablesStack);
+
+    if(compilerData->localTable == NULL)
+    {
+        return INTERNAL_ERROR;
+    }
+
     if (compilerData->token.tokenType == TOKEN_IDENTIFIER)
     {
-        //STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
-        GET_TOKEN;
+        if(STInsert(compilerData->localTable, compilerData->token.stringValue->str) == NULL)
+        {
+            return INTERNAL_ERROR;
+        }
 
+        compilerData->current_function->numberOfParams++;
+
+        GET_TOKEN;
         return dalsiParametr(compilerData);
+    }
+    else if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET)
+    {
+        GET_TOKEN;
+        return 0;
     }
     else
     {
-        return 0;
+        return SYNTAX_ERROR;
     }
-
 }
 
 
 static int dalsiParametr (CompilerData *compilerData)
 {
     printf("dalsiParametr\n");
+
     if(compilerData->token.tokenType == TOKEN_COLON)
     {
         GET_TOKEN;
 
         if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
         {
-            //STInsert(&compilerData->localTable, compilerData->token.stringValue->str);
-            GET_TOKEN;
+            if(STInsert(compilerData->localTable, compilerData->token.stringValue->str) == NULL)
+            {
+                return INTERNAL_ERROR;
+            }
 
+            compilerData->current_function->numberOfParams++;
+
+            GET_TOKEN;
             return dalsiParametr(compilerData);
         }
         else
@@ -1268,9 +1316,14 @@ static int dalsiParametr (CompilerData *compilerData)
             return SYNTAX_ERROR;
         }
     }
+    else if(compilerData->token.tokenType == TOKEN_RIGHT_BRACKET)
+    {
+        GET_TOKEN;
+        return 0;
+    }
     else
     {
-       return 0;
+        return SYNTAX_ERROR;
     }
 }
 
