@@ -70,7 +70,6 @@ int compilerDataInit(CompilerData* compilerData){
 
 static int Prog (CompilerData *compilerData)
 {
-    printf("prog\n");
 
     //PROG -> def id ( PARAMS ) : eol indent PRIKAZY_SEK dedent PROG
     if((compilerData->token.tokenType == TOKEN_KEYWORD) && (compilerData->token.keyword == DEF))
@@ -195,7 +194,6 @@ static int Prog (CompilerData *compilerData)
 static int prikazySekv(CompilerData *compilerData)
 {
     //PRIKAZY_SEK -> PRIKAZ DALSI_PRIKAZ
-    printf("prikazysekv\n");
 
     result = Prikaz(compilerData);
 
@@ -212,7 +210,6 @@ static int dalsiPrikaz(CompilerData *compilerData)
 {
     //DEDENT = konec aktualni sekvence prikazu
     //DALSI_PRIKAZ -> eps
-    printf("dalsiPrikaz\n");
 
     if (compilerData->token.tokenType == TOKEN_DEDENT)
     {
@@ -229,7 +226,6 @@ static int dalsiPrikaz(CompilerData *compilerData)
 
 static int volaniNeboPrirazeni(CompilerData *compilerData)
 {
-    printf("volaniNeboPrirazeni\n");
 
     bool defNewVar = false;
 
@@ -311,7 +307,6 @@ static int volaniNeboPrirazeni(CompilerData *compilerData)
 
 static int fceDefNeboVest(CompilerData *compilerData)
 {
-    printf("fceDefNeboVest\n");
     //FCE_DEF_NEBO_VEST -> id ( HODNOTY )
     symTableItem *item;
 
@@ -373,7 +368,6 @@ static int fceDefNeboVest(CompilerData *compilerData)
 
 static int Prikaz (CompilerData *compilerData)
 {
-    printf("prikaz %d %s\n", compilerData->token.tokenType, compilerData->token.stringValue->str);
     //PRIKAZ -> id VOLANI_NEBO_PRIRAZENI eol
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER)
     {
@@ -644,8 +638,6 @@ static int Prikaz (CompilerData *compilerData)
 
 static int Hodnota(CompilerData *compilerData){
 
-    printf("hodnota\n");
-    printf("%d\n", compilerData->token.tokenType);
 
 
     symTableItem *item;
@@ -799,8 +791,6 @@ static int Hodnota(CompilerData *compilerData){
 
 static int dalsiHodnota (CompilerData *compilerData)
 {
-    printf("dalsiHodnota\n");
-
 
     static int numOfParams = 1;
 
@@ -847,7 +837,6 @@ static int dalsiHodnota (CompilerData *compilerData)
 
 static int Hodnoty(CompilerData *compilerData)
 {
-    printf("hodnoty\n");
 
     addInstruction("CREATEFRAME\n");
 
@@ -881,7 +870,6 @@ static int Hodnoty(CompilerData *compilerData)
 
 static int navratHodnoty (CompilerData *compilerData)
 {
-    printf("navratHodnoty %d %s\n", compilerData->token.tokenType, compilerData->token.stringValue->str);
 
     if(compilerData->token.tokenType == TOKEN_IDENTIFIER || compilerData->token.tokenType == TOKEN_INTEGER
     || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING || (compilerData->token.tokenType == TOKEN_KEYWORD
@@ -1372,7 +1360,6 @@ static int navratHodnoty (CompilerData *compilerData)
 
 static int Parametry(CompilerData *compilerData)
 {
-    printf("parametry\n");
 
     STStackPush(compilerData->tablesStack);
 
@@ -1411,7 +1398,6 @@ static int Parametry(CompilerData *compilerData)
 
 static int dalsiParametr (CompilerData *compilerData)
 {
-    printf("dalsiParametr\n");
 
     if(compilerData->token.tokenType == TOKEN_COLON)
     {

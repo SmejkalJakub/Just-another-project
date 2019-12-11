@@ -585,7 +585,6 @@ void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumbe
 
     char str[12];
     sprintf(str, "%d", numberOfUses);
-    printf("NUMBEROFUSES %s\n", str);
 
     if(strcmp("", funcName) == 0)
     {
@@ -883,7 +882,7 @@ void generateFunctionSubstr()
     addInstruction("JUMPIFEQ $substr$end LF@result bool@true\n");
 
     addInstruction("MOVE LF@%retval string@\n");
-    
+
     addInstruction("DEFVAR LF@tempChar\n");
     addInstruction("DEFVAR LF@tempVar\n");
     addInstruction("SUB LF@tempVar LF@strLen LF@%1\n");
