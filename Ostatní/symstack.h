@@ -1,9 +1,9 @@
 /*
-*Implementace pøekladaèe imperativního jazyka IFJ19
+*Implementace pï¿½ekladaï¿½e imperativnï¿½ho jazyka IFJ19
 *
 *
 *Dominik Nejedly (xnejed09)
-*Jakub Smejkal (xsmejk09)
+*Jakub Smejkal (xsmejk28)
 *
 *
 *Zasobnik symbolu
