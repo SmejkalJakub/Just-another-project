@@ -1,3 +1,16 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk28)
+*Adam Grunwald (xgrunw00)
+*
+*
+*Compiler
+*
+*FIT VUT BRNO
+*/
+
 #ifndef COMPILER_H_INCLUDED
 #define COMPILER_H_INCLUDED
 
@@ -40,18 +53,8 @@ typedef struct {
 }CompilerData;
 
 
-int compilerDataInit(CompilerData* compilerData);
-static int Prog (CompilerData *compilerData);
-static int Prikaz (CompilerData *compilerData);
-static int Hodnoty(CompilerData *compilerData);
-static int Hodnota(CompilerData *compilerData);
-static int navratHodnoty (CompilerData *compilerData);
-static int Parametry(CompilerData *compilerData);
-static int dalsiParametr (CompilerData *compilerData);
-static int volaniNeboPrirazeni(CompilerData *compilerData);
-static int prikazySekv(CompilerData *compilerData);
-static int dalsiPrikaz(CompilerData *compilerData);
-static int fceDefNeboVest(CompilerData *compilerData);
+bool compilerDataInit(CompilerData* compilerData);
+int divideAndConquer();
 
 #endif
 

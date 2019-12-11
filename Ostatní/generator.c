@@ -1,3 +1,15 @@
+/*
+*Implementace p�eklada�e imperativn�ho jazyka IFJ19
+*
+*Jakub Smejkal (xsmejk28)
+*
+*
+*Generator vysledneho kodu
+*
+*FIT VUT BRNO
+*/
+
+
 #include "generator.h"
 
 DS *dynamicString;
@@ -382,7 +394,7 @@ void generateStackPush(tokenStruct *token, bool global)
         {
             addInstruction(token->stringValue->str);
         }
-        
+
     }
     else if(token->tokenType == TOKEN_KEYWORD && strcmp(token->stringValue->str, "None") == 0)
     {
@@ -516,8 +528,8 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("$if$%%0");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$type$true$float\n");     
-        
+        addInstruction("$type$true$float\n");
+
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
         addInstruction("$if$");
@@ -561,8 +573,8 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("$if$%%0");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$type$true$int\n");     
-        
+        addInstruction("$type$true$int\n");
+
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
         addInstruction("$if$");
@@ -573,7 +585,7 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
 
         addInstruction("EXIT int@4\n");
     }
-    
+
 
     else if(exprRule == EXPR_PLUS)
     {
@@ -622,7 +634,7 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction(str);
         addInstruction("$true$firstToDouble GF@%convertHelpVar0 ");
         addInstruction("bool@true\n");
-        
+
         addInstruction("EQ GF@%convertHelpVar0 ");
         addInstruction("GF@%%0$type ");
         addInstruction("string@float\n");
@@ -640,7 +652,7 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction(str);
         addInstruction("$true$thirdToDouble GF@%convertHelpVar0 ");
         addInstruction("bool@true\n");
-        
+
         addInstruction("EXIT int@4\n");
 
         addInstruction("LABEL $");
@@ -719,7 +731,7 @@ void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumbe
     }
 
     addInstruction("TYPE GF@%%0$type GF@%%0$type\n");
-    
+
 
     if(nextOperatorType == INT)
     {
@@ -763,7 +775,7 @@ void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumbe
                 generateFirstOperandToDouble();
             }
         }
-        
+
 
         addInstruction("LABEL $");
         addInstruction(funcName);
@@ -844,7 +856,7 @@ void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumbe
         {
             generateThirdOperandToDouble();
         }
-        
+
 
 
         addInstruction("LABEL $");
@@ -866,13 +878,13 @@ void generateFunctionDeclarePassedParams(int paramNumber, char *paramName)
     char str[12];
     sprintf(str, "%d", paramNumber);
 
-	addInstruction("DEFVAR LF@"); 
-    addInstruction(paramName); 
+	addInstruction("DEFVAR LF@");
+    addInstruction(paramName);
     addInstruction("\n");
 
-	addInstruction("MOVE LF@"); 
-    addInstruction(paramName); 
-    addInstruction(" LF@%"); 
+	addInstruction("MOVE LF@");
+    addInstruction(paramName);
+    addInstruction(" LF@%");
     addInstruction(str);
     addInstruction("\n");
 }
@@ -1224,7 +1236,7 @@ void generateWrite(symTableItem *variable, int frame, char *funcName)
         addInstruction("%");
         addInstruction(str);
         addInstruction("$false$nil\n");
- 
+
 
         addInstruction("LABEL $");
         addInstruction(funcName);

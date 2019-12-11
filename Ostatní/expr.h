@@ -1,3 +1,16 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Jakub Smejkal (xsmejk09)
+*Adam Grunwald (xgrunw00)
+*
+*
+*Expression
+*
+*FIT VUT BRNO
+*/
+
+
 #ifndef EXPR_H_INCLUDED
 #define EXPR_H_INCLUDED
 
@@ -41,7 +54,7 @@
 #define PREC_TAB_RIGHT_BRACKET 5
 #define PREC_TAB_DOLAR 6
 
-
+/*Vycet moznych typu operandu ve vyrazu*/
 typedef enum
 {
     SYM_PLUS,
@@ -69,7 +82,11 @@ typedef enum
 
 } precedenceTabSym;
 
+/*Vraci polozky po zarazku*/
 bool getitemsBeforeStop(int *itemsBeforeStop);
+
+/*Funkce resici vyraz*/
 int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVar, symTableItem *currentFunction);
+
 
 #endif

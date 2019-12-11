@@ -1,3 +1,18 @@
+/*
+*Implementace překladače imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk28)
+*Adam Grunwald (xgrunw00)
+*
+*
+*Compiler
+*
+*FIT VUT BRNO
+*/
+
+
+
 #include "compiler.h"
 
 
@@ -10,61 +25,42 @@ int result;
             return result; \
         } \
 
-/*
 
-TODODODO
----------
-
-
-PREDELAT A DODELAT NASLEDUJICI:
-
-    - GENEROVANI KODU. VETSINOU ZAKOMENTOVANE, BUD JESTE NEEXISTUJE (WHILE, IFY) NEBO NEVIM JAK ZAVOLAT
-
-    - KONTROLA CHYBOVYCH STAVU, VYPIS, NAVRATOVE HODNOTY
-
-    - ZKONTROLOVAT ZAPSANI PRAVIDEL
-
-    - ZASOBNIK TABULEK
-
-    - SPOJENI K VOLANI Z JEDNOHO MAINU
-
-    - PREDAVANI PARAMETRU - VOLANI getToken V expr.c
-
-    - NEJAKE PEKNE MAKRO PRO GETTOKEN A JEHO NASLEDNOU KONTROLU PRO ZPREHLEDNENI
-*/
+static int Prog (CompilerData *compilerData);
+static int Prikaz (CompilerData *compilerData);
+static int Hodnoty(CompilerData *compilerData);
+static int Hodnota(CompilerData *compilerData);
+static int navratHodnoty (CompilerData *compilerData);
+static int Parametry(CompilerData *compilerData);
+static int dalsiParametr (CompilerData *compilerData);
+static int volaniNeboPrirazeni(CompilerData *compilerData);
+static int prikazySekv(CompilerData *compilerData);
+static int dalsiPrikaz(CompilerData *compilerData);
+static int fceDefNeboVest(CompilerData *compilerData);
 
 
-int compilerDataInit(CompilerData* compilerData){
+bool compilerDataInit(CompilerData* compilerData){
 
     STStackInit(compilerData->tablesStack);
 
-    STStackPush(compilerData->tablesStack);
+    if(STStackPush(compilerData->tablesStack) == NULL)
+    {
+        return false;
+    }
 
     compilerData->globalTable = STStackTop(compilerData->tablesStack);
-
-    //compilerData->globalTable = malloc(sizeof(symTable));
-    //compilerData->localTable = malloc(sizeof(symTable));
-
-    //inicializace indentStacku, prvotni pushnuti 0
 
     compilerData->numberOfIfs = 0;
     compilerData->numberOfWhiles = 0;
 
     compilerData->current_function = NULL;
 
-    if((compilerData->token.stringValue = malloc(sizeof(DS))) == NULL)
-    {
-        return INTERNAL_ERROR;
-    }
-
-    DSInit(compilerData->token.stringValue);
-
     compilerData -> inFunction = false;
 	compilerData -> inWhileOrIf = NULL;
 
     compilerData->varToAssign = NULL;
 
-	return 0;
+	return true;
 }
 
 
@@ -685,7 +681,7 @@ static int Hodnota(CompilerData *compilerData){
                     generateFunctionParamsPass(actParam, &compilerData->token, global);
                     break;
                 }
-                    
+
                 if(item == NULL)
                 {
                     return 3;
@@ -1444,9 +1440,24 @@ static int dalsiParametr (CompilerData *compilerData)
 }
 
 
-int main(int argc, char *argv[])
+void tryToFreeAll(DS *dynamicString, CompilerData *compilerData)
 {
+    DSDelete(dynamicString);
 
+    free(compilerData->indentationStack);
+
+    STStackDelete(compilerData->tablesStack);
+
+    free(compilerData->tablesStack);
+
+    DSDelete(compilerData->token.stringValue);
+
+    free(compilerData->token.stringValue);
+}
+
+
+int divideAndConquer()
+{
     DS dynamicString;
 
     DSInit(&dynamicString);
@@ -1454,32 +1465,37 @@ int main(int argc, char *argv[])
 
     CompilerData compilerData;
 
-    compilerData.indentationStack = malloc(sizeof(Stack));
+    if((compilerData.indentationStack = malloc(sizeof(Stack))) == NULL)
+    {
+        return INTERNAL_ERROR;
+    }
 
     initStack(compilerData.indentationStack);
     stackPush(compilerData.indentationStack, 0);
     setIndentationStack(compilerData.indentationStack);
 
-    compilerData.tablesStack = malloc(sizeof(STStack));
+    if((compilerData.tablesStack = malloc(sizeof(STStack))) == NULL)
+    {
+        free(compilerData.indentationStack);
+        return INTERNAL_ERROR;
+    }
 
-    compilerData.token.stringValue = malloc(sizeof(DS));
+    if((compilerData.token.stringValue = malloc(sizeof(DS))) == NULL)
+    {
+        free(compilerData.indentationStack);
+        free(compilerData.tablesStack);
+        return INTERNAL_ERROR;
+    }
+
     DSInit(compilerData.token.stringValue);
 
-    compilerDataInit(&compilerData);
-
-    FILE *sourceCode;
-
-    if(argc == 2)
+    if(compilerDataInit(&compilerData) == false)
     {
-        sourceCode = fopen(argv[1], "r");
+        free(compilerData.indentationStack);
+        free(compilerData.tablesStack);
+        free(compilerData.token.stringValue);
+        return INTERNAL_ERROR;
     }
-    else
-    {
-        sourceCode = stdin;
-    }
-
-    setSourceCodeFile(sourceCode);
-
 
     generateHeader();
 
@@ -1489,7 +1505,6 @@ int main(int argc, char *argv[])
     {
         result = Prog(&compilerData);
     }
-        //printf("%s", dynamicString.str);
 
     if(result != 0)
     {
@@ -1529,7 +1544,7 @@ int main(int argc, char *argv[])
         printf("%s", dynamicString.str);
     }
 
-    fclose(sourceCode);
+    tryToFreeAll(&dynamicString, &compilerData);
 
     return result;
 }

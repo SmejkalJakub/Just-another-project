@@ -1,3 +1,14 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*
+*
+*Rozptylena tabulka symbolu
+*
+*FIT VUT BRNO
+*/
+
 #include "symtable.h"
 
 

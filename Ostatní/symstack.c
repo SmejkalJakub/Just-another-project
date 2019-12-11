@@ -1,3 +1,17 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk09)
+*
+*
+*Zasobnik symbolu
+*
+*FIT VUT BRNO
+*/
+
+
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -33,7 +47,7 @@ bool symStackPush(symStack* stack, precedenceTabSym symbol, int type)
 void symStackPushStop(symStack *stack)
 {
 	symStackItem *prevItem = NULL;
-	
+
 	symStackItem *tempItem = stack->top;
 
 	while (true)
@@ -60,14 +74,14 @@ void symStackPushStop(symStack *stack)
 
 			stop->symbol = SYM_STOP;
 			stop->type = TYPE_NONE;
-			
+
 			return;
 		}
 
 		prevItem = tempItem;
 		tempItem = tempItem->nextItem;
 	}
-	
+
 }
 
 bool symStackPop(symStack* stack)

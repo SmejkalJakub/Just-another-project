@@ -1,3 +1,17 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk28)
+*
+*
+*File Scanner
+*
+*FIT VUT BRNO
+*/
+
+
+
 #include "fileScanner.h"
 
 
@@ -215,6 +229,10 @@ int getToken(tokenStruct *token)
                     {
                         numOfSpaces++;
                     }
+                }
+                else if(c == '"')
+                {
+                    state = LONG_COMMENT_START_FIRST_STATE;
                 }
                 else if(c != '#')
                 {
@@ -594,7 +612,7 @@ int getToken(tokenStruct *token)
                             return INTERNAL_ERROR;
                         }
                     }
-                    
+
                     state = STRING_STATE;
                 }
                 break;
@@ -725,7 +743,7 @@ int getToken(tokenStruct *token)
                             return INTERNAL_ERROR;
                         }
                     }
-                    
+
                     else if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
@@ -902,8 +920,15 @@ int getToken(tokenStruct *token)
                 {
                     state = START_TOKEN_STATE;
                 }
+                else if(c == EOF)
+                {
+                    token->tokenType = TOKEN_EOF;
+                    DSDelete(&DString);
+                    return SCAN_OK;
+                }
                 else if(!isspace(c))
                 {
+                    printf("jsem tu\n");
                     DSDelete(&DString);
                     return LEX_ERROR;
                 }
