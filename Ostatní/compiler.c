@@ -66,7 +66,6 @@ bool compilerDataInit(CompilerData* compilerData){
 
 static int Prog (CompilerData *compilerData)
 {
-    printf("PROG\n");
     //PROG -> def id ( PARAMS ) : eol indent PRIKAZY_SEK dedent PROG
     if((compilerData->token.tokenType == TOKEN_KEYWORD) && (compilerData->token.keyword == DEF))
     {
