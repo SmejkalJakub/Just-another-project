@@ -1,7 +1,6 @@
 /*
 *Implementace pøekladaèe imperativního jazyka IFJ19
 *
-*Dominik Nejedly (xnejed09)
 *Jakub Smejkal (xsmejk09)
 *
 *
@@ -937,30 +936,7 @@ void generateFunctionReturn(symTableItem *functionName, bool empty)
 
     }
 
-    /*if(token->tokenType == TOKEN_INTEGER)
-    {
-        char str[12];
-        sprintf(str, "%d", token->integerValue);
-        addInstruction("int@");
-        addInstruction(str);
-    }
-    else if(token->tokenType == TOKEN_DOUBLE)
-    {
-        char str[30];
-        sprintf(str, "%a", token->doubleValue);
-        addInstruction("float@");
-        addInstruction(str);
-    }
-    else if(token->tokenType == TOKEN_STRING)
-    {
-        addInstruction("string@");
-        addInstruction(token->stringValue->str);
-    }
-    else if(token->tokenType == TOKEN_IDENTIFIER)
-    {
-        addInstruction("LF@");
-        addInstruction(token->stringValue->str);
-    }*/
+
 
     addInstruction("\nJUMP $");
     addInstruction(functionName->key);

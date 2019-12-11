@@ -26,23 +26,39 @@
 
 #define ST_SIZE 65003
 
+/*
+*Struktura polozky tabulky
+*/
 typedef struct hashTableItem{
-    char *key;
-    int type;
-    int numberOfParams;
-    DS *params;
-    bool function;
-    bool defined;
-    struct hashTableItem *next;
+    char *key;                      //klic polozky
+    int type;                       //typ polozky
+    int numberOfParams;             //pocet parametru
+    DS *params;                     //DS obsahujici vycet parametru
+    bool function;                  //zda se jedna o funkci
+    bool defined;                   //zda je polozka definovana
+    struct hashTableItem *next;     //ukazatel na dalsi polozku
 } symTableItem;
 
+
+/*Tabulka*/
 typedef symTableItem *symTable[ST_SIZE];
 
+/*Funkce pro inicializaci tabulky*/
 void STInit(symTable *STptr);
+
+/*Funkce vracejici ukazatel na polozku z tabulky symbolu nalezenou podle klice*/
 symTableItem *STSearch(symTable* STptr, char *key);
+
+/*Funkce pro vlozeni nove polozky do tabulky*/
 symTableItem *STInsert(symTable* STptr, char *key);
+
+/*Funkce pro pridani parametru k polozce*/
 bool STAddParam(symTableItem *item, int type);
+
+/*Funkce pro odstraneni polozky z tabulek symbolu*/
 void STDeleteItem(symTable *STptr, char *key);
+
+/*Funkce pro smazani tabulky symbolu*/
 void STDelete(symTable *STptr);
 
 #endif
