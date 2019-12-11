@@ -25,34 +25,37 @@
 
 
 
-
+/*Struktura samotneho compileru obsahujici data potrebna pro spravny beh*/
 typedef struct {
-    symTable *localTable;
-    symTable *globalTable;
+    symTable *localTable;                   //Lokalni tabulka symbolu
+    symTable *globalTable;                  //Globalni tabulka symbolu
 
-    STStack *tablesStack;
+    STStack *tablesStack;                   //Zasobnik tabulek symbolu
 
-    tokenStruct token;
+    tokenStruct token;                      //Nacteny token
 
-    symTableItem *varToAssign;
+    symTableItem *varToAssign;              //Promenna k prirazeni
 
-    symTableItem *current_function;
+    symTableItem *current_function;         //Nazev funkce, ve ktere se prave nachazime
 
-    int numberOfIfs;
-    int numberOfWhiles;
+                                            /*slouzi pro tvorbu unikatniho ID labelu*/
+    int numberOfIfs;                        //Pocet IFu, kterymi jsme prozatim prosli
+    int numberOfWhiles;                     //Pocet WHILu, kterymi jsme prozatim prosli
 
-    bool global;
+    bool global;                            //zdali jsme v globalnim ramci
 
-    bool inFunction;
-	bool inDefinition;
-	bool inWhileOrIf;
+    bool inFunction;                        //zdali jsme ve funkci
+	bool inDefinition;                      //zdali jsme v definici
+	bool inWhileOrIf;                       //zdali jsme v IFu ci WHILE
 
-    Stack *indentationStack;
+    Stack *indentationStack;                //Zasobnik Indentu
 
 }CompilerData;
 
-
+/*Funkce pro inicializaci dat Compileru*/
 int compilerDataInit(CompilerData* compilerData);
+
+/*FUNKCE REPREZENTUJICI JEDNOTLIVE NONTERMY*/
 static int Prog (CompilerData *compilerData);
 static int Prikaz (CompilerData *compilerData);
 static int Hodnoty(CompilerData *compilerData);
