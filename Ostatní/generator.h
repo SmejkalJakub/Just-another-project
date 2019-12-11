@@ -1,8 +1,6 @@
 /*
 *Implementace p�eklada�e imperativn�ho jazyka IFJ19
 *
-*
-*Dominik Nejedly (xnejed09)
 *Jakub Smejkal (xsmejk28)
 *
 *
