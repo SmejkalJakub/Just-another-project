@@ -29,7 +29,7 @@ void generateFunctionStart(symTableItem *functionName);
 void generateFunctionReturn(symTableItem *functionName, bool empty);
 void generateJump(char *functionName);
 void generateStackPush(tokenStruct *token, bool global);
-void generateExpresion(int exprRule);
+void generateExpresion(int exprRule, char *functionName);
 void generateIfStart(int numberOfPrevIfs, symTableItem *functionName);
 void generateElseStart(int numberOfPrevIfs, symTableItem *functionName);
 void generateElseEnd(int numberOfPrevIfs, symTableItem *functionName);

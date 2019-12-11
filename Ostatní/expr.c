@@ -352,7 +352,7 @@ int reduce()
             }
             else
             {
-                generateExpresion(rule);
+                generateExpresion(rule, currentFuncName);
             }
         }
 
@@ -780,13 +780,13 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
         }
         assignVar->type = stack.top->type;
     }
-    else
+    /*else
     {
         if(stack.top->type != BOOL)
         {
             return SYNTAX_ERROR;
         }
-    }
+    }*/
     if(stack.top->type != STRING || firstConcat)
     {
         generateSaveLastExpresionValue();

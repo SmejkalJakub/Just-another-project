@@ -53,19 +53,85 @@ void generateFirstOperandToDouble()
     addInstruction("PUSHS GF@%convertHelpVar0\n");
 }
 
-void generateExpresion(int exprRule)
+void generateExpresion(int exprRule, char *functionName)
 {
+    char str[12];
+    sprintf(str, "%d", numberOfUses);
     if(exprRule == EXPR_PLUS)
     {
+
         addInstruction("ADDS\n");
+
+        addInstruction("JUMP $if$");
+        addInstruction(functionName);
+        addInstruction("$string$After$concat%");
+        addInstruction(str);
+        addInstruction("\n");
+
+        addInstruction("LABEL $if$");
+        addInstruction(functionName);
+        addInstruction("$string$concat%");
+        addInstruction(str);
+        addInstruction("\n");
+
+        generateConcatenateString(true);
+
+        addInstruction("PUSHS GF@%lastExpresionResult\n");
+
+        addInstruction("LABEL $if$");
+        addInstruction(functionName);
+        addInstruction("$string$After$concat%");
+        addInstruction(str);
+        addInstruction("\n");
     }
     else if(exprRule == EXPR_MINUS)
     {
         addInstruction("SUBS\n");
+
+        addInstruction("JUMP $if$");
+        addInstruction(functionName);
+        addInstruction("$string$After$concat%");
+        addInstruction(str);
+        addInstruction("\n");
+
+        addInstruction("LABEL $if$");
+        addInstruction(functionName);
+        addInstruction("$string$concat%");
+        addInstruction(str);
+        addInstruction("\n");
+
+        addInstruction("EXIT int@4\n");
+
+        addInstruction("LABEL $if$");
+        addInstruction(functionName);
+        addInstruction("$string$After$concat%");
+        addInstruction(str);
+        addInstruction("\n");
+
     }
     else if(exprRule == EXPR_MUL)
     {
         addInstruction("MULS\n");
+
+        addInstruction("JUMP $if$");
+        addInstruction(functionName);
+        addInstruction("$string$After$concat%");
+        addInstruction(str);
+        addInstruction("\n");
+
+        addInstruction("LABEL $if$");
+        addInstruction(functionName);
+        addInstruction("$string$concat%");
+        addInstruction(str);
+        addInstruction("\n");
+
+        addInstruction("EXIT int@4\n");
+
+        addInstruction("LABEL $if$");
+        addInstruction(functionName);
+        addInstruction("$string$After$concat%");
+        addInstruction(str);
+        addInstruction("\n");
     }
     else if(exprRule == EXPR_DIV)
     {
@@ -130,6 +196,83 @@ void generateIfStart(int numberOfPrevIfs, symTableItem *functionName)
     char str[12];
     sprintf(str, "%d", numberOfPrevIfs);
 
+
+    addInstruction("TYPE GF@%%0$type GF@%lastExpresionResult\n");
+
+    addInstruction("JUMPIFEQ $if$start%");
+    addInstruction(str);
+    addInstruction(" GF@%%0$type string@bool\n");
+    
+    addInstruction("EQ GF@%convertHelpVar0 GF@%%0$type string@int\n");
+    addInstruction("JUMPIFNEQ $if$start$valueCheck$float%");
+    addInstruction(str);
+    addInstruction(" GF@%convertHelpVar0 bool@true\n");
+    addInstruction("EQ GF@%convertHelpVar1 GF@%lastExpresionResult int@0\n");
+    addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+    addInstruction("JUMPIFEQ $else%");
+    addInstruction(str);
+    addInstruction(" GF@%convertHelpVar0 bool@true\n");
+
+    addInstruction("MOVE GF@%lastExpresionResult bool@true\n");
+    addInstruction("JUMP $if$start%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("LABEL $if$start$valueCheck$float%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("EQ GF@%convertHelpVar0 GF@%%0$type string@float\n");
+    addInstruction("JUMPIFNEQ $if$start$valueCheck$string%");
+    addInstruction(str);
+    addInstruction(" GF@%convertHelpVar0 bool@true\n");
+    addInstruction("EQ GF@%convertHelpVar1 GF@%lastExpresionResult float@0x0p+0\n");
+    addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+    addInstruction("JUMPIFEQ $else%");
+    addInstruction(str);
+    addInstruction(" GF@%convertHelpVar0 bool@true\n");
+
+    addInstruction("MOVE GF@%lastExpresionResult bool@true\n");
+    addInstruction("JUMP $if$start%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("LABEL $if$start$valueCheck$string%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    
+    addInstruction("EQ GF@%convertHelpVar0 GF@%%0$type string@string\n");
+    addInstruction("JUMPIFNEQ $if$start$valueCheck$None%");
+    addInstruction(str);
+    addInstruction(" GF@%convertHelpVar0 bool@true\n");
+    addInstruction("EQ GF@%convertHelpVar1 GF@%lastExpresionResult string@\n");
+    addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+    addInstruction("JUMPIFEQ $else%");
+    addInstruction(str);
+    addInstruction(" GF@%convertHelpVar0 bool@true\n");
+
+    addInstruction("MOVE GF@%lastExpresionResult bool@true\n");
+    addInstruction("JUMP $if$start%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("LABEL $if$start$valueCheck$None%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("EQ GF@%convertHelpVar0 GF@%%0$type string@nil\n");
+    addInstruction("EQ GF@%convertHelpVar1 GF@%lastExpresionResult nil@nil\n");
+    addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+    addInstruction("JUMPIFEQ $else%");
+    addInstruction(str);
+    addInstruction(" GF@%convertHelpVar0 bool@true\n");
+
+    addInstruction("MOVE GF@%lastExpresionResult bool@true\n");
+
+    addInstruction("LABEL $if$start%");
+    addInstruction(str);
+    addInstruction("\n");
 
     addInstruction("JUMPIFNEQ ");
 
@@ -436,7 +579,24 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
     {
         addInstruction("EQ GF@%convertHelpVar0 ");
         addInstruction("GF@%%0$type ");
+        addInstruction("string@string\n");
+
+        addInstruction("EQ GF@%convertHelpVar1 ");
+        addInstruction("GF@%%0$type ");
         addInstruction("GF@%%1$type\n");
+
+        addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+        addInstruction("JUMPIFEQ $if$");
+        addInstruction(funcName);
+        addInstruction("$string$concat%");
+        addInstruction(str);
+        addInstruction(" GF@%convertHelpVar0 ");
+        addInstruction("bool@true\n");
+
+        addInstruction("EQ GF@%convertHelpVar0 ");
+        addInstruction("GF@%%0$type ");
+        addInstruction("GF@%%1$type\n");
+
 
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
@@ -920,34 +1080,9 @@ void generateFunctionReturn(symTableItem *functionName, bool empty)
     }
     else
     {
-        addInstruction("MOVE LF@%retval string@");
+        addInstruction("MOVE LF@%retval nil@nil");
 
     }
-
-    /*if(token->tokenType == TOKEN_INTEGER)
-    {
-        char str[12];
-        sprintf(str, "%d", token->integerValue);
-        addInstruction("int@");
-        addInstruction(str);
-    }
-    else if(token->tokenType == TOKEN_DOUBLE)
-    {
-        char str[30];
-        sprintf(str, "%a", token->doubleValue);
-        addInstruction("float@");
-        addInstruction(str);
-    }
-    else if(token->tokenType == TOKEN_STRING)
-    {
-        addInstruction("string@");
-        addInstruction(token->stringValue->str);
-    }
-    else if(token->tokenType == TOKEN_IDENTIFIER)
-    {
-        addInstruction("LF@");
-        addInstruction(token->stringValue->str);
-    }*/
 
     addInstruction("\nJUMP $");
     addInstruction(functionName->key);
@@ -1274,6 +1409,75 @@ void generateWhileStart(int numberOfPrevWhiles, symTableItem *functionName)
 {
     char str[12];
     sprintf(str, "%d", numberOfPrevWhiles);
+
+    addInstruction("TYPE GF@%%0$type GF@%lastExpresionResult\n");
+
+    addInstruction("JUMPIFEQ $while$start%");
+    addInstruction(str);
+    addInstruction(" GF@%%0$type string@bool\n");
+    
+    addInstruction("EQ GF@%convertHelpVar0 GF@%%0$type string@int\n");
+    addInstruction("JUMPIFNEQ $while$start$valueCheck$float%");
+    addInstruction(str);
+    addInstruction(" GF@%convertHelpVar0 bool@true\n");
+    addInstruction("EQ GF@%convertHelpVar1 GF@%lastExpresionResult int@0\n");
+    addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+    addInstruction("NOT GF@%convertHelpVar0 GF@%convertHelpVar0\n");
+    addInstruction("MOVE GF@%lastExpresionResult GF@%convertHelpVar0\n");
+
+    addInstruction("JUMP $while$start%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("LABEL $while$start$valueCheck$float%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("EQ GF@%convertHelpVar0 GF@%%0$type string@float\n");
+    addInstruction("JUMPIFNEQ $while$start$valueCheck$string%");
+    addInstruction(str);
+    addInstruction(" GF@%convertHelpVar0 bool@true\n");
+    addInstruction("EQ GF@%convertHelpVar1 GF@%lastExpresionResult float@0x0p+0\n");
+    addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+    addInstruction("NOT GF@%convertHelpVar0 GF@%convertHelpVar0\n");
+    addInstruction("MOVE GF@%lastExpresionResult GF@%convertHelpVar0\n");
+
+    addInstruction("JUMP $while$start%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("LABEL $while$start$valueCheck$string%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    
+    addInstruction("EQ GF@%convertHelpVar0 GF@%%0$type string@string\n");
+    addInstruction("JUMPIFNEQ $while$start$valueCheck$None%");
+    addInstruction(str);
+    addInstruction(" GF@%convertHelpVar0 bool@true\n");
+    addInstruction("EQ GF@%convertHelpVar1 GF@%lastExpresionResult string@\n");
+    addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+    addInstruction("NOT GF@%convertHelpVar0 GF@%convertHelpVar0\n");
+    addInstruction("MOVE GF@%lastExpresionResult GF@%convertHelpVar0\n");
+
+    addInstruction("JUMP $while$start%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("LABEL $while$start$valueCheck$None%");
+    addInstruction(str);
+    addInstruction("\n");
+
+    addInstruction("EQ GF@%convertHelpVar0 GF@%%0$type string@nil\n");
+    addInstruction("EQ GF@%convertHelpVar1 GF@%lastExpresionResult nil@nil\n");
+    addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+    addInstruction("NOT GF@%convertHelpVar0 GF@%convertHelpVar0\n");
+    addInstruction("MOVE GF@%lastExpresionResult GF@%convertHelpVar0\n");
+
+    addInstruction("LABEL $while$start%");
+    addInstruction(str);
+    addInstruction("\n");
+
 
     addInstruction("JUMPIFEQ ");
 
