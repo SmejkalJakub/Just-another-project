@@ -377,8 +377,6 @@ int reduce()
 
 int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem* operand3, int rule, int *finalType){
 
-    bool firstOperandToInteger = false;
-    bool thirdOperandToInteger = false;
     bool firstOperandToDouble = false;
     bool thirdOperandToDouble = false;
 
@@ -547,6 +545,11 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
                 break;
             }
 
+            if(operand1->type == DOUBLE || operand3->type == DOUBLE)
+            {
+                return SEM_ERROR_COMPATIBILITY;
+            }
+
             //stringy opet nepodelime
             if(operand1->type == STRING || operand3->type == STRING){
                 return SEM_ERROR_COMPATIBILITY;
@@ -558,14 +561,6 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             else if(operand3->isZero)
             {
                 return SEM_ERROR_DIV_ZERO;
-            }
-
-            //pokud byl nejaky z ciselnych operandu double, prevedeme jej na int
-            if(operand1->type == DOUBLE){
-                firstOperandToInteger = true;
-            }
-            if(operand3->type == DOUBLE){
-                thirdOperandToInteger = true;
             }
 
             break;
@@ -619,15 +614,8 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
         generateFirstOperandToDouble();
     }
 
-    if(firstOperandToInteger){
-        generateFirstOperandToInteger();
-    }
-
     if(thirdOperandToDouble){
         generateThirdOperandToDouble();
-    }
-    if(thirdOperandToInteger){
-        generateThirdOperandToInteger();
     }
 
     return 0;

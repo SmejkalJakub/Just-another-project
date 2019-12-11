@@ -42,22 +42,11 @@ void generateThirdOperandToDouble()
     addInstruction("INT2FLOATS\n");
 }
 
-void generateThirdOperandToInteger()
-{
-    addInstruction("FLOAT2INTS\n");
-}
 
 void generateFirstOperandToDouble()
 {
     addInstruction("POPS GF@%convertHelpVar0\n");
     addInstruction("INT2FLOATS\n");
-    addInstruction("PUSHS GF@%convertHelpVar0\n");
-}
-
-void generateFirstOperandToInteger()
-{
-    addInstruction("POPS GF@%convertHelpVar0\n");
-    addInstruction("FLOAT2INTS\n");
     addInstruction("PUSHS GF@%convertHelpVar0\n");
 }
 
@@ -841,7 +830,7 @@ void generateFunctionSubstr()
     addInstruction("PUSHFRAME\n");
 
     addInstruction("DEFVAR LF@%retval\n");
-    addInstruction("MOVE LF@%retval string@\n");
+    addInstruction("MOVE LF@%retval nil@nil\n");
 
     addInstruction("DEFVAR LF@result\n");
     addInstruction("DEFVAR LF@strLen\n");
@@ -897,7 +886,7 @@ void generateFunctionOrd()
     addInstruction("PUSHFRAME\n");
 
     addInstruction("DEFVAR LF@%retval\n");
-    addInstruction("MOVE LF@%retval string@\n\n");
+    addInstruction("MOVE LF@%retval nil@nil\n\n");
 
     addInstruction("DEFVAR LF@result\n");
     addInstruction("DEFVAR LF@strLen\n");
