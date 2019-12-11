@@ -767,6 +767,15 @@ static int Hodnota(CompilerData *compilerData){
                     return 4;
                 }
                 break;
+            case TOKEN_KEYWORD:
+                if(compilerData->token.keyword == NONE)
+                {
+                    return 4;
+                }
+                else
+                {
+                    return SYNTAX_ERROR;
+                }
             default:
                 return SYNTAX_ERROR;
         }
@@ -1094,6 +1103,8 @@ static int navratHodnoty (CompilerData *compilerData)
         //NAVRAT_HODNOT -> len ( HODNOTY )
         else if(compilerData->token.keyword == LEN)
         {
+            symTableItem *prevFunction = compilerData->current_function;
+
             compilerData->current_function = STInsert(compilerData->globalTable, "len");
 
             if(compilerData->current_function == NULL)
@@ -1146,10 +1157,14 @@ static int navratHodnoty (CompilerData *compilerData)
 
                 compilerData->varToAssign->type = TYPE_NONE;
             }
+
+            compilerData->current_function = prevFunction;
         }
         //NAVRAT_HODNOT -> substr ( HODNOTY )
         else if(compilerData->token.keyword == SUBSTR)
         {
+            symTableItem *prevFunction = compilerData->current_function;
+
             compilerData->current_function = STInsert(compilerData->globalTable, "substr");
 
             if(compilerData->current_function == NULL)
@@ -1211,12 +1226,15 @@ static int navratHodnoty (CompilerData *compilerData)
                 }
 
                 compilerData->varToAssign->type = TYPE_NONE;
-
             }
+
+            compilerData->current_function = prevFunction;
         }
         //NAVRAT_HODNOT -> chr ( HODNOTY )
         else if(compilerData->token.keyword == CHR)
         {
+            symTableItem *prevFunction = compilerData->current_function;
+
             compilerData->current_function = STInsert(compilerData->globalTable, "chr");
 
             if(compilerData->current_function == NULL)
@@ -1269,10 +1287,13 @@ static int navratHodnoty (CompilerData *compilerData)
                 compilerData->varToAssign->type = TYPE_NONE;
             }
 
+            compilerData->current_function = prevFunction;
         }
         //NAVRAT_HODNOT -> ord ( HODNOTY )
         else if(compilerData->token.keyword == ORD)
         {
+            symTableItem *prevFunction = compilerData->current_function;
+
             compilerData->current_function = STInsert(compilerData->globalTable, "ord");
 
             if(compilerData->current_function == NULL)
@@ -1330,6 +1351,8 @@ static int navratHodnoty (CompilerData *compilerData)
 
                 compilerData->varToAssign->type = TYPE_NONE;
             }
+
+            compilerData->current_function = prevFunction;
         }
     }
     else
