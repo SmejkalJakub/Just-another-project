@@ -928,7 +928,6 @@ int getToken(tokenStruct *token)
                 }
                 else if(!isspace(c))
                 {
-                    printf("jsem tu\n");
                     DSDelete(&DString);
                     return LEX_ERROR;
                 }
