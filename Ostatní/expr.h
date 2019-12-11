@@ -9,6 +9,8 @@
 *
 *FIT VUT BRNO
 */
+
+
 #ifndef EXPR_H_INCLUDED
 #define EXPR_H_INCLUDED
 
@@ -52,7 +54,7 @@
 #define PREC_TAB_RIGHT_BRACKET 5
 #define PREC_TAB_DOLAR 6
 
-
+/*Vycet moznych typu operandu ve vyrazu*/
 typedef enum
 {
     SYM_PLUS,
@@ -80,7 +82,34 @@ typedef enum
 
 } precedenceTabSym;
 
+/*Vraci polozky po zarazku*/
 bool getitemsBeforeStop(int *itemsBeforeStop);
+
+/*Funkce resici vyraz*/
 int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVar, symTableItem *currentFunction);
+
+/*Zkontroluje operand a pripadne pretypuje*/
+int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem* operand3, int rule, int *finalType);
+
+/*Funkce vracejici typ tokenu*/
+int getTokenType(tokenStruct *token, STStack *symTableStack);
+
+/*Funkce prevadejici symbol na typ symbolu z precedencni tabulky*/
+int symbolToType(precedenceTabSym symbol);
+
+/*Funkce pro ziskani termu z vrcholu zasobniku*/
+symStackItem *getTopTerm();
+
+/*Funcke vracejici polozky po zarazku*/
+bool getitemsBeforeStop(int *itemsBeforeStop);
+
+/*Funkce kontrolujici pravidlo vyrazu*/
+int checkExprRule(symStackItem *firstItem, symStackItem *secondItem, symStackItem *thirdItem, int numberOfItems);
+
+/*Funkce redukce vyrazu*/
+int reduce();
+
+/*Funkce shiftnuti*/
+void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableStack);
 
 #endif

@@ -111,19 +111,26 @@
 #define SEM_ERROR_DIV_ZERO 9
 #define INTERNAL_ERROR 99
 
+
+/*Struktura Tokenu*/
 typedef struct
 {
-    int tokenType;
-    int integerValue;
-    double doubleValue;
-    DS *stringValue;
-    int keyword;
+    int tokenType;          //Typ
+    int integerValue;       //Hodnota intigeru
+    double doubleValue;     //Hodnota doublu
+    DS *stringValue;        //Hodnota retezce
+    int keyword;            //Klicove slovo - ID
 
 }tokenStruct;
 
+
+/*Funkce pro ziskani tokenu*/
 int getToken(tokenStruct *token);
+
+/*Nastaveni zdrojoveho souboru*/
 void setSourceCodeFile(FILE *sourceCodeFile);
-//void initIndentationStack();
+
+/*Nastaveni Indent Zasobniku*/
 void setIndentationStack(Stack *_indentStack);
 
 
