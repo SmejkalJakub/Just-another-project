@@ -684,6 +684,12 @@ static int Hodnota(CompilerData *compilerData){
             case TOKEN_IDENTIFIER:
                 item = STStackSearch(compilerData->tablesStack, compilerData->token.stringValue->str, &global);
 
+                if(item->type == TYPE_NONE)
+                {
+                    generateFunctionParamsPass(actParam, &compilerData->token, global);
+                    break;
+                }
+                    
                 if(item == NULL)
                 {
                     return 3;
@@ -808,7 +814,6 @@ static int dalsiHodnota (CompilerData *compilerData)
         GET_TOKEN;
 
         result = Hodnota(compilerData);
-                                        printf("jsem tu\n");
 
         if(result != 0)
         {

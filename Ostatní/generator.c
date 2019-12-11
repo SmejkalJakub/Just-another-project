@@ -803,12 +803,19 @@ void generateFunctionLen()
     addInstruction("\n\nLABEL $len\n");
     addInstruction("PUSHFRAME\n");
 
+    addInstruction("DEFVAR LF@%inLenFirstArg$type\n");
+    addInstruction("TYPE LF@%inLenFirstArg$type LF@%0\n");
+    addInstruction("JUMPIFNEQ $%inLen$error$true LF@%inLenFirstArg$type string@string\n");
+
     addInstruction("DEFVAR LF@%retval\n");
 
     addInstruction("STRLEN LF@%retval LF@%0\n");
 
     addInstruction("POPFRAME\n");
-    addInstruction("RETURN\n\n\n");
+    addInstruction("RETURN\n");
+
+    addInstruction("LABEL $%inLen$error$true\n");
+    addInstruction("EXIT int@4\n\n\n");
 }
 
 void generateFunctionChr()
@@ -816,12 +823,19 @@ void generateFunctionChr()
     addInstruction("\n\nLABEL $chr\n");
     addInstruction("PUSHFRAME\n");
 
+    addInstruction("DEFVAR LF@%inChrFirstArg$type\n");
+    addInstruction("TYPE LF@%inChrFirstArg$type LF@%0\n");
+    addInstruction("JUMPIFNEQ $%inChr$error$true LF@%inChrFirstArg$type string@int\n");
+
     addInstruction("DEFVAR LF@%retval\n");
 
     addInstruction("INT2CHAR LF@%retval LF@%0\n");
 
     addInstruction("POPFRAME\n");
     addInstruction("RETURN\n\n\n");
+
+    addInstruction("LABEL $%inChr$error$true\n");
+    addInstruction("EXIT int@4\n\n\n");
 }
 
 void generateFunctionSubstr()
@@ -829,8 +843,24 @@ void generateFunctionSubstr()
     addInstruction("\n\nLABEL $substr\n");
     addInstruction("PUSHFRAME\n");
 
+    addInstruction("DEFVAR LF@%inSubstrFirstArg$type\n");
+    addInstruction("TYPE LF@%inSubstrFirstArg$type LF@%0\n");
+
+    addInstruction("DEFVAR LF@%inSubstrSecondArg$type\n");
+    addInstruction("TYPE LF@%inSubstrSecondArg$type LF@%1\n");
+
+    addInstruction("DEFVAR LF@%inSubstrThirdArg$type\n");
+    addInstruction("TYPE LF@%inSubstrThirdArg$type LF@%1\n");
+
+
+    addInstruction("JUMPIFNEQ $%inSubstr$error$true LF@%inSubstrFirstArg$type string@string\n");
+    addInstruction("JUMPIFNEQ $%inSubstr$error$true LF@%inSubstrSecondArg$type string@int\n");
+    addInstruction("JUMPIFNEQ $%inSubstr$error$true LF@%inSubstrThirdArg$type string@int\n");
+
+
     addInstruction("DEFVAR LF@%retval\n");
     addInstruction("MOVE LF@%retval nil@nil\n");
+
 
     addInstruction("DEFVAR LF@result\n");
     addInstruction("DEFVAR LF@strLen\n");
@@ -852,6 +882,8 @@ void generateFunctionSubstr()
     addInstruction("EQ LF@result LF@strLen int@0\n");
     addInstruction("JUMPIFEQ $substr$end LF@result bool@true\n");
 
+    addInstruction("MOVE LF@%retval string@\n");
+    
     addInstruction("DEFVAR LF@tempChar\n");
     addInstruction("DEFVAR LF@tempVar\n");
     addInstruction("SUB LF@tempVar LF@strLen LF@%1\n");
@@ -878,12 +910,24 @@ void generateFunctionSubstr()
     addInstruction("LABEL $substr$end\n");
     addInstruction("POPFRAME\n");
     addInstruction("RETURN\n\n\n");
+
+    addInstruction("LABEL $%inSubstr$error$true\n");
+    addInstruction("EXIT int@4\n\n\n");
 }
 
 void generateFunctionOrd()
 {
     addInstruction("\n\nLABEL $ord\n");
     addInstruction("PUSHFRAME\n");
+
+    addInstruction("DEFVAR LF@%inOrdFirstArg$type\n");
+    addInstruction("TYPE LF@%inOrdFirstArg$type LF@%0\n");
+
+    addInstruction("DEFVAR LF@%inOrdSecondArg$type\n");
+    addInstruction("TYPE LF@%inOrdSecondArg$type LF@%1\n");
+
+    addInstruction("JUMPIFNEQ $%inOrd$error$true LF@%inOrdFirstArg$type string@string\n");
+    addInstruction("JUMPIFNEQ $%inOrd$error$true LF@%inOrdSecondArg$type string@int\n");
 
     addInstruction("DEFVAR LF@%retval\n");
     addInstruction("MOVE LF@%retval nil@nil\n\n");
@@ -908,6 +952,9 @@ void generateFunctionOrd()
 
     addInstruction("POPFRAME\n");
     addInstruction("RETURN\n\n\n");
+
+    addInstruction("LABEL $%inOrd$error$true\n");
+    addInstruction("EXIT int@4\n\n\n");
 }
 
 void generateFunctionStart(symTableItem *functionName)
