@@ -7,7 +7,7 @@ symStack stack;
 
 bool firstConcat = true;
 
-symTableItem *currentFunc;
+char *currentFuncName;
 
 int precedenceTable[TABLE_SIZE][TABLE_SIZE] =
 {
@@ -280,53 +280,6 @@ int checkExprRule(symStackItem *firstItem, symStackItem *secondItem, symStackIte
     return EXPR_ERR;
 }
 
-int checkItems(symStackItem *firstItem, symStackItem *thirdItem, int exprRule)
-{
-    if(exprRule == EXPR_ID && firstItem->type == TYPE_NONE)
-    {
-        return TYPE_NONE;
-    }
-    else
-    {
-        if(exprRule == EXPR_ID)
-        {
-            return firstItem->type;
-        }
-        if(exprRule == EXPR_LESS || exprRule == EXPR_LESS_EQ ||
-           exprRule == EXPR_MORE || exprRule == EXPR_MORE_EQ ||
-           exprRule == EXPR_ASSIGN ||
-           exprRule == EXPR_EQ || exprRule == EXPR_NOT_EQ)
-        {
-            return BOOL;
-        }
-        if(exprRule == EXPR_DIV)
-        {
-            return DOUBLE;
-        }
-        if(exprRule == EXPR_SPEC_DIV)
-        {
-            return INT;
-        }
-        if(exprRule == EXPR_MUL || exprRule == EXPR_PLUS || exprRule == EXPR_MINUS)
-        {
-            if(firstItem->type == INT && thirdItem->type == INT)
-            {
-                return INT;
-            }
-            else if(firstItem->type == DOUBLE && thirdItem->type == DOUBLE)
-            {
-                return DOUBLE;
-            }
-            else if(firstItem->type == STRING && thirdItem->type == STRING)
-            {
-                return STRING;
-            }
-        }
-    }
-
-    return EXPR_ERR;
-}
-
 int reduce()
 {
         bool hasStop = false;
@@ -403,29 +356,12 @@ int reduce()
             }
         }
 
-        char *savedId = malloc(80);
-
-        if(symStackTop(&stack)->type == TYPE_NONE)
-        {
-            strcpy(savedId, symStackTop(&stack)->id);
-        }
-        else
-        {
-            savedId = NULL;
-        }
-        
-
         for(int i = 0; i <= itemsBeforeStop; i++)
         {
             symStackPop(&stack);
         }
 
         symStackPush(&stack, SYM_NON_TERM, finalType);
-
-        if(savedId != NULL)
-        {
-            strcpy(symStackTop(&stack)->id, savedId);
-        }
 
         if(isFinalZero)
         {
@@ -436,7 +372,6 @@ int reduce()
             symStackTop(&stack)->isZero = false;
         }
         
-        free(savedId);
         return 0;
 }
 
@@ -462,10 +397,16 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
         case EXPR_MINUS:
         case EXPR_MUL:
 
-            if(operand1->type == TYPE_NONE)
+            if(operand1->type == TYPE_NONE && operand3->type == TYPE_NONE)
             {
                 *finalType = TYPE_NONE;
-                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1, EXPR_PLUS);
+                generateDynamicCheckTwoNones(currentFuncName, EXPR_PLUS);
+                break;
+            }
+            else if(operand1->type == TYPE_NONE)
+            {
+                *finalType = TYPE_NONE;
+                generateDynamicCheck(currentFuncName, operand3->type, 1, EXPR_PLUS);
                 if(operand3->type != STRING)
                 {
                     break;
@@ -478,7 +419,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             else if(operand3->type == TYPE_NONE)
             {
                 *finalType = TYPE_NONE;
-                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3, EXPR_PLUS);
+                generateDynamicCheck(currentFuncName, operand1->type, 3, EXPR_PLUS);
                 if(operand1->type != STRING)
                 {
                     break;
@@ -525,15 +466,21 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
         //; klasickem deleni je vzdy vysledek double
         case EXPR_DIV:
             *finalType = DOUBLE;
-            if(operand1->type == TYPE_NONE)
+
+        
+            if(operand1->type == TYPE_NONE && operand3->type == TYPE_NONE)
+            {
+                generateDynamicCheckTwoNones(currentFuncName, EXPR_DIV);
+                break;
+            }
+            else if(operand1->type == TYPE_NONE)
             {
                 if(operand3->type == STRING)
                 {
                     return SEM_ERROR_COMPATIBILITY;
                 }
-                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1, EXPR_DIV);
+                generateDynamicCheck(currentFuncName, operand3->type, 1, EXPR_DIV);
                 break;
-
 
             }
             else if(operand3->type == TYPE_NONE)
@@ -542,7 +489,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
                 {
                     return SEM_ERROR_COMPATIBILITY;
                 }
-                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3, EXPR_DIV);
+                generateDynamicCheck(currentFuncName, operand1->type, 3, EXPR_DIV);
                 break;
             }
 
@@ -573,6 +520,11 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
         //pri celosielnem je vysledek typu int
         case EXPR_SPEC_DIV:
             *finalType = INT;
+            if(operand1->type == TYPE_NONE && operand3->type == TYPE_NONE)
+            {
+                generateDynamicCheckTwoNones(currentFuncName, EXPR_SPEC_DIV);
+                break;
+            }
 
             if(operand1->type == TYPE_NONE)
             {
@@ -580,7 +532,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
                 {
                     return SEM_ERROR_COMPATIBILITY;
                 }
-                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1, EXPR_SPEC_DIV);
+                generateDynamicCheck(currentFuncName, operand3->type, 1, EXPR_SPEC_DIV);
                 break;
 
 
@@ -591,7 +543,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
                 {
                     return SEM_ERROR_COMPATIBILITY;
                 }
-                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3, EXPR_SPEC_DIV);
+                generateDynamicCheck(currentFuncName, operand1->type, 3, EXPR_SPEC_DIV);
                 break;
             }
 
@@ -628,12 +580,12 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
 
             if(operand1->type == TYPE_NONE)
             {
-                generateDynamicCheck(currentFunc->key, operand1->id, operand3->type, 1, EXPR_PLUS);
+                generateDynamicCheck(currentFuncName, operand3->type, 1, EXPR_LESS);
                 break;
             }
             else if(operand3->type == TYPE_NONE)
             {
-                generateDynamicCheck(currentFunc->key, operand3->id, operand1->type, 3, EXPR_PLUS);
+                generateDynamicCheck(currentFuncName, operand1->type, 3, EXPR_LESS);
                 break;
             }
 
@@ -735,7 +687,15 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
 {
     int returnValue;
 
-    currentFunc = currentFunction;
+    if(currentFunction == NULL)
+    {
+        currentFuncName = "";
+    }
+    else
+    {
+        currentFuncName = currentFunction->key;    
+    }
+    
 
     bool end = false;
     precedenceTabSym currentSym;

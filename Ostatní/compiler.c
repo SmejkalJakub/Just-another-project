@@ -643,6 +643,7 @@ static int Hodnota(CompilerData *compilerData){
     printf("hodnota\n");
     printf("%d\n", compilerData->token.tokenType);
 
+
     symTableItem *item;
 
     bool global = true;
@@ -781,6 +782,7 @@ static int dalsiHodnota (CompilerData *compilerData)
 {
     printf("dalsiHodnota\n");
 
+
     static int numOfParams = 1;
 
     if(compilerData->token.tokenType == TOKEN_COLON)
@@ -793,6 +795,7 @@ static int dalsiHodnota (CompilerData *compilerData)
         GET_TOKEN;
 
         result = Hodnota(compilerData);
+                                        printf("jsem tu\n");
 
         if(result != 0)
         {
@@ -843,6 +846,7 @@ static int Hodnoty(CompilerData *compilerData)
     }
     else
     {
+
         result = Hodnota(compilerData);
 
         if(result != 0)
@@ -929,7 +933,7 @@ static int navratHodnoty (CompilerData *compilerData)
                     generateRead(compilerData->varToAssign->key, LOCAL_VAR, STRING);
                 }
 
-                compilerData->varToAssign->type = STRING;
+                compilerData->varToAssign->type = TYPE_NONE;
             }
         }
         //NAVRAT_HODNOT -> inputf ( )
@@ -966,7 +970,7 @@ static int navratHodnoty (CompilerData *compilerData)
                     generateRead(compilerData->varToAssign->key, LOCAL_VAR, DOUBLE);
                 }
 
-                compilerData->varToAssign->type = DOUBLE;
+                compilerData->varToAssign->type = TYPE_NONE;
             }
         }
         //NAVRAT_HODNOT -> inputi ( )
@@ -1004,7 +1008,7 @@ static int navratHodnoty (CompilerData *compilerData)
                     generateRead(compilerData->varToAssign->key, LOCAL_VAR, INT);
                 }
 
-                compilerData->varToAssign->type = INT;
+                compilerData->varToAssign->type = TYPE_NONE;
             }
         }
         //NAVRAT_HODNOT -> print ( HODNOTY )
@@ -1029,14 +1033,28 @@ static int navratHodnoty (CompilerData *compilerData)
                         }
                         else
                         {
-                            if(global)
+                            if(temp->type == SPEC_TYPE_NONE)
                             {
-                                generateWrite(temp->key, GLOBAL_VAR);
+                                addInstruction("WRITE string@None\n");
+                            }
+                            else if(compilerData->current_function == NULL)
+                            {
+                                generateWrite(temp, GLOBAL_VAR, "");
+
                             }
                             else
                             {
-                                generateWrite(temp->key, LOCAL_VAR);
+    
+                                if(global)
+                                {
+                                    generateWrite(temp, GLOBAL_VAR, compilerData->current_function->key);
+                                }
+                                else
+                                {
+                                    generateWrite(temp, LOCAL_VAR, compilerData->current_function->key);
+                                }
                             }
+                            
                         }
                     }
                     else if(compilerData->token.tokenType == TOKEN_INTEGER || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING)
@@ -1189,6 +1207,7 @@ static int navratHodnoty (CompilerData *compilerData)
                 }
 
                 compilerData->varToAssign->type = TYPE_NONE;
+
             }
         }
         //NAVRAT_HODNOT -> chr ( HODNOTY )

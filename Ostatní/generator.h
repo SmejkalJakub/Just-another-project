@@ -18,7 +18,7 @@ void generateVariableDef(char *varName, int frame);
 void setDynamicString(DS *dString);
 void generateMoveVariableToVariable(char *toVar, char *fromVar, int toFrame, int fromFrame);
 void generateMoveValueToVariable(char *toVar, int toFrame, char *type, char *value);
-void generateWrite(char *variable, int frame);
+void generateWrite(symTableItem *variable, int frame, char *funcName);
 void generateWriteValue(tokenStruct *token);
 void generateConcatenateString(bool firstConcat);
 void generateRead(char *var, int frame, int type);
@@ -39,7 +39,8 @@ void generateWhileEnd(int numberOfPrevWhiles, symTableItem *functionName);
 void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken, bool global);
 void generateFunctionDeclarePassedParams(int paramNumber, char *paramName);
 void generateSaveLastExpresionValue();
-void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int operandNumber, int exprRule);
+void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumber, int exprRule);
+void generateDynamicCheckTwoNones(char *funcName, int exprRule);
 
 
 void generateThirdOperandToDouble();
@@ -51,6 +52,7 @@ void generateFunctionLen();
 void generateFunctionOrd();
 void generateFunctionChr();
 void generateFunctionSubstr();
+
 
 
 #endif

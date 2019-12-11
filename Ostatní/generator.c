@@ -2,6 +2,8 @@
 
 DS *dynamicString;
 
+int numberOfUses = 0;
+
 void setDynamicString(DS *dString)
 {
     dynamicString = dString;
@@ -76,6 +78,15 @@ void generateExpresion(int exprRule)
     else if(exprRule == EXPR_DIV)
     {
         addInstruction("DIVS\n");
+    }
+    else if(exprRule == EXPR_SPEC_DIV)
+    {
+        addInstruction("POPS GF@%convertHelpVar0\n");
+        addInstruction("INT2FLOATS\n");
+        addInstruction("PUSHS GF@%convertHelpVar0\n");
+        addInstruction("INT2FLOATS\n");
+        addInstruction("DIVS\n");
+        addInstruction("FLOAT2INTS\n");
     }
     else if(exprRule == EXPR_EQ)
     {
@@ -308,67 +319,366 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken, bool g
 
 }
 
-void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int operandNumber, int exprRule)
+
+void generateDynamicCheckTwoNones(char *funcName, int exprRule)
 {
-    addInstruction("DEFVAR LF@");
-    addInstruction(varId);
+    char str[12];
+    sprintf(str, "%d", numberOfUses);
+
+
+    if(strcmp("", funcName) == 0)
+    {
+        addInstruction("CREATEFRAME\n");
+        addInstruction("PUSHFRAME\n");
+    }
+
+    addInstruction("DEFVAR LF@%0");
+    addInstruction("%");
+    addInstruction(str);
     addInstruction("$type\n");
 
-    addInstruction("DEFVAR LF@");
-    addInstruction(varId);
-    addInstruction("$tmp\n");
+    addInstruction("POPS GF@%convertHelpVar0\n");
+    addInstruction("POPS LF@%0");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type\n");
+    addInstruction("PUSHS LF@%0");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type\n");
+    addInstruction("PUSHS GF@%convertHelpVar0\n");
 
-    addInstruction("TYPE LF@");
-    addInstruction(varId);
-    addInstruction("$type ");
-    addInstruction("LF@");
-    addInstruction(varId);
-    addInstruction("\n");
+    addInstruction("TYPE LF@%0");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type LF@%0");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type\n");
 
-    addInstruction("MOVE LF@");
-    addInstruction(varId);
-    addInstruction("$tmp ");
-    addInstruction("LF@");
-    addInstruction(varId);
-    addInstruction("\n");
+    addInstruction("DEFVAR LF@%1");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type\n");
+
+    addInstruction("POPS LF@%1");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type\n");
+
+    addInstruction("PUSHS LF@%1");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type\n");
+
+    addInstruction("TYPE LF@%1");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type LF@%1");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type\n");
+
+    if(exprRule == EXPR_DIV)
+    {
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$%%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type$true$float LF@%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("string@float\n");
+
+        addInstruction("JUMPIFNEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$error LF@%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("string@int\n");
+
+        generateFirstOperandToDouble();
+
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$if$%%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type$true$float\n");     
+        
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$same LF@%1");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("string@float\n");
+
+        addInstruction("JUMPIFNEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$error LF@%1");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("string@int\n");
+
+        generateThirdOperandToDouble();
+
+        addInstruction("JUMP $");
+        addInstruction(funcName);
+        addInstruction("$if$%");
+        addInstruction(str);
+        addInstruction("$true$same\n");
+    }
+
+    else if(exprRule == EXPR_SPEC_DIV)
+    {
+
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$%%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type$true$int LF@%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("string@int\n");
+
+        addInstruction("EXIT int@4\n");
+
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$if$%%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type$true$int\n");     
+        
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$same LF@%1");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("string@int\n");
+
+        addInstruction("EXIT int@4\n");
+    }
+    
+
+    else if(exprRule == EXPR_PLUS)
+    {
+        addInstruction("EQ GF@%convertHelpVar0 ");
+        addInstruction("LF@%0%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("LF@%1%");
+        addInstruction(str);
+        addInstruction("$type\n");
+
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$same GF@%convertHelpVar0 ");
+        addInstruction("bool@true\n");
+
+        addInstruction("EQ GF@%convertHelpVar0 ");
+        addInstruction("LF@%0%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("string@int\n");
+
+        addInstruction("EQ GF@%convertHelpVar1 ");
+        addInstruction("LF@%1%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("string@float\n");
+
+        addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$firstToDouble GF@%convertHelpVar0 ");
+        addInstruction("bool@true\n");
+        
+        addInstruction("EQ GF@%convertHelpVar0 ");
+        addInstruction("LF@%0%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("string@float\n");
+
+        addInstruction("EQ GF@%convertHelpVar1 ");
+        addInstruction("LF@%1%");
+        addInstruction(str);
+        addInstruction("$type ");
+        addInstruction("string@int\n");
+
+        addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
+
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$thirdToDouble GF@%convertHelpVar0 ");
+        addInstruction("bool@true\n");
+
+
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$thirdToDouble\n");
+        generateThirdOperandToDouble();
+        addInstruction("JUMP $");
+        addInstruction(funcName);
+        addInstruction("$if$%");
+        addInstruction(str);
+        addInstruction("$true$same\n");
+
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$firstToDouble\n");
+        generateFirstOperandToDouble();
+        addInstruction("JUMP $");
+        addInstruction(funcName);
+        addInstruction("$if$%");
+        addInstruction(str);
+        addInstruction("$true$same\n");
+
+    }
+
+    addInstruction("LABEL $");
+    addInstruction(funcName);
+    addInstruction("$if$");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$error\n");
+    addInstruction("EXIT int@4\n");
+
+    addInstruction("LABEL $");
+    addInstruction(funcName);
+    addInstruction("$if$%");
+    addInstruction(str);
+    addInstruction("$true$same\n");
+
+    numberOfUses++;
+}
+
+
+void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumber, int exprRule)
+{
+
+    numberOfUses++;
+
+    char str[12];
+    sprintf(str, "%d", numberOfUses);
+    printf("NUMBEROFUSES %s\n", str);
+
+    if(strcmp("", funcName) == 0)
+    {
+        addInstruction("CREATEFRAME\n");
+        addInstruction("PUSHFRAME\n");
+    }
+    addInstruction("DEFVAR LF@%0");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type\n");
+
+    if(operandNumber == 1)
+    {
+        addInstruction("POPS GF@%convertHelpVar0\n");
+        addInstruction("POPS LF@%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type\n");
+        addInstruction("PUSHS LF@%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type\n");
+        addInstruction("PUSHS GF@%convertHelpVar0\n");
+    }
+    else if(operandNumber == 3)
+    {
+        addInstruction("POPS LF@%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type\n");
+
+        addInstruction("PUSHS LF@%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$type\n");
+    }
+
+    addInstruction("TYPE LF@%0");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type LF@%0");
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$type\n");
+    
 
     if(nextOperatorType == INT)
     {
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
-        addInstruction("$if$");
-        addInstruction(varId);
-        addInstruction("$true$float LF@");
-        addInstruction(varId);
+        addInstruction("$if$%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$float LF@%0");
+        addInstruction("%");
+        addInstruction(str);
         addInstruction("$type string@float\n");
 
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
-        addInstruction("$if$");
-        addInstruction(varId);
-        addInstruction("$true$int LF@");
-        addInstruction(varId);
+        addInstruction("$if$%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$int LF@%0");
+        addInstruction("%");
+        addInstruction(str);
         addInstruction("$type string@int\n");
 
         addInstruction("EXIT int@4\n");
 
         addInstruction("LABEL $");
         addInstruction(funcName);
-        addInstruction("$if$");
-        addInstruction(varId);
+        addInstruction("$if$%0");
+        addInstruction("%");
+        addInstruction(str);
         addInstruction("$true$float\n");
+
         if(exprRule == EXPR_SPEC_DIV)
         {
-            if(operandNumber == 1)
-            {
-                generateFirstOperandToInteger();
-            }
-            else if(operandNumber == 3)
-            {
-                generateThirdOperandToInteger();
-            }
+            addInstruction("EXIT int@4");
         }
-        else if(exprRule == EXPR_PLUS)
+        else if(exprRule == EXPR_PLUS || exprRule == EXPR_LESS)
         {
             if(operandNumber == 1)
             {
@@ -383,8 +693,9 @@ void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int
 
         addInstruction("LABEL $");
         addInstruction(funcName);
-        addInstruction("$if$");
-        addInstruction(varId);
+        addInstruction("$if$%0");
+        addInstruction("%");
+        addInstruction(str);
         addInstruction("$true$int\n");
         if(exprRule == EXPR_DIV)
         {
@@ -399,79 +710,86 @@ void generateDynamicCheck(char *funcName, char *varId, int nextOperatorType, int
         }
     }
 
-    if(nextOperatorType == STRING && exprRule != EXPR_DIV && exprRule != EXPR_SPEC_DIV)
+    else if(nextOperatorType == STRING && exprRule == EXPR_PLUS)
     {
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
-        addInstruction("$if$");
-        addInstruction(varId);
-        addInstruction("$true$string LF@");
-        addInstruction(varId);
+        addInstruction("$if$%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$string LF@%0");
+        addInstruction("%");
+        addInstruction(str);
         addInstruction("$type string@string\n");
 
         addInstruction("EXIT int@4\n");
 
         addInstruction("LABEL $");
         addInstruction(funcName);
-        addInstruction("$if$");
-        addInstruction(varId);
+        addInstruction("$if$%0");
+        addInstruction("%");
+        addInstruction(str);
         addInstruction("$true$string\n");
     }
 
-    if(nextOperatorType == DOUBLE)
+    else if(nextOperatorType == DOUBLE)
     {
+        if(exprRule == EXPR_SPEC_DIV)
+        {
+            addInstruction("EXIT int@4\n");
+            return;
+        }
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
-        addInstruction("$if$");
-        addInstruction(varId);
-        addInstruction("$true$float LF@");
-        addInstruction(varId);
+        addInstruction("$if$%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$float LF@%0");
+        addInstruction("%");
+        addInstruction(str);
         addInstruction("$type string@float\n");
 
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
-        addInstruction("$if$");
-        addInstruction(varId);
-        addInstruction("$true$int LF@");
-        addInstruction(varId);
+        addInstruction("$if$%0");
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$int LF@%0");
+        addInstruction("%");
+        addInstruction(str);
         addInstruction("$type string@int\n");
 
         addInstruction("EXIT int@4\n");
 
         addInstruction("LABEL $");
         addInstruction(funcName);
-        addInstruction("$if$");
-        addInstruction(varId);
+        addInstruction("$if$%0");
+        addInstruction("%");
+        addInstruction(str);
         addInstruction("$true$int\n");
-        if(exprRule != EXPR_PLUS)
+
+        if(operandNumber == 1)
         {
-            if(operandNumber == 1)
-            {
-                generateFirstOperandToDouble();
-            }
-            else if(operandNumber == 3)
-            {
-                generateThirdOperandToDouble();
-            }
+            generateFirstOperandToDouble();
         }
+        else if(operandNumber == 3)
+        {
+            generateThirdOperandToDouble();
+        }
+        
+
 
         addInstruction("LABEL $");
         addInstruction(funcName);
-        addInstruction("$if$");
-        addInstruction(varId);
+        addInstruction("$if$%0");
+        addInstruction("%");
+        addInstruction(str);
         addInstruction("$true$float\n");
-        if(exprRule != EXPR_SPEC_DIV)
-        {
-            if(operandNumber == 1)
-            {
-                generateFirstOperandToInteger();
-            }
-            else if(operandNumber == 3)
-            {
-                generateThirdOperandToInteger();
-            }
-        }
 
+    }
+    if(strcmp("", funcName) == 0)
+    {
+        addInstruction("POPFRAME\n");
     }
 }
 
@@ -616,7 +934,7 @@ void generateFunctionStart(symTableItem *functionName)
     addInstruction("\n");
     addInstruction("PUSHFRAME\n");
     addInstruction("DEFVAR LF@%retval\n");
-    addInstruction("MOVE LF@%retval string@\n\n");
+    addInstruction("MOVE LF@%retval nil@nil\n\n");
 
     labelCounter++;
 }
@@ -628,7 +946,6 @@ void generateFunctionEnd(symTableItem *functionName)
     char str[13];
     sprintf(str, "l%d", labelCounter);
 
-    addInstruction("MOVE LF@%retval string@\n");
     addInstruction("LABEL $");
     addInstruction(functionName->key);
     addInstruction("$exitFunction");
@@ -765,9 +1082,13 @@ void generateMoveValueToVariable(char *toVar, int toFrame, char *type, char *val
     addInstruction("\n");
 }
 
-void generateWrite(char *variable, int frame)
+void generateWrite(symTableItem *variable, int frame, char *funcName)
 {
+
     char *frameVar = "";
+
+    char str[12];
+    sprintf(str, "%d", numberOfUses);
 
     if(frame == LOCAL_VAR)
     {
@@ -778,10 +1099,91 @@ void generateWrite(char *variable, int frame)
         frameVar = "GF@";
     }
 
+    if(variable->type == TYPE_NONE)
+    {
+        if(strcmp(funcName, "") == 0)
+        {
+            addInstruction("CREATEFRAME\n");
+            addInstruction("PUSHFRAME\n");
+        }
+        addInstruction("DEFVAR LF@");
+        addInstruction(variable->key);
+        addInstruction("$type\n");
+
+        addInstruction("TYPE LF@");
+        addInstruction(variable->key);
+        addInstruction("$type ");
+        addInstruction(frameVar);
+        addInstruction(variable->key);
+        addInstruction("\n");
+
+        addInstruction("JUMPIFEQ $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(variable->key);
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$nil LF@");
+        addInstruction(variable->key);
+        addInstruction("$type string@nil\n");
+
+        addInstruction("JUMP $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(variable->key);
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$false$nil\n");
+ 
+
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$if$");
+        addInstruction(variable->key);
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("$true$nil\n");
+
+        addInstruction("WRITE string@None\n");
+
+        addInstruction("JUMP $");
+        addInstruction(funcName);
+        addInstruction("$end$");
+        addInstruction(variable->key);
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("\n");
+    }
+
+    addInstruction("LABEL $");
+    addInstruction(funcName);
+    addInstruction("$if$");
+    addInstruction(variable->key);
+    addInstruction("%");
+    addInstruction(str);
+    addInstruction("$false$nil\n");
+
     addInstruction("WRITE ");
     addInstruction(frameVar);
-    addInstruction(variable);
+    addInstruction(variable->key);
     addInstruction("\n");
+
+    if(variable->type == TYPE_NONE)
+    {
+        addInstruction("LABEL $");
+        addInstruction(funcName);
+        addInstruction("$end$");
+        addInstruction(variable->key);
+        addInstruction("%");
+        addInstruction(str);
+        addInstruction("\n");
+
+        if(strcmp(funcName, "") == 0)
+        {
+            addInstruction("POPFRAME\n");
+        }
+        numberOfUses++;
+    }
 }
 
 void generatePrint(char *string)
