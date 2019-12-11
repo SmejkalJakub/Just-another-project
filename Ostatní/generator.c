@@ -24,6 +24,9 @@ void generateHeader()
     addInstruction("DEFVAR GF@%convertHelpVar0\n");
     addInstruction("DEFVAR GF@%convertHelpVar1\n\n");
 
+    addInstruction("DEFVAR GF@%%0$type\n");
+    addInstruction("DEFVAR GF@%%1$type\n\n");
+
     addInstruction("DEFVAR GF@%lastExpresionResult\n\n");
 
     generateJump("afterBuildInFunctions\n");
@@ -228,7 +231,15 @@ void generateStackPush(tokenStruct *token, bool global)
     else if(token->tokenType == TOKEN_STRING)
     {
         addInstruction("string@");
-        addInstruction(token->stringValue->str);
+        if(token->stringValue->str == NULL)
+        {
+            addInstruction("");
+        }
+        else
+        {
+            addInstruction(token->stringValue->str);
+        }
+        
     }
     else if(token->tokenType == TOKEN_KEYWORD && strcmp(token->stringValue->str, "None") == 0)
     {
@@ -311,6 +322,8 @@ void generateFunctionParamsPass(int paramNumber, tokenStruct *paramToken, bool g
 
 void generateDynamicCheckTwoNones(char *funcName, int exprRule)
 {
+    numberOfUses++;
+
     char str[12];
     sprintf(str, "%d", numberOfUses);
 
@@ -321,52 +334,19 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("PUSHFRAME\n");
     }
 
-    addInstruction("DEFVAR LF@%0");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type\n");
-
     addInstruction("POPS GF@%convertHelpVar0\n");
-    addInstruction("POPS LF@%0");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type\n");
-    addInstruction("PUSHS LF@%0");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type\n");
+    addInstruction("POPS GF@%%0$type\n");
+    addInstruction("PUSHS GF@%%0$type\n");
     addInstruction("PUSHS GF@%convertHelpVar0\n");
 
-    addInstruction("TYPE LF@%0");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type LF@%0");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type\n");
+    addInstruction("TYPE GF@%%0$type GF@%%0$type\n");
 
-    addInstruction("DEFVAR LF@%1");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type\n");
 
-    addInstruction("POPS LF@%1");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type\n");
+    addInstruction("POPS GF@%%1$type\n");
+    addInstruction("PUSHS GF@%%1$type\n");
 
-    addInstruction("PUSHS LF@%1");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type\n");
+    addInstruction("TYPE GF@%%1$type GF@%%1$type\n");
 
-    addInstruction("TYPE LF@%1");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type LF@%1");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type\n");
 
     if(exprRule == EXPR_DIV)
     {
@@ -375,10 +355,7 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("$if$%%0");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$type$true$float LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type ");
+        addInstruction("$type$true$float GF@%%0$type ");
         addInstruction("string@float\n");
 
         addInstruction("JUMPIFNEQ $");
@@ -386,10 +363,7 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("$if$");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$error LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type ");
+        addInstruction("$error GF@%%0$type ");
         addInstruction("string@int\n");
 
         generateFirstOperandToDouble();
@@ -406,10 +380,7 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("$if$");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$true$same LF@%1");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type ");
+        addInstruction("$true$same GF@%%1$type ");
         addInstruction("string@float\n");
 
         addInstruction("JUMPIFNEQ $");
@@ -417,10 +388,7 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("$if$");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$error LF@%1");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type ");
+        addInstruction("$error GF@%%1$type ");
         addInstruction("string@int\n");
 
         generateThirdOperandToDouble();
@@ -440,10 +408,7 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("$if$%%0");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$type$true$int LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type ");
+        addInstruction("$type$true$int GF@%%0$type ");
         addInstruction("string@int\n");
 
         addInstruction("EXIT int@4\n");
@@ -460,10 +425,7 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("$if$");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$true$same LF@%1");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type ");
+        addInstruction("$true$same GF@%%1$type ");
         addInstruction("string@int\n");
 
         addInstruction("EXIT int@4\n");
@@ -473,12 +435,8 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
     else if(exprRule == EXPR_PLUS)
     {
         addInstruction("EQ GF@%convertHelpVar0 ");
-        addInstruction("LF@%0%");
-        addInstruction(str);
-        addInstruction("$type ");
-        addInstruction("LF@%1%");
-        addInstruction(str);
-        addInstruction("$type\n");
+        addInstruction("GF@%%0$type ");
+        addInstruction("GF@%%1$type\n");
 
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
@@ -489,15 +447,11 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("bool@true\n");
 
         addInstruction("EQ GF@%convertHelpVar0 ");
-        addInstruction("LF@%0%");
-        addInstruction(str);
-        addInstruction("$type ");
+        addInstruction("GF@%%0$type ");
         addInstruction("string@int\n");
 
         addInstruction("EQ GF@%convertHelpVar1 ");
-        addInstruction("LF@%1%");
-        addInstruction(str);
-        addInstruction("$type ");
+        addInstruction("GF@%%1$type ");
         addInstruction("string@float\n");
 
         addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
@@ -510,15 +464,11 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("bool@true\n");
         
         addInstruction("EQ GF@%convertHelpVar0 ");
-        addInstruction("LF@%0%");
-        addInstruction(str);
-        addInstruction("$type ");
+        addInstruction("GF@%%0$type ");
         addInstruction("string@float\n");
 
         addInstruction("EQ GF@%convertHelpVar1 ");
-        addInstruction("LF@%1%");
-        addInstruction(str);
-        addInstruction("$type ");
+        addInstruction("GF@%%1$type ");
         addInstruction("string@int\n");
 
         addInstruction("AND GF@%convertHelpVar0 GF@%convertHelpVar0 GF@%convertHelpVar1\n");
@@ -530,7 +480,8 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction(str);
         addInstruction("$true$thirdToDouble GF@%convertHelpVar0 ");
         addInstruction("bool@true\n");
-
+        
+        addInstruction("EXIT int@4\n");
 
         addInstruction("LABEL $");
         addInstruction(funcName);
@@ -538,7 +489,9 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("%");
         addInstruction(str);
         addInstruction("$true$thirdToDouble\n");
+
         generateThirdOperandToDouble();
+
         addInstruction("JUMP $");
         addInstruction(funcName);
         addInstruction("$if$%");
@@ -551,7 +504,9 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
         addInstruction("%");
         addInstruction(str);
         addInstruction("$true$firstToDouble\n");
+
         generateFirstOperandToDouble();
+
         addInstruction("JUMP $");
         addInstruction(funcName);
         addInstruction("$if$%");
@@ -574,13 +529,11 @@ void generateDynamicCheckTwoNones(char *funcName, int exprRule)
     addInstruction(str);
     addInstruction("$true$same\n");
 
-    numberOfUses++;
 }
 
 
 void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumber, int exprRule)
 {
-
     numberOfUses++;
 
     char str[12];
@@ -591,44 +544,21 @@ void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumbe
         addInstruction("CREATEFRAME\n");
         addInstruction("PUSHFRAME\n");
     }
-    addInstruction("DEFVAR LF@%0");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type\n");
 
     if(operandNumber == 1)
     {
         addInstruction("POPS GF@%convertHelpVar0\n");
-        addInstruction("POPS LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type\n");
-        addInstruction("PUSHS LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type\n");
+        addInstruction("POPS GF@%%0$type\n");
+        addInstruction("PUSHS GF@%%0$type\n");
         addInstruction("PUSHS GF@%convertHelpVar0\n");
     }
     else if(operandNumber == 3)
     {
-        addInstruction("POPS LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type\n");
-
-        addInstruction("PUSHS LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type\n");
+        addInstruction("POPS GF@%%0$type\n");
+        addInstruction("PUSHS GF@%%0$type\n");
     }
 
-    addInstruction("TYPE LF@%0");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type LF@%0");
-    addInstruction("%");
-    addInstruction(str);
-    addInstruction("$type\n");
+    addInstruction("TYPE GF@%%0$type GF@%%0$type\n");
     
 
     if(nextOperatorType == INT)
@@ -638,20 +568,16 @@ void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumbe
         addInstruction("$if$%0");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$true$float LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type string@float\n");
+        addInstruction("$true$float GF@%%0$type ");
+        addInstruction("string@float\n");
 
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
         addInstruction("$if$%0");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$true$int LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type string@int\n");
+        addInstruction("$true$int GF@%%0$type ");
+        addInstruction("string@int\n");
 
         addInstruction("EXIT int@4\n");
 
@@ -705,10 +631,8 @@ void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumbe
         addInstruction("$if$%0");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$true$string LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type string@string\n");
+        addInstruction("$true$string GF@%%0$type ");
+        addInstruction("string@string\n");
 
         addInstruction("EXIT int@4\n");
 
@@ -732,20 +656,16 @@ void generateDynamicCheck(char *funcName, int nextOperatorType, int operandNumbe
         addInstruction("$if$%0");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$true$float LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type string@float\n");
+        addInstruction("$true$float GF@%%0$type ");
+        addInstruction("string@float\n");
 
         addInstruction("JUMPIFEQ $");
         addInstruction(funcName);
         addInstruction("$if$%0");
         addInstruction("%");
         addInstruction(str);
-        addInstruction("$true$int LF@%0");
-        addInstruction("%");
-        addInstruction(str);
-        addInstruction("$type string@int\n");
+        addInstruction("$true$int GF@%%0$type ");
+        addInstruction("string@int\n");
 
         addInstruction("EXIT int@4\n");
 

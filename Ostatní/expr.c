@@ -626,6 +626,7 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
 {
     symStackPushStop(&stack);
 
+
     symStackPush(&stack, currentSym, getTokenType(token, symTableStack));
     if(token->tokenType == TOKEN_INTEGER && token->integerValue == 0)
     {
@@ -647,11 +648,9 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
 
     if(symbolToType(currentSym) == PREC_TAB_ID)
     {
-        symStackTop(&stack)->id = malloc(80);
         if(currentSym == SYM_ID)
         {
             STStackSearch(symTableStack, token->stringValue->str, &global);
-            strcpy(symStackTop(&stack)->id, token->stringValue->str);
             if(global)
             {
                 generateStackPush(token, true);

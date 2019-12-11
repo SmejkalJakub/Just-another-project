@@ -444,6 +444,14 @@ int getToken(tokenStruct *token)
                     DSDelete(&DString);
                     return LEX_ERROR;
                 }
+                else if(c == '#')
+                {
+                    if(!DSAddStr(&DString, "\\035"))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                }
                 else if(c == '\'')
                 {
                     token->tokenType = TOKEN_STRING;
@@ -709,6 +717,15 @@ int getToken(tokenStruct *token)
                             return INTERNAL_ERROR;
                         }
                     }
+                    else if(c == '#')
+                    {
+                        if(!DSAddStr(&DString, "\\035"))
+                        {
+                            DSDelete(&DString);
+                            return INTERNAL_ERROR;
+                        }
+                    }
+                    
                     else if(!DSAddChar(&DString, c))
                     {
                         DSDelete(&DString);
@@ -786,6 +803,14 @@ int getToken(tokenStruct *token)
                                 return INTERNAL_ERROR;
                             }
                         }
+                        else if(c == '#')
+                        {
+                            if(!DSAddStr(&DString, "\\035"))
+                            {
+                                DSDelete(&DString);
+                                return INTERNAL_ERROR;
+                            }
+                        }
                         else if(!DSAddChar(&DString, c))
                         {
                             DSDelete(&DString);
@@ -847,6 +872,15 @@ int getToken(tokenStruct *token)
                                 return INTERNAL_ERROR;
                             }
                             if(!DSAddStr(&DString, str))
+                            {
+                                DSDelete(&DString);
+                                return INTERNAL_ERROR;
+                            }
+                        }
+
+                        else if(c == '#')
+                        {
+                            if(!DSAddStr(&DString, "\\035"))
                             {
                                 DSDelete(&DString);
                                 return INTERNAL_ERROR;
