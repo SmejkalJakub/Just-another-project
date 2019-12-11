@@ -1,13 +1,3 @@
-#ifndef COMPILER_H_INCLUDED
-#define COMPILER_H_INCLUDED
-
-#include <stdbool.h>
-
-#include "stack.h"
-#include "generator.h"
-#include "dynamicString.h"
-#include "symtable.h"
-#include "fileScanner.h"
 /*
 *Implementace pøekladaèe imperativního jazyka IFJ19
 *
@@ -20,53 +10,51 @@
 *
 *FIT VUT BRNO
 */
+
+#ifndef COMPILER_H_INCLUDED
+#define COMPILER_H_INCLUDED
+
+#include <stdbool.h>
+
+#include "stack.h"
+#include "generator.h"
+#include "dynamicString.h"
+#include "symtable.h"
+#include "fileScanner.h"
 #include "expr.h"
 #include "symTableStack.h"
 
 
 
-/*Struktura samotneho compileru obsahujici data potrebna pro spravny beh*/
+
 typedef struct {
-    symTable *localTable;                   //Lokalni tabulka symbolu
-    symTable *globalTable;                  //Globalni tabulka symbolu
+    symTable *localTable;
+    symTable *globalTable;
 
-    STStack *tablesStack;                   //Zasobnik tabulek symbolu
+    STStack *tablesStack;
 
-    tokenStruct token;                      //Nacteny token
+    tokenStruct token;
 
-    symTableItem *varToAssign;              //Promenna k prirazeni
+    symTableItem *varToAssign;
 
-    symTableItem *current_function;         //Nazev funkce, ve ktere se prave nachazime
+    symTableItem *current_function;
 
-                                            /*slouzi pro tvorbu unikatniho ID labelu*/
-    int numberOfIfs;                        //Pocet IFu, kterymi jsme prozatim prosli
-    int numberOfWhiles;                     //Pocet WHILu, kterymi jsme prozatim prosli
+    int numberOfIfs;
+    int numberOfWhiles;
 
-    bool global;                            //zdali jsme v globalnim ramci
+    bool global;
 
-    bool inFunction;                        //zdali jsme ve funkci
-	bool inDefinition;                      //zdali jsme v definici
-	bool inWhileOrIf;                       //zdali jsme v IFu ci WHILE
+    bool inFunction;
+	bool inDefinition;
+	bool inWhileOrIf;
 
-    Stack *indentationStack;                //Zasobnik Indentu
+    Stack *indentationStack;
 
 }CompilerData;
 
-/*Funkce pro inicializaci dat Compileru*/
-int compilerDataInit(CompilerData* compilerData);
 
-/*FUNKCE REPREZENTUJICI JEDNOTLIVE NONTERMY*/
-static int Prog (CompilerData *compilerData);
-static int Prikaz (CompilerData *compilerData);
-static int Hodnoty(CompilerData *compilerData);
-static int Hodnota(CompilerData *compilerData);
-static int navratHodnoty (CompilerData *compilerData);
-static int Parametry(CompilerData *compilerData);
-static int dalsiParametr (CompilerData *compilerData);
-static int volaniNeboPrirazeni(CompilerData *compilerData);
-static int prikazySekv(CompilerData *compilerData);
-static int dalsiPrikaz(CompilerData *compilerData);
-static int fceDefNeboVest(CompilerData *compilerData);
+bool compilerDataInit(CompilerData* compilerData);
+int divideAndConquer();
 
 #endif
 

@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -Wextra -std=c99 -pedantic
 PROG=compiler
 TESTFILE=test
-OBJFILES=symTableStack.o symtable.o symstack.o stack.o generator.o fileScanner.o expr.o dynamicString.o compiler.o
+OBJFILES=symTableStack.o symtable.o symstack.o stack.o generator.o fileScanner.o expr.o dynamicString.o compiler.o compiler-main.o
 
 all: $(PROG)
 
@@ -10,6 +10,9 @@ run: compile interpret
 
 $(PROG): $(OBJFILES)
 	$(CC) $(CFLAGS) $(OBJFILES) -o $(PROG)
+
+compiler-main.o: compiler-main.c
+	$(CC) $(CFLAGS) compiler-main.c -c
 
 compiler.o: compiler.c
 	$(CC) $(CFLAGS) compiler.c -c
