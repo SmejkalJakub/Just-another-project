@@ -59,7 +59,7 @@ int compilerDataInit(CompilerData* compilerData){
 
     DSInit(compilerData->token.stringValue);
 
-    compilerData -> inFunction = NULL;
+    compilerData -> inFunction = false;
 	compilerData -> inWhileOrIf = NULL;
 
     compilerData->varToAssign = NULL;
@@ -286,6 +286,8 @@ static int volaniNeboPrirazeni(CompilerData *compilerData)
             return 3;
         }
 
+        symTableItem *prevFunction = compilerData->current_function;
+
         compilerData->current_function = compilerData->varToAssign;
         compilerData->varToAssign = NULL;
 
@@ -297,7 +299,7 @@ static int volaniNeboPrirazeni(CompilerData *compilerData)
             generateCall(compilerData->current_function->key);
         }
 
-        compilerData->current_function = NULL;
+        compilerData->current_function = prevFunction;
 
         return result;
     }
@@ -329,6 +331,8 @@ static int fceDefNeboVest(CompilerData *compilerData)
 
         if(compilerData->token.tokenType == TOKEN_LEFT_BRACKET)
         {
+            symTableItem *prevFunction = compilerData->current_function;
+
             compilerData->current_function = item;
 
             GET_TOKEN;
@@ -350,7 +354,7 @@ static int fceDefNeboVest(CompilerData *compilerData)
                 compilerData->varToAssign = TYPE_NONE;
             }
 
-            compilerData->current_function = NULL;
+            compilerData->current_function = prevFunction;
 
             return result;
         }
@@ -1044,7 +1048,7 @@ static int navratHodnoty (CompilerData *compilerData)
                             }
                             else
                             {
-    
+
                                 if(global)
                                 {
                                     generateWrite(temp, GLOBAL_VAR, compilerData->current_function->key);
@@ -1054,7 +1058,7 @@ static int navratHodnoty (CompilerData *compilerData)
                                     generateWrite(temp, LOCAL_VAR, compilerData->current_function->key);
                                 }
                             }
-                            
+
                         }
                     }
                     else if(compilerData->token.tokenType == TOKEN_INTEGER || compilerData->token.tokenType == TOKEN_DOUBLE || compilerData->token.tokenType == TOKEN_STRING)
@@ -1463,28 +1467,28 @@ int main(int argc, char *argv[])
         switch (result)
         {
             case LEX_ERROR:
-                printf("LEX ERROR\n");
+                fprintf(stderr, "LEX ERROR\n");
                 break;
             case SYNTAX_ERROR:
-                printf("SYNTAX ERROR\n");
+                fprintf(stderr, "SYNTAX ERROR\n");
                 break;
             case SEM_ERROR_DEF:
-                printf("SEMANTIC ERROR UNDEFINED\n");
+                fprintf(stderr, "SEMANTIC ERROR UNDEFINED\n");
                 break;
             case SEM_ERROR_COMPATIBILITY:
-                printf("SEMANTIC ERROR TYPES NOT COMPATIBLE\n");
+                fprintf(stderr, "SEMANTIC ERROR TYPES NOT COMPATIBLE\n");
                 break;
             case SEM_ERROR_PARAMS:
-                printf("SEMANTIC ERROR WRONG NUMBER OF PARAMS\n");
+                fprintf(stderr, "SEMANTIC ERROR WRONG NUMBER OF PARAMS\n");
                 break;
             case SEM_ERROR:
-                printf("SEMANTIC ERROR\n");
+                fprintf(stderr, "SEMANTIC ERROR\n");
                 break;
             case SEM_ERROR_DIV_ZERO:
-                printf("ZERO DIVISION ERROR\n");
+                fprintf(stderr, "ZERO DIVISION ERROR\n");
                 break;
             case INTERNAL_ERROR:
-                printf("ERROR INTERNAL\n");
+                fprintf(stderr, "ERROR INTERNAL\n");
                 break;
             default:
                 break;
