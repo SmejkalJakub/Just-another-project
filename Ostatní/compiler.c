@@ -1282,7 +1282,7 @@ static int navratHodnoty (CompilerData *compilerData)
 
             if(compilerData->current_function->defined == false)
             {
-                compilerData->current_function->numberOfParams = 1;
+                compilerData->current_function->numberOfParams = 2;
                 compilerData->current_function->function = true;
                 compilerData->current_function->defined = true;
 
@@ -1458,9 +1458,12 @@ int main(int argc, char *argv[])
 
     generateHeader();
 
-    getToken(&compilerData.token);
+    result = getToken(&compilerData.token);
 
-    result = Prog(&compilerData);
+    if(result == SCAN_OK)
+    {
+        result = Prog(&compilerData);
+    }
 
     if(result != 0)
     {
@@ -1493,9 +1496,14 @@ int main(int argc, char *argv[])
             default:
                 break;
         }
-        return result;
     }
-    printf("%s", dynamicString.str);
+
+    if(result == 0)
+    {
+        printf("%s", dynamicString.str);
+    }
 
     fclose(sourceCode);
+
+    return result;
 }
