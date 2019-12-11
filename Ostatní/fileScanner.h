@@ -1,3 +1,17 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk28)
+*
+*
+*File Scanner
+*
+*FIT VUT BRNO
+*/
+
+
+
 #ifndef FILESCANNER_H_INCLUDED
 #define FILESCANNER_H_INCLUDED
 

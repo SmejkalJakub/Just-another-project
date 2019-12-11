@@ -1,3 +1,15 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk09)
+*Adam Grunwald (xgrunw00)
+*
+*
+*Expression
+*
+*FIT VUT BRNO
+*/
 #ifndef EXPR_H_INCLUDED
 #define EXPR_H_INCLUDED
 

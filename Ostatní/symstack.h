@@ -1,3 +1,16 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk09)
+*
+*
+*Zasobnik symbolu
+*
+*FIT VUT BRNO
+*/
+
 #ifndef SYMSTACK_H_INCLUDED
 #define SYMSTACK_H_INCLUDED
 

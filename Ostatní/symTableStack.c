@@ -1,3 +1,15 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*
+*
+*Zasobnik tabulek symbolu
+*
+*FIT VUT BRNO
+*/
+
+
 #include "symTableStack.h"
 
 

@@ -1,3 +1,17 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk09)
+*Adam Grunwald (xgrunw00)
+*
+*
+*Expression
+*
+*FIT VUT BRNO
+*/
+
+
 #include "expr.h"
 #include "fileScanner.h"
 #include "symtable.h"
@@ -371,7 +385,7 @@ int reduce()
         {
             symStackTop(&stack)->isZero = false;
         }
-        
+
         return 0;
 }
 
@@ -426,7 +440,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
                 {
                     operand3->type = STRING;
                 }
-                
+
             }
              //dva retezce jde jen scitat - konkatenace
             if(operand1->type == STRING && operand3->type == STRING && rule == EXPR_PLUS){
@@ -465,7 +479,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
         case EXPR_DIV:
             *finalType = DOUBLE;
 
-        
+
             if(operand1->type == TYPE_NONE && operand3->type == TYPE_NONE)
             {
                 generateDynamicCheckTwoNones(currentFuncName, EXPR_DIV);
@@ -503,7 +517,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             {
                 return SEM_ERROR_DIV_ZERO;
             }
-            
+
 
 
             if(operand1->type == INT){
@@ -584,7 +598,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
                 break;
             }
 
-            
+
             //pokud jsou oba operandy cisla, udelame z nich doubly
             if (operand1->type == INT && operand3->type == DOUBLE){
                 firstOperandToDouble = true;
@@ -596,7 +610,7 @@ int checkAndRetype(symStackItem* operand1, symStackItem* operand2, symStackItem*
             {
                 break;
             }
-            
+
 
             //pokud chceme porovnavat dva operandy, z nichz jeden je jineho typu nez druhy(neplati u cisel) - chyba
             else if(operand1->type != operand3->type){
@@ -640,8 +654,8 @@ void shift(precedenceTabSym currentSym, tokenStruct *token, STStack *symTableSta
     {
         symStackTop(&stack)->isZero = false;
     }
-    
-    
+
+
 
     bool global;
 
@@ -680,9 +694,9 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
     }
     else
     {
-        currentFuncName = currentFunction->key;    
+        currentFuncName = currentFunction->key;
     }
-    
+
 
     bool end = false;
     precedenceTabSym currentSym;
@@ -760,7 +774,7 @@ int solveExpr(tokenStruct *token, STStack *symTableStack, symTableItem *assignVa
             default:
                 break;
         }
-        
+
     }
 
     if(stack.top == NULL)

@@ -1,3 +1,18 @@
+/*
+*Implementace překladače imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk28)
+*Adam Grunwald (xgrunw00)
+*
+*
+*Compiler
+*
+*FIT VUT BRNO
+*/
+
+
+
 #include "compiler.h"
 
 
@@ -10,28 +25,7 @@ int result;
             return result; \
         } \
 
-/*
 
-TODODODO
----------
-
-
-PREDELAT A DODELAT NASLEDUJICI:
-
-    - GENEROVANI KODU. VETSINOU ZAKOMENTOVANE, BUD JESTE NEEXISTUJE (WHILE, IFY) NEBO NEVIM JAK ZAVOLAT
-
-    - KONTROLA CHYBOVYCH STAVU, VYPIS, NAVRATOVE HODNOTY
-
-    - ZKONTROLOVAT ZAPSANI PRAVIDEL
-
-    - ZASOBNIK TABULEK
-
-    - SPOJENI K VOLANI Z JEDNOHO MAINU
-
-    - PREDAVANI PARAMETRU - VOLANI getToken V expr.c
-
-    - NEJAKE PEKNE MAKRO PRO GETTOKEN A JEHO NASLEDNOU KONTROLU PRO ZPREHLEDNENI
-*/
 
 
 int compilerDataInit(CompilerData* compilerData){
@@ -42,10 +36,6 @@ int compilerDataInit(CompilerData* compilerData){
 
     compilerData->globalTable = STStackTop(compilerData->tablesStack);
 
-    //compilerData->globalTable = malloc(sizeof(symTable));
-    //compilerData->localTable = malloc(sizeof(symTable));
-
-    //inicializace indentStacku, prvotni pushnuti 0
 
     compilerData->numberOfIfs = 0;
     compilerData->numberOfWhiles = 0;
@@ -685,7 +675,7 @@ static int Hodnota(CompilerData *compilerData){
                     generateFunctionParamsPass(actParam, &compilerData->token, global);
                     break;
                 }
-                    
+
                 if(item == NULL)
                 {
                     return 3;

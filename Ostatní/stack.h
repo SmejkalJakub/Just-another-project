@@ -1,3 +1,14 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Jakub Smejkal (xsmejk09)
+*Adam Grunwald (xgrunw00)
+*
+*
+*Zasobnik
+*
+*FIT VUT BRNO
+*/
 #ifndef _STACK_H_
 #define _STACK_H_
 

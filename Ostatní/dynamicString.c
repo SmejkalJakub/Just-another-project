@@ -1,3 +1,15 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*
+*
+*Dynamic String
+*
+*FIT VUT BRNO
+*/
+
+
 #include "dynamicString.h"
 
 
@@ -41,22 +53,6 @@ bool DSAddStr(DS *dynamicStr, char *str)
         str++;
     }
 
-    /*unsigned int strLength = strlen(str);
-
-    if(dynamicStr->actIndex + strLength >= dynamicStr->maxLength)
-    {
-        dynamicStr->maxLength = dynamicStr->actIndex + strLength + 1;
-        dynamicStr->str = realloc(dynamicStr->str, dynamicStr->maxLength);
-
-        if(!dynamicStr->str)
-        {
-            return false;
-        }
-    }
-
-    strcpy(dynamicStr->str + dynamicStr->actIndex, str);
-
-    dynamicStr->actIndex += strLength;*/
 
     return true;
 }

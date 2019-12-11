@@ -1,3 +1,13 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*
+*
+*Dynamic String
+*
+*FIT VUT BRNO
+*/
 #ifndef DYNAMICSTRING_H_INCLUDED
 #define DYNAMICSTRING_H_INCLUDED
 

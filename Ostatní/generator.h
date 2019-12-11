@@ -1,3 +1,15 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk09)
+*
+*
+*Generator vysledneho kodu
+*
+*FIT VUT BRNO
+*/
 #ifndef GENERATOR_H_INCLUDED
 #define GENERATOR_H_INCLUDED
 

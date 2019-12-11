@@ -1,3 +1,15 @@
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*
+*
+*Rozptylena tabulka symbolu
+*
+*FIT VUT BRNO
+*/
+
+
 #ifndef SYMTABLE_H_INCLUDED
 #define SYMTABLE_H_INCLUDED
 

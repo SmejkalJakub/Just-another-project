@@ -8,6 +8,18 @@
 #include "dynamicString.h"
 #include "symtable.h"
 #include "fileScanner.h"
+/*
+*Implementace pøekladaèe imperativního jazyka IFJ19
+*
+*Dominik Nejedly (xnejed09)
+*Jakub Smejkal (xsmejk28)
+*Adam Grunwald (xgrunw00)
+*
+*
+*Compiler
+*
+*FIT VUT BRNO
+*/
 #include "expr.h"
 #include "symTableStack.h"
 
